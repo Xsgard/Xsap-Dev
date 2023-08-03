@@ -47,14 +47,13 @@ public class EmployeeController {
                         Model model) {
         LambdaQueryWrapper<EmployeeEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotEmpty(username), EmployeeEntity::getName, username);
-//        .and(wrapper -> wrapper.eq(StringUtils.isNotEmpty(password), EmployeeEntity::getRolePassword, password)
         EmployeeEntity one = employeeService.getOne(queryWrapper);
-        if (one == null || password.trim().equals(one.getRolePassword())) {
+        if (one == null || !password.trim().equals(one.getRolePassword())) {
             model.addAttribute("USER_NOT_EXIST", false);
             return "x_login";
         }
-
-        return "x_index_home";
+        session.setAttribute("LOGIN_USER", one);
+        return "index";
     }
 
     /**
