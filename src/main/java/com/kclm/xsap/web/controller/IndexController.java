@@ -31,4 +31,9 @@ public class IndexController {
         session.invalidate();
         return "redirect:/user/login";
     }
+
+    @GetMapping("/x_index_home.do")
+    public String indexHome() {
+        return "x_index_home";
+    }
 }
