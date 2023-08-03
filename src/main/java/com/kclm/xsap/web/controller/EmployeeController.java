@@ -53,7 +53,7 @@ public class EmployeeController {
             return "x_login";
         }
         session.setAttribute("LOGIN_USER", one);
-        return "index";
+        return "redirect:/index";
     }
 
     /**
