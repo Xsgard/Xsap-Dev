@@ -3,6 +3,7 @@ package com.kclm.xsap.web.controller;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
 import com.kclm.xsap.entity.MemberEntity;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,7 +74,7 @@ public class MemberController {
     @PostMapping("/memberDetail.do")
     public R memberDetail(Integer id) {
         MemberEntity memberEntity = memberService.getById(id);
-        return new R().put("data", memberEntity);
+        return R.ok().put("data", memberEntity);
     }
 
     @PostMapping("/cardInfo.do")
@@ -101,22 +101,14 @@ public class MemberController {
     @PostMapping("/memberEdit.do")
     @ResponseBody
     public R memberEdit(@Valid MemberEntity member, BindingResult bindingResult) {
-        //BeanValidation校验前端传入的数据
-        if (bindingResult.hasErrors()) {
-            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-            for (FieldError fe : fieldErrors) {
-                System.out.println(fe.getField() + " ==> " + fe.getDefaultMessage());
-            }
-            return R.error().put("error", fieldErrors);
-        } else {
-            //修改
-            boolean b = memberService.updateById(member);
-            if (b)
-                return R.ok();
-            else
-                return R.error();
+        try {
+            return memberService.memberEdit(member, bindingResult);
+        } catch (BusinessException e) {
+            String msg = e.getMsg();
+            return R.error(msg);
         }
     }
+
 
     @PostMapping("/deleteOne.do")
     @ResponseBody
