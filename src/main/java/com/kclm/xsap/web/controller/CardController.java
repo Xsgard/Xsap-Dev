@@ -1,5 +1,6 @@
 package com.kclm.xsap.web.controller;
 
+import com.kclm.xsap.entity.CourseCardEntity;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.service.CourseCardService;
@@ -7,14 +8,20 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,4 +91,33 @@ public class CardController {
         else
             return R.error();
     }
+
+    @PostMapping("/cardAdd.do")
+    @ResponseBody
+    @Transactional
+    public R cardAdd(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        } else {
+            boolean flag = false;
+            cardEntity.setCreateTime(LocalDateTime.now());
+            boolean b = memberCardService.save(cardEntity);
+            List<CourseCardEntity> courseCardEntities = new ArrayList<>();
+            for (Long courseId : courseListStr) {
+                CourseCardEntity courseCardEntity = new CourseCardEntity();
+                courseCardEntity.setCardId(cardEntity.getId());
+                courseCardEntity.setCourseId(courseId);
+                courseCardEntities.add(courseCardEntity);
+            }
+            boolean b1 = courseCardService.insertCourseCard(courseCardEntities);
+            if (b && b1) {
+                flag = true;
+            }
+            if (flag)
+                return R.ok();
+            else
+                return R.error();
+        }
+    }
+
 }

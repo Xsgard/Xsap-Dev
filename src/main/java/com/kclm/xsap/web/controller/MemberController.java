@@ -7,6 +7,7 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +20,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * @author Asgard
@@ -91,10 +91,7 @@ public class MemberController {
     public R memberAdd(@Valid MemberEntity member, BindingResult bindingResult) {
         //BeanValidation校验前端传入的数据
         if (bindingResult.hasErrors()) {
-            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-            Map<String, String> map = new HashMap<>();
-            fieldErrors.forEach((item) -> map.put(item.getField(), item.getDefaultMessage()));
-            return R.error(400, "填写信息有误，请检查！").put("errorMap", map);
+            return ValidationUtil.getErrors(bindingResult);
         }
         //根据手机号查询数据库中是否有重复记录
         MemberEntity queried = memberService.queryByPhone(member.getPhone());
