@@ -7,7 +7,6 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
-import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -89,22 +87,7 @@ public class MemberController {
     @PostMapping("/memberAdd.do")
     @ResponseBody
     public R memberAdd(@Valid MemberEntity member, BindingResult bindingResult) {
-        //BeanValidation校验前端传入的数据
-        if (bindingResult.hasErrors()) {
-            return ValidationUtil.getErrors(bindingResult);
-        }
-        //根据手机号查询数据库中是否有重复记录
-        MemberEntity queried = memberService.queryByPhone(member.getPhone());
-        //记录数大于0 或 手机号不满足正则校验
-//        if (count > 0 || member.getPhone().matches(phoneRegex)) {
-        if (queried != null) {
-            return R.error(400, "手机号有误，请检查是否操作有误！");
-        } else {
-            member.setCreateTime(LocalDateTime.now());
-            //保存
-            memberService.save(member);
-            return new R().put("data", member);
-        }
+        return memberService.login(member, bindingResult);
     }
 
     @PostMapping("/x_member_edit.do")
