@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,10 +103,10 @@ public class MemberController {
         if (queried != null) {
             return R.error(400, "手机号有误，请检查是否操作有误！");
         } else {
+            member.setCreateTime(LocalDateTime.now());
             //保存
             memberService.save(member);
-            queried = memberService.queryByPhone(member.getPhone());
-            return new R().put("data", queried);
+            return new R().put("data", member);
         }
     }
 
