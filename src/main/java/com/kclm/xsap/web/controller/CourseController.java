@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: 处理/course请求
  * @date 2023/8/4 13:17
  */
 @RequestMapping("/course")
