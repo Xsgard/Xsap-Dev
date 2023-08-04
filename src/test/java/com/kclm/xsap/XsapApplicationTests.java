@@ -38,4 +38,12 @@ class XsapApplicationTests {
         System.out.println(localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
+    @Test
+    public void testRegex() {
+        String regex = "^1([3456789])\\d{9}$";
+        String phone = "15261570017";
+        boolean b = phone.matches(regex);
+        System.out.println(b);
+    }
+
 }
