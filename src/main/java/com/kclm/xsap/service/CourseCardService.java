@@ -13,4 +13,6 @@ import java.util.List;
  */
 public interface CourseCardService extends IService<CourseCardEntity> {
     List<Long> getCourseIdList(Long cardId);
+
+    boolean insertCourseCard(List<CourseCardEntity> entities);
 }

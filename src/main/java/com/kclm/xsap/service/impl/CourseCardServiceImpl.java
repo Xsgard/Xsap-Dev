@@ -28,4 +28,10 @@ public class CourseCardServiceImpl extends ServiceImpl<CourseCardDao, CourseCard
     public List<Long> getCourseIdList(Long cardId) {
         return cardDao.getCourseIdList(cardId);
     }
+
+    @Override
+    public boolean insertCourseCard(List<CourseCardEntity> entities) {
+        entities.forEach((item) -> cardDao.insertCourseCard(item.getCardId(), item.getCourseId()));
+        return true;
+    }
 }
