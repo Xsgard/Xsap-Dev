@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
 import com.kclm.xsap.entity.MemberEntity;
+import com.kclm.xsap.utils.R;
+import org.springframework.validation.BindingResult;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -19,4 +22,6 @@ public interface MemberService extends IService<MemberEntity> {
     List<MemberDTO> memberDtoList();
 
     MemberEntity queryByPhone(String phone);
+
+    R login(@Valid MemberEntity member, BindingResult bindingResult);
 }
