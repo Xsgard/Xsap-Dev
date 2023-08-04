@@ -1,7 +1,11 @@
 package com.kclm.xsap;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dao.MemberDao;
 import com.kclm.xsap.dto.MemberDTO;
+import com.kclm.xsap.entity.MemberCardEntity;
+import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.utils.TimeCalculate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,12 @@ class XsapApplicationTests {
 
     @Autowired
     private MemberDao dao;
+
+    @Autowired
+    private MemberCardService cardService;
+
+    @Autowired
+    private MemberCardDao cardDao;
 
     @Test
     public void testSelect() {
@@ -44,6 +54,16 @@ class XsapApplicationTests {
         String phone = "15261570017";
         boolean b = phone.matches(regex);
         System.out.println(b);
+    }
+
+    @Test
+    public void testQueryWrapper() {
+        QueryWrapper<MemberCardEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("id");
+        List<MemberCardEntity> cardEntityList = cardService.list(queryWrapper);
+        System.out.println(cardEntityList);
+        List<Long> cardIdList = cardDao.getCardIdList();
+        System.out.println(cardIdList);
     }
 
 }
