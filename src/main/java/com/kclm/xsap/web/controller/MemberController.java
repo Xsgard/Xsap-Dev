@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Asgard
@@ -29,7 +31,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/member")
 public class MemberController {
-    private static final String phoneRegex = "^1([3456789])\\d{9}$";
+    private static final String phoneRegex = "^1[3-9]\\d{9}$";
 
     private MemberService memberService;
 
@@ -88,17 +90,22 @@ public class MemberController {
     public R memberAdd(@Valid MemberEntity member, BindingResult bindingResult) {
         //BeanValidation校验前端传入的数据
         if (bindingResult.hasErrors()) {
-            return R.error(400, "填写信息有误，请检查！");
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            Map<String, String> map = new HashMap<>();
+            fieldErrors.forEach((item) -> map.put(item.getField(), item.getDefaultMessage()));
+            return R.error(400, "填写信息有误，请检查！").put("errorMap", map);
         }
         //根据手机号查询数据库中是否有重复记录
-        Integer count = memberService.queryByPhone(member.getPhone());
+        MemberEntity queried = memberService.queryByPhone(member.getPhone());
         //记录数大于0 或 手机号不满足正则校验
-        if (count > 0 || member.getPhone().matches(phoneRegex)) {
+//        if (count > 0 || member.getPhone().matches(phoneRegex)) {
+        if (queried != null) {
             return R.error(400, "手机号有误，请检查是否操作有误！");
         } else {
             //保存
             memberService.save(member);
-            return new R();
+            queried = memberService.queryByPhone(member.getPhone());
+            return new R().put("data", queried);
         }
     }
 
