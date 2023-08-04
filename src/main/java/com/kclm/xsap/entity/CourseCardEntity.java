@@ -2,10 +2,12 @@ package com.kclm.xsap.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
  * 中间表：课程-会员卡
@@ -17,6 +19,8 @@ import lombok.experimental.Accessors;
 @Data
 @TableName("t_course_card")
 @Accessors(chain = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class CourseCardEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
 
