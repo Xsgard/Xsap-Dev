@@ -1,30 +1,24 @@
 package com.kclm.xsap.web.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
-import com.kclm.xsap.dto.convert.MemberConvert;
-import com.kclm.xsap.entity.MemberBindRecordEntity;
-import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
-import com.kclm.xsap.utils.TimeCalculate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * @author Asgard
@@ -35,6 +29,7 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/member")
 public class MemberController {
+    private static final String phoneRegex = "^1([3456789])\\d{9}$";
 
     private MemberService memberService;
 
@@ -56,46 +51,23 @@ public class MemberController {
         return "member/x_member_list";
     }
 
-    @PostMapping("/memberList.do")
-    @ResponseBody
-    public List<MemberDTO> memberEntityList() {
-        //查询出MemberEntity的List
-        List<MemberEntity> memberEntityList = memberService.list();
-        //使用Stream流操作memberEntityList返回List<MemberDTO>类型
-        return memberEntityList.stream().map((item) -> {
-            //将MemberEntity转换为MemberDTO
-            MemberDTO memberDTO = MemberConvert.INSTANCE.entity2Dto(item);
-            memberDTO.setName(item.getName() + "(" + item.getPhone() + ")");
-            memberDTO.setJoiningDate(item.getCreateTime());
-            //查询条件--> 会员绑定表的memberId等于会员表的id
-            LambdaQueryWrapper<MemberBindRecordEntity> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(MemberBindRecordEntity::getMemberId, item.getId());
-            //查询
-            List<MemberBindRecordEntity> recordEntityList = bindRecordService.list(wrapper);
-            //存储会员卡名的集合
-            List<String> cardName = new ArrayList<>();
-            //遍历record集合
-            recordEntityList.forEach((record) -> {
-                if (Objects.equals(record.getMemberId(), item.getId())) {
-                    //查询条件--> 会员卡表的id等于会员绑定记录表的卡号
-                    LambdaQueryWrapper<MemberCardEntity> queryWrapper = new LambdaQueryWrapper<>();
-                    queryWrapper.eq(MemberCardEntity::getId, record.getCardId());
-                    List<MemberCardEntity> cardEntityList = cardService.list(queryWrapper);
-                    cardEntityList.forEach((card) -> {
-                        cardName.add(card.getName());
-                        memberDTO.setCardNameList(cardName);
-                    });
-                }
-            });
-            return memberDTO;
-        }).collect(Collectors.toList());
-    }
-
     @GetMapping("/x_member_list_details.do")
     public String toMemberDetail(Integer id, Model model) {
         model.addAttribute("ID", id);
         return "member/x_member_list_details";
     }
+
+    @GetMapping("/x_member_add.do")
+    public String toMemberAdd() {
+        return "member/x_member_add";
+    }
+
+    @PostMapping("/memberList.do")
+    @ResponseBody
+    public List<MemberDTO> memberEntityList() {
+        return memberService.memberDtoList();
+    }
+
 
     @ResponseBody
     @PostMapping("/memberDetail.do")
@@ -106,20 +78,66 @@ public class MemberController {
 
     @PostMapping("/cardInfo.do")
     @ResponseBody
-    public R cardInfo(Integer id) {
-        LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(id != null, MemberBindRecordEntity::getMemberId, id);
-        List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
-        List<MemberCardDTO> dtoList = bindRecordEntities.stream().map((item) -> {
-            MemberCardEntity card = cardService.getById(item.getCardId());
-            LocalDateTime endTime = TimeCalculate.timeSub(item.getCreateTime(), item.getValidDay());
-            return new MemberCardDTO(
-                    item.getId(), card.getName(), card.getType(),
-                    item.getValidCount(), item.getValidDay(), endTime,
-                    item.getActiveStatus(), null, null
-            );
-        }).collect(Collectors.toList());
+    public R cardInfo(Long id) {
+        List<MemberCardDTO> dtoList = memberService.cardInfo(id);
         return new R().put("data", dtoList);
+    }
+
+    @PostMapping("/memberAdd.do")
+    @ResponseBody
+    public R memberAdd(@Valid MemberEntity member, BindingResult bindingResult) {
+        //BeanValidation校验前端传入的数据
+        if (bindingResult.hasErrors()) {
+            return R.error(400, "填写信息有误，请检查！");
+        }
+        //根据手机号查询数据库中是否有重复记录
+        Integer count = memberService.queryByPhone(member.getPhone());
+        //记录数大于0 或 手机号不满足正则校验
+        if (count > 0 || member.getPhone().matches(phoneRegex)) {
+            return R.error(400, "手机号有误，请检查是否操作有误！");
+        } else {
+            //保存
+            memberService.save(member);
+            return new R();
+        }
+    }
+
+    @PostMapping("/x_member_edit.do")
+    @ResponseBody
+    public R getMemberEditInfo(Long id) {
+        //
+        MemberEntity memberEntity = memberService.getById(id);
+        return new R().put("data", memberEntity);
+    }
+
+    @PostMapping("/memberEdit.do")
+    @ResponseBody
+    public R memberEdit(@Valid MemberEntity member, BindingResult bindingResult) {
+        //BeanValidation校验前端传入的数据
+        if (bindingResult.hasErrors()) {
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            for (FieldError fe : fieldErrors) {
+                System.out.println(fe.getField() + " ==> " + fe.getDefaultMessage());
+            }
+            return R.error().put("error", fieldErrors);
+        } else {
+            //修改
+            boolean b = memberService.updateById(member);
+            if (b)
+                return R.ok();
+            else
+                return R.error();
+        }
+    }
+
+    @PostMapping("/deleteOne.do")
+    @ResponseBody
+    public R deleteMember(Long id) {
+        boolean b = memberService.removeById(id);
+        if (b)
+            return R.ok();
+        else
+            return R.error();
     }
 
 }
