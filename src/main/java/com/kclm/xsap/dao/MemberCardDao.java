@@ -3,6 +3,9 @@ package com.kclm.xsap.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kclm.xsap.entity.MemberCardEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @author Asgard
@@ -12,4 +15,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface MemberCardDao extends BaseMapper<MemberCardEntity> {
+    @Select("select id from t_member_card;")
+    List<Long> getCardIdList();
 }
