@@ -93,11 +93,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     @Override
-    public Integer queryByPhone(String phone) {
+    public MemberEntity queryByPhone(String phone) {
         //查询条件，根据手机号查询数据库中是否有重复
         LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotEmpty(phone), MemberEntity::getPhone, phone);
         //查询到的记录数
-        return this.count(queryWrapper);
+        return this.getOne(queryWrapper);
     }
 }

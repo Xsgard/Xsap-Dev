@@ -18,5 +18,5 @@ public interface MemberService extends IService<MemberEntity> {
 
     List<MemberDTO> memberDtoList();
 
-    Integer queryByPhone(String phone);
+    MemberEntity queryByPhone(String phone);
 }
