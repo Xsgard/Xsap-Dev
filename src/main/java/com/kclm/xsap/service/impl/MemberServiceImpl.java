@@ -9,6 +9,7 @@ import com.kclm.xsap.dto.convert.MemberConvert;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.MemberEntity;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
@@ -19,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -121,6 +123,31 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             //保存
             this.save(member);
             return new R().put("data", member);
+        }
+    }
+
+    @Override
+    public R memberEdit(MemberEntity member, BindingResult bindingResult) {
+        //BeanValidation校验前端传入的数据
+        if (bindingResult.hasErrors()) {
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            for (FieldError fe : fieldErrors) {
+                System.out.println(fe.getField() + " ==> " + fe.getDefaultMessage());
+            }
+            return R.error().put("error", fieldErrors);
+        } else {
+            LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberEntity::getPhone, member.getPhone());
+            int count = this.count(queryWrapper);
+            if (count > 0) {
+                throw new BusinessException("电话号码重复，检查是否操作有误！");
+            }
+            //修改
+            boolean b = this.updateById(member);
+            if (b)
+                return R.ok();
+            else
+                return R.error();
         }
     }
 }
