@@ -6,6 +6,7 @@ import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.utils.R;
 import org.springframework.validation.BindingResult;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -18,4 +19,8 @@ public interface MemberCardService extends IService<MemberCardEntity> {
     List<Long> getMemberCardIdList();
 
     R memberBind(BindingResult bindingResult, BindCardInfoDto info);
+
+    R addCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult);
+
+    void editCard(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult);
 }

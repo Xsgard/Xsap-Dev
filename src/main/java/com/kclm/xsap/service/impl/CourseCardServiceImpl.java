@@ -17,21 +17,27 @@ import java.util.List;
  */
 @Service
 public class CourseCardServiceImpl extends ServiceImpl<CourseCardDao, CourseCardEntity> implements CourseCardService {
-    private CourseCardDao cardDao;
+    private CourseCardDao courseCardDao;
 
     @Autowired
     private void setDao(CourseCardDao cardDao) {
-        this.cardDao = cardDao;
+        this.courseCardDao = cardDao;
     }
 
     @Override
     public List<Long> getCourseIdList(Long cardId) {
-        return cardDao.getCourseIdList(cardId);
+        return courseCardDao.getCourseIdList(cardId);
     }
 
     @Override
     public boolean insertCourseCard(List<CourseCardEntity> entities) {
-        entities.forEach((item) -> cardDao.insertCourseCard(item.getCardId(), item.getCourseId()));
+        entities.forEach((item) -> courseCardDao.insertCourseCard(item.getCardId(), item.getCourseId()));
         return true;
+    }
+
+    @Override
+    public boolean deleteCourseCard(Long id) {
+        int i = courseCardDao.deleteCourseCard(id);
+        return i > 0;
     }
 }
