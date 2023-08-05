@@ -1,6 +1,7 @@
 package com.kclm.xsap.web.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -13,4 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class CardBindController {
 
+    @GetMapping("/x_member_card_bind.do")
+    public String toCardBind() {
+        return "member/x_member_card_bind";
+    }
 }

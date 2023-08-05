@@ -63,17 +63,11 @@ public class MemberController {
         return "member/x_member_add";
     }
 
-    @GetMapping("/x_member_card_bind.do")
-    public String toCardBind() {
-        return "member/x_member_bind";
-    }
-
     @PostMapping("/memberList.do")
     @ResponseBody
     public List<MemberDTO> memberEntityList() {
         return memberService.memberDtoList();
     }
-
 
     @ResponseBody
     @PostMapping("/memberDetail.do")
@@ -124,5 +118,6 @@ public class MemberController {
         else
             return R.error();
     }
+
 
 }
