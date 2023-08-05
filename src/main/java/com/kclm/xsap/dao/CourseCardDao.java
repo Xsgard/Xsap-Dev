@@ -2,6 +2,7 @@ package com.kclm.xsap.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kclm.xsap.entity.CourseCardEntity;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -20,5 +21,8 @@ public interface CourseCardDao extends BaseMapper<CourseCardEntity> {
     List<Long> getCourseIdList(Long cardId);
 
     @Insert("insert into t_course_card (card_id, course_id) values (#{cardId},#{courseId});")
-    boolean insertCourseCard(Long cardId, Long courseId);
+    void insertCourseCard(Long cardId, Long courseId);
+
+    @Delete("delete from t_course_card where card_id=#{cardId};")
+    int deleteCourseCard(Long cardId);
 }
