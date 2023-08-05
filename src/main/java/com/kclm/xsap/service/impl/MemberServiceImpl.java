@@ -40,11 +40,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     private MemberBindRecordService bindRecordService;
 
+    private MemberService memberService;
+
     @Autowired
     private void setApplicationContext(MemberCardService cardService,
-                                       MemberBindRecordService bindRecordService) {
+                                       MemberBindRecordService bindRecordService,
+                                       MemberService memberService) {
         this.cardService = cardService;
         this.bindRecordService = bindRecordService;
+        this.memberService = memberService;
     }
 
     @Override
@@ -149,5 +153,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             else
                 return R.error();
         }
+    }
+
+    @Override
+    public List<MemberEntity> getMemberList() {
+        List<MemberEntity> memberList = memberService.getMemberList();
+        return null;
     }
 }
