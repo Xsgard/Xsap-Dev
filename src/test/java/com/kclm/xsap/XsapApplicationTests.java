@@ -1,6 +1,7 @@
 package com.kclm.xsap;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.kclm.xsap.dao.CourseCardDao;
 import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dao.MemberDao;
 import com.kclm.xsap.dto.MemberDTO;
@@ -30,6 +31,9 @@ class XsapApplicationTests {
 
     @Autowired
     private MemberCardDao cardDao;
+
+    @Autowired
+    private CourseCardDao courseCardDao;
 
     @Test
     public void testSelect() {
@@ -64,6 +68,12 @@ class XsapApplicationTests {
         System.out.println(cardEntityList);
         List<Long> cardIdList = cardDao.getCardIdList();
         System.out.println(cardIdList);
+    }
+
+    @Test
+    public void testDelete() {
+        Long id = 49L;
+        courseCardDao.deleteCourseCard(id);
     }
 
 }
