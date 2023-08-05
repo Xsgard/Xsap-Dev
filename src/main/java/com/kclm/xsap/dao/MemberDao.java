@@ -20,4 +20,7 @@ public interface MemberDao extends BaseMapper<MemberEntity> {
             "left JOIN t_member_bind_record r on m.id = r.member_id " +
             "left join t_member_card c on r.card_id = c.id;")
     List<MemberDTO> memberEntiesList();
+
+    @Select("select id,name,sex,phone from t_member;")
+    List<MemberEntity> selectMemberList();
 }
