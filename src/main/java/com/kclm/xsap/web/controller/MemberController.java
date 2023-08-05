@@ -119,5 +119,11 @@ public class MemberController {
             return R.error();
     }
 
+    @GetMapping("/toSearcherAll.do")
+    @ResponseBody
+    public R toSearch() {
+        List<MemberEntity> list = memberService.list();
+        return R.ok().put("value", list);
+    }
 
 }

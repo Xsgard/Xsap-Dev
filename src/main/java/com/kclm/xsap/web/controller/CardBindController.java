@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author Asgard
@@ -36,6 +38,8 @@ public class CardBindController {
         return "member/x_member_card_bind";
     }
 
+    @PostMapping("/memberBind.do")
+    @ResponseBody
     public R memberBind(BindingResult bindingResult, BindCardInfoDto infoDto) {
         //绑定会员卡信息
         return memberCardService.memberBind(bindingResult, infoDto);
