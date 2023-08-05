@@ -140,9 +140,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             }
             return R.error().put("error", fieldErrors);
         } else {
-            LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(MemberEntity::getPhone, member.getPhone());
-            int count = this.count(queryWrapper);
+            MemberEntity temp = this.getById(member.getId());
+            int count = 0;
+            if (!temp.getPhone().equals(member.getPhone())) {
+                LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(MemberEntity::getPhone, member.getPhone());
+                count = this.count(queryWrapper);
+            }
             if (count > 0) {
                 throw new BusinessException("电话号码重复，检查是否操作有误！");
             }
