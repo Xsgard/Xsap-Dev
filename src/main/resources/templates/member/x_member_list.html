@@ -335,11 +335,14 @@
                             window.location.href = "[[${#request.getContextPath()}]]/member/x_member_list.do";
                         }, 1000);
                     } else {
-                        swal(data.msg, "未知原因,请稍后再试！", "success");
+                        if (data.msg != null) {
+                            swal(data.msg, "", "error");
+                        } else
+                            swal(data.msg, "未知原因,请稍后再试！", "error");
                         //刷新界面
-                        setTimeout(function () {
-                            window.location.href = "[[${#request.getContextPath()}]]/member/x_member_list.do";
-                        }, 1000);
+                        // setTimeout(function () {
+                        //     window.location.href = "[[${#request.getContextPath()}]]/member/x_member_list.do";
+                        // }, 1000);
                     }
                 },
                 error: function () {
