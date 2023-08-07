@@ -25,7 +25,7 @@ public interface MemberService extends IService<MemberEntity> {
 
     R login(@Valid MemberEntity member, BindingResult bindingResult);
 
-    R memberEdit(MemberEntity member, BindingResult bindingResult);
+    R memberEdit(@Valid MemberEntity member, BindingResult bindingResult);
 
     List<MemberEntity> getMemberList();
 }
