@@ -91,7 +91,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      * @return R
      */
     @Override
-    public R addCard(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
+    public R addCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
         } else {
@@ -112,19 +112,15 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
     /**
      * 修改会员卡业务：
-     * 1.校验前端传入的会员卡实体信息并修改
-     * 2.删除‘课程-会员卡’绑定表中本卡的绑定信息
-     * 3.添加本卡绑定课程信息
+     * 1.删除‘课程-会员卡’绑定表中本卡的绑定信息
+     * 2.添加本卡绑定课程信息
      *
      * @param cardEntity    会员卡实体信息
      * @param courseListStr 绑定课程Id数组
-     * @param bindingResult 校验结果集
      */
     @Override
     @Transactional
-    public void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
-        //Bean Validation
-        ValidationUtil.getErrors(bindingResult);
+    public void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr) {
         //修改实体信息
         cardEntity.setLastModifyTime(LocalDateTime.now());
         boolean b = this.updateById(cardEntity);
