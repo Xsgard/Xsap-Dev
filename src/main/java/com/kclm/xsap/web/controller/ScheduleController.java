@@ -1,5 +1,6 @@
 package com.kclm.xsap.web.controller;
 
+import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.ScheduleRecordService;
@@ -47,9 +48,7 @@ public class ScheduleController {
 
     @PostMapping("/scheduleList.do")
     @ResponseBody
-    public List<ScheduleRecordEntity> getScheduleList(Long start, Long end) {
-        List<ScheduleRecordEntity> scheduleRecordEntities = scheduleRecordService.list();
-
-        return null;
+    public List<ScheduleRecordDto> getScheduleList(Long start, Long end) {
+        return scheduleRecordService.scheduleList();
     }
 }
