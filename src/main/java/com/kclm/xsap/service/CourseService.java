@@ -15,4 +15,6 @@ public interface CourseService extends IService<CourseEntity> {
     void toCourseEditPage(Model model, Long courseId);
 
     void updateCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult);
+
+    void addCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult);
 }
