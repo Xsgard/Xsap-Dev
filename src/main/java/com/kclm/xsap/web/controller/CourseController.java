@@ -78,7 +78,9 @@ public class CourseController {
     @ResponseBody
     public R editCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
         //校验前端传入的数据
-        ValidationUtil.getErrors(bindingResult);
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         try {
             courseService.updateCourse(course, cardListStr);
             return R.ok();
@@ -91,7 +93,9 @@ public class CourseController {
     @ResponseBody
     public R addCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
         //校验前端传入的数据
-        ValidationUtil.getErrors(bindingResult);
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         try {
             courseService.addCourse(course, cardListStr);
             return R.ok();
