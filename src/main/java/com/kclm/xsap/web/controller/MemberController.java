@@ -1,9 +1,12 @@
 package com.kclm.xsap.web.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
+import com.kclm.xsap.entity.ConsumeRecordEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.exceptions.BusinessException;
+import com.kclm.xsap.service.ConsumeRecordService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
@@ -38,13 +41,17 @@ public class MemberController {
 
     private MemberBindRecordService bindRecordService;
 
+    private ConsumeRecordService consumeRecordService;
+
     @Autowired
     private void setApplicationContext(MemberService memberService,
                                        MemberCardService cardService,
-                                       MemberBindRecordService bindRecordService) {
+                                       MemberBindRecordService bindRecordService,
+                                       ConsumeRecordService consumeRecordService) {
         this.memberService = memberService;
         this.cardService = cardService;
         this.bindRecordService = bindRecordService;
+        this.consumeRecordService = consumeRecordService;
     }
 
     @GetMapping("/x_member_list.do")
@@ -125,5 +132,15 @@ public class MemberController {
         List<MemberEntity> list = memberService.list();
         return R.ok().put("value", list);
     }
+
+    @PostMapping("/consumeInfo.do")
+    @ResponseBody
+    public R getConsumeInfo(Long memberId) {
+        LambdaQueryWrapper<ConsumeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ConsumeRecordEntity::getMemberBindId, memberId);
+        List<ConsumeRecordEntity> consumeRecordEntities = consumeRecordService.list(queryWrapper);
+        return R.ok().put("data", consumeRecordEntities);
+    }
+
 
 }
