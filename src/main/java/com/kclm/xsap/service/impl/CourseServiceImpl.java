@@ -9,12 +9,10 @@ import com.kclm.xsap.entity.CourseEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.CourseCardService;
 import com.kclm.xsap.service.CourseService;
-import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
@@ -58,13 +56,10 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
      *
      * @param course        课程实体信息
      * @param cardListStr   cardId数组
-     * @param bindingResult 校验结果集
      */
     @Transactional
     @Override
-    public void updateCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
-        //校验前端传入的数据
-        ValidationUtil.getErrors(bindingResult);
+    public void updateCourse(@Valid CourseEntity course, Long[] cardListStr) {
         //修改实体信息 --失败则抛出异常
         course.setLastModifyTime(LocalDateTime.now());
         boolean b = this.updateById(course);
@@ -97,13 +92,11 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
      *
      * @param course        课程实体信息
      * @param cardListStr   cardId数组
-     * @param bindingResult 校验结果集
      */
     @Override
-    public void addCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
-        //校验前端传入的数据
-        ValidationUtil.getErrors(bindingResult);
+    public void addCourse(CourseEntity course, Long[] cardListStr) {
         //保存课程实体信息
+        course.setCreateTime(LocalDateTime.now());
         boolean b = this.save(course);
         if (!b) {
             throw new BusinessException("添加失败！");

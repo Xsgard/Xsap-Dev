@@ -3,7 +3,6 @@ package com.kclm.xsap.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.entity.CourseEntity;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 
 /**
  * @author Asgard
@@ -14,7 +13,7 @@ import org.springframework.validation.BindingResult;
 public interface CourseService extends IService<CourseEntity> {
     void toCourseEditPage(Model model, Long courseId);
 
-    void updateCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult);
+    void updateCourse(CourseEntity course, Long[] cardListStr);
 
-    void addCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult);
+    void addCourse(CourseEntity course, Long[] cardListStr);
 }
