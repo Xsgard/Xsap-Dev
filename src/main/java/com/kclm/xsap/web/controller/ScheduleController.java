@@ -7,6 +7,7 @@ import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +35,12 @@ public class ScheduleController {
     @GetMapping("/x_course_schedule.do")
     public String toCourseSchedule() {
         return "course/x_course_schedule";
+    }
+
+    @GetMapping("/x_course_schedule_detail.do")
+    public String toScheduleDetail(Long id, Model model) {
+        model.addAttribute("ID", id);
+        return "course/x_course_schedule_detail";
     }
 
     @PostMapping("/scheduleAdd.do")
