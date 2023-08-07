@@ -27,5 +27,8 @@ public interface CourseCardDao extends BaseMapper<CourseCardEntity> {
     void insertCourseCard(Long cardId, Long courseId);
 
     @Delete("delete from t_course_card where card_id=#{cardId};")
-    int deleteCourseCard(Long cardId);
+    int deleteCourse_Card(Long cardId);
+
+    @Delete("delete from t_course_card where course_id=#{courseId};")
+    int deleteCard_Course(Long courseId);
 }
