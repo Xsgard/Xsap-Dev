@@ -1,5 +1,6 @@
 package com.kclm.xsap.web.controller;
 
+import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
@@ -57,5 +58,12 @@ public class ScheduleController {
     @ResponseBody
     public List<ScheduleRecordDto> getScheduleList(Long start, Long end) {
         return scheduleRecordService.scheduleList();
+    }
+
+    @PostMapping("/scheduleDetail.do")
+    @ResponseBody
+    public R scheduleDetail(Long id) {
+        ScheduleDetailsDto scheduleDto = scheduleRecordService.getScheduleDto(id);
+        return R.ok().put("data", scheduleDto);
     }
 }
