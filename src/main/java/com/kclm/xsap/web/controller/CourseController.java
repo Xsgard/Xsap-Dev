@@ -60,6 +60,13 @@ public class CourseController {
         return "course/x_course_list_add";
     }
 
+    @GetMapping("/toSearch.do")
+    @ResponseBody
+    public R toSearch() {
+        List<CourseEntity> courseEntities = courseService.list();
+        return R.ok().put("value", courseEntities);
+    }
+
     @PostMapping("/courseList.do")
     @ResponseBody
     public R getCourseList() {
@@ -102,5 +109,12 @@ public class CourseController {
         } catch (BusinessException e) {
             return R.error(e.getMsg());
         }
+    }
+
+    @PostMapping("/getOneCourse.do")
+    @ResponseBody
+    public R getOneCourse(Long id) {
+        CourseEntity courseEntity = courseService.getById(id);
+        return R.ok().put("data", courseEntity);
     }
 }
