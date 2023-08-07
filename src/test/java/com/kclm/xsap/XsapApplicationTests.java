@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -71,9 +73,17 @@ class XsapApplicationTests {
     }
 
     @Test
-    public void testDelete() {
-        Long id = 49L;
-        courseCardDao.deleteCourse_Card(id);
+    public void testDate() {
+        Long start = 1690646400L;
+        Long end = 1694275200L;
+        Instant instant = Instant.ofEpochMilli(start);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+        Instant instant1 = Instant.ofEpochMilli(end);
+        LocalDateTime localDateTime1 = LocalDateTime.ofInstant(instant1, ZoneId.systemDefault());
+
+        System.out.println(localDateTime);
+        System.out.println(localDateTime1);
     }
 
 }
