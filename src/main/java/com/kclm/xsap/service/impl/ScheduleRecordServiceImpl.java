@@ -2,14 +2,13 @@ package com.kclm.xsap.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kclm.xsap.dao.ScheduleRecordDao;
+import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.CourseEntity;
 import com.kclm.xsap.entity.EmployeeEntity;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.CourseService;
-import com.kclm.xsap.service.EmployeeService;
-import com.kclm.xsap.service.ScheduleRecordService;
+import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
@@ -32,11 +31,16 @@ import java.util.stream.Collectors;
 public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, ScheduleRecordEntity> implements ScheduleRecordService {
     private CourseService courseService;
     private EmployeeService employeeService;
+    private CourseCardService courseCardService;
+    private MemberService memberService;
 
     @Autowired
-    private void setApplicationContext(CourseService courseService, EmployeeService employeeService) {
+    private void setApplicationContext(CourseService courseService, EmployeeService employeeService,
+                                       CourseCardService courseCardService, MemberService memberService) {
         this.courseService = courseService;
         this.employeeService = employeeService;
+        this.courseCardService = courseCardService;
+        this.memberService = memberService;
     }
 
     @Override
@@ -71,5 +75,36 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
             return dto;
         }).collect(Collectors.toList());
         return dtoList;
+    }
+
+    @Override
+    public ScheduleDetailsDto getScheduleDto(Long id) {
+        //查询排课计划信息
+        ScheduleRecordEntity scheduleRecord = this.getById(id);
+        //查询课程实体信息
+        CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+        //获取支持的卡号集合
+        List<Long> cardIds = courseCardService.getCardIdList(scheduleRecord.getCourseId());
+        List<String> supportCards = memberService.getSupportCardNames(cardIds);
+        //查询教师信息
+        EmployeeEntity teacher = employeeService.getById(scheduleRecord.getTeacherId());
+        //
+        LocalDateTime start = TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime());
+        LocalDateTime end = TimeUtil.toEndTime(start, courseEntity.getDuration());
+        //
+        ScheduleDetailsDto dto = new ScheduleDetailsDto();
+        dto.setCourseName(courseEntity.getName());
+        dto.setStartTime(start);
+        dto.setEndTime(end);
+        dto.setDuration(courseEntity.getDuration());
+        dto.setLimitSex(courseEntity.getLimitSex());
+        dto.setLimitAge(courseEntity.getLimitAge());
+        dto.setSupportCards(supportCards);
+        dto.setTeacherName(teacher.getName());
+        dto.setOrderNums(scheduleRecord.getOrderNums());
+        dto.setClassNumbers(courseEntity.getContains());
+        dto.setTimesCost(courseEntity.getTimesCost());
+
+        return dto;
     }
 }

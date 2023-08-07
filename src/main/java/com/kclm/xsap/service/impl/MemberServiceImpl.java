@@ -2,6 +2,7 @@ package com.kclm.xsap.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dao.MemberDao;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
@@ -42,10 +43,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     private MemberService memberService;
 
+    private MemberCardDao cardDao;
+
     @Autowired
     private void setApplicationContext(MemberCardService cardService,
                                        MemberBindRecordService bindRecordService,
-                                       MemberService memberService) {
+                                       MemberService memberService, MemberCardDao cardDao) {
+        this.cardDao = cardDao;
         this.cardService = cardService;
         this.bindRecordService = bindRecordService;
         this.memberService = memberService;
@@ -157,6 +161,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             else
                 return R.error();
         }
+    }
+
+    @Override
+    public List<String> getSupportCardNames(List<Long> cardIds) {
+        List<String> supportCardNames = new ArrayList<>();
+        cardIds.forEach(item -> supportCardNames.add("「" + cardDao.getSupportCardName(item) + "」"));
+        return supportCardNames;
     }
 
     @Override
