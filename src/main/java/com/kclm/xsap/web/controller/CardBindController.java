@@ -1,6 +1,7 @@
 package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.dto.BindCardInfoDto;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.utils.R;
@@ -40,8 +41,13 @@ public class CardBindController {
 
     @PostMapping("/memberBind.do")
     @ResponseBody
-    public R memberBind(BindingResult bindingResult, BindCardInfoDto infoDto) {
+    public R memberBind(BindCardInfoDto infoDto, BindingResult bindingResult) {
         //绑定会员卡信息
-        return memberCardService.memberBind(bindingResult, infoDto);
+        try {
+            memberCardService.memberBind(bindingResult, infoDto);
+            return R.ok();
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
     }
 }
