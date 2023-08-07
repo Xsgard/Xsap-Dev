@@ -53,6 +53,10 @@ public class CourseController {
         return "course/x_course_list_edit";
     }
 
+    @GetMapping("/x_course_list_add.do")
+    public String toCourseAddPage() {
+        return "course/x_course_list_add";
+    }
 
     @PostMapping("/courseList.do")
     @ResponseBody
@@ -70,13 +74,20 @@ public class CourseController {
 
     @PostMapping("/courseEdit.do")
     @ResponseBody
-    public R EditCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+    public R editCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
         try {
             courseService.updateCourse(course, cardListStr, bindingResult);
             return R.ok();
         } catch (BusinessException e) {
             return R.error(e.getMsg());
         }
+    }
+
+    @PostMapping("/courseAdd.do")
+    @ResponseBody
+    public R addCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+
+        return null;
     }
 
 }
