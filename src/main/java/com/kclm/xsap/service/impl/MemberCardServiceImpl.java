@@ -132,8 +132,8 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         //非空且长度>0
         if (courseListStr != null && courseListStr.length > 0) {
             List<CourseCardEntity> courseCardEntities = toList(cardEntity, courseListStr);
-            boolean b = courseCardService.insertCourseCard(courseCardEntities);
-            if (!b)
+            boolean flag = courseCardService.insertCourseCard(courseCardEntities);
+            if (!flag)
                 throw new BusinessException("添加‘课程-会员卡’表记录出现异常");
         }
         R.ok();
