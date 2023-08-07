@@ -20,6 +20,9 @@ public interface CourseCardDao extends BaseMapper<CourseCardEntity> {
     @Select("select course_id from t_course_card where card_id = #{cardId};")
     List<Long> getCourseIdList(Long cardId);
 
+    @Select(("select card_id from t_course_card where course_id= #{courseId};"))
+    List<Long> getCardIdList(Long courseId);
+
     @Insert("insert into t_course_card (card_id, course_id) values (#{cardId},#{courseId});")
     void insertCourseCard(Long cardId, Long courseId);
 
