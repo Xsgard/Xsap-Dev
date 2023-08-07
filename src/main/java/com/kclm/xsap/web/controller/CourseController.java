@@ -1,6 +1,7 @@
 package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.entity.CourseEntity;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.CourseCardService;
 import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.MemberCardService;
@@ -8,6 +9,7 @@ import com.kclm.xsap.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,9 +69,14 @@ public class CourseController {
     }
 
     @PostMapping("/courseEdit.do")
-    public R EditCourse(CourseEntity course, Long[] cardListStr) {
-
-        return null;
+    @ResponseBody
+    public R EditCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+        try {
+            courseService.updateCourse(course, cardListStr, bindingResult);
+            return R.ok();
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
     }
 
 }
