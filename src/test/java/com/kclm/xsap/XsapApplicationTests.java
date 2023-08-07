@@ -73,7 +73,7 @@ class XsapApplicationTests {
     @Test
     public void testDelete() {
         Long id = 49L;
-        courseCardDao.deleteCourseCard(id);
+        courseCardDao.deleteCourse_Card(id);
     }
 
 }
