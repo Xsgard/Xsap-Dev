@@ -14,7 +14,7 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
-import com.kclm.xsap.utils.TimeCalculate;
+import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
         return bindRecordEntities.stream().map((item) -> {
             MemberCardEntity card = cardService.getById(item.getCardId());
-            LocalDateTime endTime = TimeCalculate.timeSub(item.getCreateTime(), item.getValidDay());
+            LocalDateTime endTime = TimeUtil.timeSub(item.getCreateTime(), item.getValidDay());
             return new MemberCardDTO(
                     item.getId(), card.getName(), card.getType(),
                     item.getValidCount(), item.getValidDay(), endTime,
