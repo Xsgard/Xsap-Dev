@@ -7,7 +7,7 @@ import com.kclm.xsap.dao.MemberDao;
 import com.kclm.xsap.dto.MemberDTO;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.service.MemberCardService;
-import com.kclm.xsap.utils.TimeCalculate;
+import com.kclm.xsap.utils.TimeUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,7 +50,7 @@ class XsapApplicationTests {
     public void testTimePlus() {
         LocalDateTime now = LocalDateTime.now();
         Integer day = 10;
-        LocalDateTime localDateTime = TimeCalculate.timeSub(now, day);
+        LocalDateTime localDateTime = TimeUtil.timeSub(now, day);
         System.out.println(localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
