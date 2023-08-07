@@ -17,4 +17,7 @@ import java.util.List;
 public interface MemberCardDao extends BaseMapper<MemberCardEntity> {
     @Select("select id from t_member_card;")
     List<Long> getCardIdList();
+
+    @Select(("select name from t_member_card where id=#{cardId};"))
+    String getSupportCardName(Long cardId);
 }
