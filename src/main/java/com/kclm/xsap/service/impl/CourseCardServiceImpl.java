@@ -39,12 +39,18 @@ public class CourseCardServiceImpl extends ServiceImpl<CourseCardDao, CourseCard
 
     @Override
     public boolean deleteCourseCard(Long id) {
-        int i = courseCardDao.deleteCourseCard(id);
+        int i = courseCardDao.deleteCourse_Card(id);
         return i > 0;
     }
 
     @Override
     public List<Long> getCardIdList(Long courseId) {
         return courseCardDao.getCardIdList(courseId);
+    }
+
+    @Override
+    public boolean deleteCardCourse(Long id) {
+        int i = courseCardDao.deleteCard_Course(id);
+        return i > 0;
     }
 }
