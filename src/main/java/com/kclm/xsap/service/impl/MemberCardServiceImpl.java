@@ -112,7 +112,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
     /**
      * 修改会员卡业务：
-     * 1.校验前端传入的会员卡实体信息
+     * 1.校验前端传入的会员卡实体信息并修改
      * 2.删除‘课程-会员卡’绑定表中本卡的绑定信息
      * 3.添加本卡绑定课程信息
      *
@@ -125,6 +125,11 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     public void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
         //Bean Validation
         ValidationUtil.getErrors(bindingResult);
+        //修改实体信息
+        boolean b = this.updateById(cardEntity);
+        if (!b) {
+            throw new BusinessException("修改会员卡信息失败！");
+        }
         //查询 课程-会员卡 表中是否有本卡Id的信息
         LambdaQueryWrapper<CourseCardEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(CourseCardEntity::getCardId, cardEntity.getId());
@@ -132,9 +137,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         if (!list.isEmpty()) {
             //删除信息，如失败则抛出异常
             boolean flag = courseCardService.deleteCourseCard(cardEntity.getId());
-            if (!flag) {
+            if (!flag)
                 throw new BusinessException("删除‘课程-会员卡’表记录出现异常");
-            }
+
         }
         //非空且长度>0
         if (courseListStr != null && courseListStr.length > 0) {
