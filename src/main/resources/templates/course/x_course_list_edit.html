@@ -23,8 +23,8 @@
     <link href="../../static/css/plugins/datapicker/datepicker3.css" th:href="@{/static/css/plugins/datapicker/datepicker3.css}" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../../static/css/plugins/simditor/simditor.css" th:href="@{/static/css/plugins/simditor/simditor.css}"/>
     <link href="../../static/css/plugins/sweetalert/sweetalert.css" rel="stylesheet" th:href="@{/static/css/plugins/sweetalert/sweetalert.css}">
- 
-     <style type="text/css">
+
+    <style type="text/css">
         .input_width {
             width: 50px;
             height: 25px;
@@ -55,7 +55,7 @@
                             <label class="col-sm-2 control-label"><i class="red">*</i>课程名称</label>
                             <div class="col-sm-10">
                             	<input type="hidden" name="id" value="1" th:value="${courseInfo.id}"/>
-                            	
+
                                 <input type="text" class="form-control" id="course_name" placeholder="请输入课程名称" value="钢琴课"  th:value="${courseInfo.name}" name="name">
                            		<span class="text-danger">[[${NAME_EXIST}]]</span>
                             </div>
