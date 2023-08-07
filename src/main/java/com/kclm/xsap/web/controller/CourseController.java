@@ -66,4 +66,10 @@ public class CourseController {
         return null;
     }
 
+    @PostMapping("/courseEdit.do")
+    public R EditCourse(CourseEntity course, Long[] cardListStr) {
+
+        return null;
+    }
+
 }
