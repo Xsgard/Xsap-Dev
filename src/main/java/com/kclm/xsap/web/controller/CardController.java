@@ -7,6 +7,7 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,8 +99,10 @@ public class CardController {
     @PostMapping("/cardEdit.do")
     @ResponseBody
     public R cardEdit(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
+        //Bean Validation
+        ValidationUtil.getErrors(bindingResult);
         try {
-            memberCardService.editCard(cardEntity, courseListStr, bindingResult);
+            memberCardService.editCard(cardEntity, courseListStr);
         } catch (RuntimeException e) {
             return R.error(e.getMessage());
         }
