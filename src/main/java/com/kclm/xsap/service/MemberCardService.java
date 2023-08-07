@@ -18,7 +18,7 @@ import java.util.List;
 public interface MemberCardService extends IService<MemberCardEntity> {
     List<Long> getMemberCardIdList();
 
-    R memberBind(BindingResult bindingResult, BindCardInfoDto info);
+    void memberBind(BindingResult bindingResult, BindCardInfoDto info);
 
     R addCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult);
 

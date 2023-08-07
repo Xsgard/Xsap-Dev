@@ -63,16 +63,23 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      *
      * @param bindingResult 用于BeanValidation
      * @param info          传入的绑定数据的Dto信息
-     * @return R
      */
     @Override
-    public R memberBind(BindingResult bindingResult, @Valid BindCardInfoDto info) {
+    public void memberBind(BindingResult bindingResult, @Valid BindCardInfoDto info) {
         ValidationUtil.getErrors(bindingResult);
         MemberBindRecordEntity bindRecordEntity = new MemberBindRecordEntity();
         BeanUtils.copyProperties(info, bindRecordEntity);
+
+        LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberBindRecordEntity::getMemberId, bindRecordEntity.getMemberId())
+                .and(wrapper -> wrapper.eq(MemberBindRecordEntity::getCardId, bindRecordEntity.getCardId()));
+        List<MemberBindRecordEntity> list = bindRecordService.list(queryWrapper);
+
+        if (!list.isEmpty()) {
+            throw new BusinessException("此卡已经绑定到该用户，请勿重复绑定！");
+        }
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         bindRecordService.save(bindRecordEntity);
-        return R.ok();
     }
 
     /**
