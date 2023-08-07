@@ -47,7 +47,7 @@ public class CourseController {
 
     @GetMapping("/x_course_list_edit.do")
     public String toCourseEditPage(Long id, Model model) {
-
+        courseService.toCourseEditPage(model, id);
         return "course/x_course_list_edit";
     }
 
