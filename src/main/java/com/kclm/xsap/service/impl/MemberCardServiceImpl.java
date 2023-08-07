@@ -1,5 +1,6 @@
 package com.kclm.xsap.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dto.BindCardInfoDto;
@@ -115,18 +116,26 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     @Override
     @Transactional
     public void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
+        //Bean Validation
         ValidationUtil.getErrors(bindingResult);
-        boolean flag = courseCardService.deleteCourseCard(cardEntity.getId());
-        if (!flag) {
-            throw new BusinessException("删除‘课程-会员卡’表记录出现异常");
+        //查询 课程-会员卡 表中是否有本卡Id的信息
+        LambdaQueryWrapper<CourseCardEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(CourseCardEntity::getCardId, cardEntity.getId());
+        List<CourseCardEntity> list = courseCardService.list(queryWrapper);
+        if (!list.isEmpty()) {
+            //删除信息，如失败则抛出异常
+            boolean flag = courseCardService.deleteCourseCard(cardEntity.getId());
+            if (!flag) {
+                throw new BusinessException("删除‘课程-会员卡’表记录出现异常");
+            }
         }
-        if (courseListStr.length > 0) {
+        //非空且长度>0
+        if (courseListStr != null && courseListStr.length > 0) {
             List<CourseCardEntity> courseCardEntities = toList(cardEntity, courseListStr);
             boolean b = courseCardService.insertCourseCard(courseCardEntities);
             if (!b)
                 throw new BusinessException("添加‘课程-会员卡’表记录出现异常");
         }
-
         R.ok();
     }
 
