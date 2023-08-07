@@ -17,4 +17,6 @@ public interface CourseCardService extends IService<CourseCardEntity> {
     boolean insertCourseCard(List<CourseCardEntity> entities);
 
     boolean deleteCourseCard(Long id);
+
+    List<Long> getCardIdList(Long courseId);
 }

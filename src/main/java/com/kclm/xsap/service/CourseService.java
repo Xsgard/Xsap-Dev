@@ -2,6 +2,7 @@ package com.kclm.xsap.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.entity.CourseEntity;
+import org.springframework.ui.Model;
 
 /**
  * @author Asgard
@@ -10,4 +11,5 @@ import com.kclm.xsap.entity.CourseEntity;
  * @date 2023/8/2 16:19
  */
 public interface CourseService extends IService<CourseEntity> {
+    void toCourseEditPage(Model model, Long courseId);
 }

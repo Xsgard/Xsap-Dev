@@ -1,10 +1,15 @@
 package com.kclm.xsap.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kclm.xsap.dao.CourseCardDao;
 import com.kclm.xsap.dao.CourseDao;
 import com.kclm.xsap.entity.CourseEntity;
 import com.kclm.xsap.service.CourseService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+
+import java.util.List;
 
 /**
  * @author Asgard
@@ -14,4 +19,18 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> implements CourseService {
+    private CourseCardDao courseCardDao;
+
+    @Autowired
+    private void setApplicationContext(CourseCardDao courseCardDao) {
+        this.courseCardDao = courseCardDao;
+    }
+
+    @Override
+    public void toCourseEditPage(Model model, Long courseId) {
+        CourseEntity courseEntity = this.getById(courseId);
+        List<Long> cardIdList = courseCardDao.getCardIdList(courseId);
+        model.addAttribute("cardCarry", cardIdList);
+        model.addAttribute("courseInfo", courseEntity);
+    }
 }

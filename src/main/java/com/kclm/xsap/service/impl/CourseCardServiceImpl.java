@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
 /**
  * @author Asgard
  * @version 1.0
@@ -17,6 +18,7 @@ import java.util.List;
  */
 @Service
 public class CourseCardServiceImpl extends ServiceImpl<CourseCardDao, CourseCardEntity> implements CourseCardService {
+
     private CourseCardDao courseCardDao;
 
     @Autowired
@@ -39,5 +41,10 @@ public class CourseCardServiceImpl extends ServiceImpl<CourseCardDao, CourseCard
     public boolean deleteCourseCard(Long id) {
         int i = courseCardDao.deleteCourseCard(id);
         return i > 0;
+    }
+
+    @Override
+    public List<Long> getCardIdList(Long courseId) {
+        return courseCardDao.getCardIdList(courseId);
     }
 }
