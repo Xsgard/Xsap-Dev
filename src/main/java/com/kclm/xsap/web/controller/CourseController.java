@@ -6,6 +6,7 @@ import com.kclm.xsap.service.CourseCardService;
 import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -74,9 +76,11 @@ public class CourseController {
 
     @PostMapping("/courseEdit.do")
     @ResponseBody
-    public R editCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+    public R editCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+        //校验前端传入的数据
+        ValidationUtil.getErrors(bindingResult);
         try {
-            courseService.updateCourse(course, cardListStr, bindingResult);
+            courseService.updateCourse(course, cardListStr);
             return R.ok();
         } catch (BusinessException e) {
             return R.error(e.getMsg());
@@ -85,9 +89,14 @@ public class CourseController {
 
     @PostMapping("/courseAdd.do")
     @ResponseBody
-    public R addCourse(CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
-
-        return null;
+    public R addCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+        //校验前端传入的数据
+        ValidationUtil.getErrors(bindingResult);
+        try {
+            courseService.addCourse(course, cardListStr);
+            return R.ok();
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
     }
-
 }
