@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
     @Override
     public void updateCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
         ValidationUtil.getErrors(bindingResult);
+        course.setLastModifyTime(LocalDateTime.now());
         boolean b = this.updateById(course);
         if (!b) {
             throw new BusinessException("修改课程信息失败！");
@@ -67,7 +69,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
 
         if (cardListStr != null && cardListStr.length > 0) {
             List<CourseCardEntity> courseCardEntities = transferToCourseCard(course, cardListStr);
-            boolean flag = courseCardService.saveBatch(courseCardEntities);
+            boolean flag = courseCardService.insertCourseCard(courseCardEntities);
             if (!flag) {
                 throw new BusinessException("添加关联表信息失败！");
             }

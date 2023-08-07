@@ -126,6 +126,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         //Bean Validation
         ValidationUtil.getErrors(bindingResult);
         //修改实体信息
+        cardEntity.setLastModifyTime(LocalDateTime.now());
         boolean b = this.updateById(cardEntity);
         if (!b) {
             throw new BusinessException("修改会员卡信息失败！");
