@@ -653,7 +653,7 @@
 
         /*------会员搜索------*/
         $("#chooseMember").bsSuggest({
-            url: "[[${#request.getContextPath()}]]/member/toSearch.do",
+            url: "[[${#request.getContextPath()}]]/member/toSearcherAll.do",
             effectiveFieldsAlias: {id: "ID", name: "会员名", sex: "性别", phone: "手机号"},
             effectiveFields: ["id", "name", "sex", "phone"],
             ignorecase: true,
@@ -701,7 +701,11 @@
                                 console.log(id);
                                 $("option[value='" + selectOne + "']").attr("selected", "selected");
                                 //---------显示某会员的某会员卡的提示信息---------
-                                $.post("/card/cardTip.do", {cardId: id, scheduleId: schedule_id}, function (data) {
+                                $.post("/card/cardTip.do", {
+                                    cardId: id,
+                                    memberId: member_id,
+                                    scheduleId: schedule_id
+                                }, function (data) {
                                     //会员对应的卡剩余的次数
                                     var result = data.data;
                                     if (result.cardTotalCount > 0) {
@@ -742,7 +746,7 @@
             $("#endTime").html(baseInfo.data.endTime);
             $("#duration").html(baseInfo.data.duration + "分钟");
             $("#limitSex").html(baseInfo.data.limitSex);
-            $("#limitAge").html(baseInfo.data.limitAge === -1 ? "无限制" : baseInfo.data.limitAge);
+            $("#limitAge").html(baseInfo.data.limitAge === 0 ? "无限制" : baseInfo.data.limitAge);
             $("#supportCards").html(baseInfo.data.supportCards);
             $("#teacherName").html(baseInfo.data.teacherName);
             $("#classNumbers").html(baseInfo.data.orderNums + "/" + baseInfo.data.classNumbers);
