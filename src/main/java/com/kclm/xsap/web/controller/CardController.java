@@ -2,6 +2,7 @@ package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.CourseCardService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
@@ -112,8 +113,17 @@ public class CardController {
     @PostMapping("/toSearchByMemberId.do")
     @ResponseBody
     public R getByMemberId(Long memberId) {
-        List<MemberCardEntity> cardList = memberCardService.getCardList(memberId);
+        List<MemberCardEntity> cardList = memberCardService.getActiveCards(memberId);
         return R.ok().put("value", cardList);
     }
 
+    @PostMapping("/cardTip.do")
+    @ResponseBody
+    public R cardTip(Long cardId, Long memberId, Long scheduleId) {
+        try {
+            return memberCardService.getCardTip(cardId, memberId, scheduleId);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+    }
 }
