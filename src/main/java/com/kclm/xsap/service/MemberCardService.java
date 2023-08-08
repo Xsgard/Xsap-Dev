@@ -23,4 +23,6 @@ public interface MemberCardService extends IService<MemberCardEntity> {
     R addCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult);
 
     void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr);
+
+    List<MemberCardEntity> getCardList(Long memberId);
 }

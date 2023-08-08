@@ -2,6 +2,7 @@ package com.kclm.xsap.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.kclm.xsap.dao.MemberBindRecordDao;
 import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dto.BindCardInfoDto;
 import com.kclm.xsap.entity.CourseCardEntity;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Asgard
@@ -39,13 +41,23 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
     private CourseCardService courseCardService;
 
+    private MemberCardService memberCardService;
+
+    private MemberBindRecordDao memberBindRecordDao;
+
     @Autowired
-    private void setApplicationContext(MemberCardDao cardDao,
-                                       MemberBindRecordService bindRecordService,
-                                       CourseCardService courseCardService) {
+    private void setDao(MemberCardDao cardDao, MemberBindRecordDao memberBindRecordDao) {
         this.cardDao = cardDao;
+        this.memberBindRecordDao = memberBindRecordDao;
+    }
+
+    @Autowired
+    private void setApplicationContext(MemberBindRecordService bindRecordService,
+                                       CourseCardService courseCardService,
+                                       MemberCardService memberCardService) {
         this.bindRecordService = bindRecordService;
         this.courseCardService = courseCardService;
+        this.memberCardService = memberCardService;
     }
 
     /**
@@ -147,6 +159,14 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         }
         R.ok();
     }
+
+    @Override
+    public List<MemberCardEntity> getCardList(Long memberId) {
+        List<Long> cardIds = memberBindRecordDao.getCardIds(memberId);
+        return cardIds.stream().map(this::getById)
+                .collect(Collectors.toList());
+    }
+
 
     /**
      * 重构方法：用于创建CourseCardList
