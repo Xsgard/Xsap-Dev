@@ -70,6 +70,14 @@ public class MemberController {
         return "member/x_member_add";
     }
 
+    @GetMapping("/toSearcherAll.do")
+    @ResponseBody
+    public R toSearch() {
+        List<MemberEntity> list = memberService.list();
+        return R.ok().put("value", list);
+    }
+
+
     @PostMapping("/memberList.do")
     @ResponseBody
     public List<MemberDTO> memberEntityList() {
@@ -124,13 +132,6 @@ public class MemberController {
             return R.ok();
         else
             return R.error();
-    }
-
-    @GetMapping("/toSearcherAll.do")
-    @ResponseBody
-    public R toSearch() {
-        List<MemberEntity> list = memberService.list();
-        return R.ok().put("value", list);
     }
 
     @PostMapping("/consumeInfo.do")

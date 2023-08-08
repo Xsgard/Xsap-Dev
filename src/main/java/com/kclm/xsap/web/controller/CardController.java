@@ -109,4 +109,11 @@ public class CardController {
         return R.ok();
     }
 
+    @PostMapping("/toSearchByMemberId.do")
+    @ResponseBody
+    public R getByMemberId(Long memberId) {
+        List<MemberCardEntity> cardList = memberCardService.getCardList(memberId);
+        return R.ok().put("value", cardList);
+    }
+
 }
