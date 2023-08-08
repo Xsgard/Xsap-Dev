@@ -13,7 +13,7 @@ import org.springframework.ui.Model;
 public interface CourseService extends IService<CourseEntity> {
     void toCourseEditPage(Model model, Long courseId);
 
-    void updateCourse(CourseEntity course, Long[] cardListStr);
+    void updateCourse(CourseEntity course, Long[] cardListStr, Integer limitAgeRadio, Integer limitCountsRadio);
 
     void addCourse(CourseEntity course, Long[] cardListStr);
 }
