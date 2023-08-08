@@ -25,4 +25,8 @@ public interface MemberCardService extends IService<MemberCardEntity> {
     void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr);
 
     List<MemberCardEntity> getCardList(Long memberId);
+
+    R getCardTip(Long cardId, Long memberId, Long scheduleId);
+
+    List<MemberCardEntity> getActiveCards(Long memberId);
 }

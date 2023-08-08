@@ -5,13 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kclm.xsap.dao.MemberBindRecordDao;
 import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dto.BindCardInfoDto;
-import com.kclm.xsap.entity.CourseCardEntity;
-import com.kclm.xsap.entity.MemberBindRecordEntity;
-import com.kclm.xsap.entity.MemberCardEntity;
+import com.kclm.xsap.dto.CardTipsDto;
+import com.kclm.xsap.entity.*;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.CourseCardService;
-import com.kclm.xsap.service.MemberBindRecordService;
-import com.kclm.xsap.service.MemberCardService;
+import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.BeanUtils;
@@ -36,14 +33,13 @@ import java.util.stream.Collectors;
 public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCardEntity> implements MemberCardService {
 
     private MemberCardDao cardDao;
-
-    private MemberBindRecordService bindRecordService;
-
-    private CourseCardService courseCardService;
-
-    private MemberCardService memberCardService;
-
     private MemberBindRecordDao memberBindRecordDao;
+    private MemberBindRecordService bindRecordService;
+    private CourseCardService courseCardService;
+    private CourseService courseService;
+    private ScheduleRecordService scheduleRecordService;
+    private MemberCardService memberCardService;
+    private MemberBindRecordService memberBindRecordService;
 
     @Autowired
     private void setDao(MemberCardDao cardDao, MemberBindRecordDao memberBindRecordDao) {
@@ -52,12 +48,18 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     }
 
     @Autowired
-    private void setApplicationContext(MemberBindRecordService bindRecordService,
-                                       CourseCardService courseCardService,
-                                       MemberCardService memberCardService) {
+    private void setService(MemberBindRecordService bindRecordService,
+                            CourseCardService courseCardService,
+                            MemberCardService memberCardService,
+                            MemberBindRecordService memberBindRecordService,
+                            CourseService courseService,
+                            ScheduleRecordService scheduleRecordService) {
+        this.courseService = courseService;
         this.bindRecordService = bindRecordService;
         this.courseCardService = courseCardService;
         this.memberCardService = memberCardService;
+        this.memberBindRecordService = memberBindRecordService;
+        this.scheduleRecordService = scheduleRecordService;
     }
 
     /**
@@ -160,10 +162,62 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         R.ok();
     }
 
+    /**
+     * 获取该会员可用的卡的List
+     *
+     * @param memberId 会员ID
+     * @return List
+     */
     @Override
     public List<MemberCardEntity> getCardList(Long memberId) {
         List<Long> cardIds = memberBindRecordDao.getCardIds(memberId);
         return cardIds.stream().map(this::getById)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取该卡的可使用剩余次数 和 课程中每次消费多少课次
+     *
+     * @param cardId     会员卡id
+     * @param memberId   会员id
+     * @param scheduleId 绑定表的id
+     * @return R
+     */
+    @Override
+    @Transactional
+    public R getCardTip(Long cardId, Long memberId, Long scheduleId) {
+        //查询绑定的记录实体
+        LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberBindRecordEntity::getMemberId, memberId)
+                .and(qw -> qw.eq(MemberBindRecordEntity::getCardId, cardId));
+        MemberBindRecordEntity memberBindRecord = memberBindRecordService.getOne(queryWrapper);
+        //未激活的会员卡不能进行消费
+        if (memberBindRecord.getActiveStatus() != 1) {
+            throw new BusinessException("该卡未激活，不能进行消费！");
+        }
+        //查询绑定记录实体
+        ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(scheduleId);
+        CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+        CardTipsDto cardTips = new CardTipsDto(memberBindRecord.getValidCount(), courseEntity.getTimesCost());
+        return R.ok().put("data", cardTips);
+    }
+
+    /**
+     * 获取该用户绑定的激活的所有卡的实体
+     *
+     * @param memberId 会员id
+     * @return List
+     */
+    @Override
+    public List<MemberCardEntity> getActiveCards(Long memberId) {
+        //查询所有该用户绑定的激活的卡的实体
+        LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberBindRecordEntity::getMemberId, memberId)
+                .eq(MemberBindRecordEntity::getActiveStatus, 1);
+        List<MemberBindRecordEntity> bindRecordEntities = memberBindRecordService.list(queryWrapper);
+        //通过Stream流对绑定的卡进行查询
+        return bindRecordEntities.stream()
+                .map(item -> memberCardService.getById(item.getCardId()))
                 .collect(Collectors.toList());
     }
 
