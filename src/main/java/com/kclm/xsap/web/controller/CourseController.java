@@ -83,13 +83,13 @@ public class CourseController {
 
     @PostMapping("/courseEdit.do")
     @ResponseBody
-    public R editCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+    public R editCourse(@Valid CourseEntity course, Long[] cardListStr, Integer limitAgeRadio, Integer limitCountsRadio, BindingResult bindingResult) {
         //校验前端传入的数据
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
         }
         try {
-            courseService.updateCourse(course, cardListStr);
+            courseService.updateCourse(course, cardListStr, limitAgeRadio, limitCountsRadio);
             return R.ok();
         } catch (BusinessException e) {
             return R.error(e.getMsg());
