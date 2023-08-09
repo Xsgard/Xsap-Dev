@@ -1,6 +1,7 @@
 package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.entity.ReservationRecordEntity;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.ReservationRecordService;
 import com.kclm.xsap.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,11 @@ public class ReserveController {
     @PostMapping("/addReserve.do")
     @ResponseBody
     public R addReserve(ReservationRecordEntity reservationRecord) {
-
-        return null;
+        try {
+            reservationRecordService.addReserve(reservationRecord);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok();
     }
 }
