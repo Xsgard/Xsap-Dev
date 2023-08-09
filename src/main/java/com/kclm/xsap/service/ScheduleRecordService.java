@@ -2,6 +2,7 @@ package com.kclm.xsap.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.dto.ReservedInfoDto;
+import com.kclm.xsap.dto.ReverseClassRecordDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
@@ -27,4 +28,6 @@ public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
     List<ReservedInfoDto> getReserveInfoDto(Long scheduleId);
 
     List<ReservedInfoDto> getAllReserveInfoDto(Long scheduleId);
+
+    List<ReverseClassRecordDto> getReverseClassRecordDto(Long scheduleId);
 }

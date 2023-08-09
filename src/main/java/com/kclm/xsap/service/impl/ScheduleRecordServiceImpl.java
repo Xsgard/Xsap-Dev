@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kclm.xsap.dao.ScheduleRecordDao;
 import com.kclm.xsap.dto.ReservedInfoDto;
+import com.kclm.xsap.dto.ReverseClassRecordDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.*;
@@ -131,6 +132,34 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId);
         List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
         return getReservedInfoDtos(scheduleId, recordEntityList);
+    }
+
+    @Override
+    public List<ReverseClassRecordDto> getReverseClassRecordDto(Long scheduleId) {
+        //查询预约记录
+        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
+                .eq(ReservationRecordEntity::getStatus, 1);
+        List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
+        return recordEntityList.stream().map(item -> {
+            MemberEntity member = memberService.getById(item.getMemberId());
+            ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(scheduleId);
+            CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+            ReverseClassRecordDto dto = new ReverseClassRecordDto();
+            dto.setMemberName(member.getName());
+            dto.setReserveNums(item.getReserveNums());
+            dto.setMemberPhone(member.getPhone());
+            dto.setCardName(item.getCardName());
+            dto.setMemberSex(member.getSex());
+            dto.setMemberBirthday(member.getBirthday());
+            dto.setTimesCost(courseEntity.getTimesCost());
+            dto.setReserveNums(item.getReserveNums());
+            if (item.getLastModifyTime() != null)
+                dto.setOperateTime(item.getLastModifyTime());
+            else
+                dto.setOperateTime(item.getCreateTime());
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     private List<ReservedInfoDto> getReservedInfoDtos(Long scheduleId, List<ReservationRecordEntity> recordEntityList) {

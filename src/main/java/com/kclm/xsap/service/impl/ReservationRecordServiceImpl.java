@@ -116,7 +116,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         //设置预约记录属性
         reservationRecord.setCreateTime(LocalDateTime.now());
         reservationRecord.setStatus(1);
-        //
+        //保存排课记录中已预约人数的变化
         scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() + reservationRecord.getReserveNums());
         boolean saved = scheduleRecordService.updateById(scheduleRecord);
         if (!saved)
@@ -126,7 +126,9 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         if (!flag) {
             b = this.save(reservationRecord);
         } else {
-            b = this.updateById(reservationRecord);
+            one.setStatus(1);
+            one.setLastModifyTime(LocalDateTime.now());
+            b = this.updateById(one);
         }
         if (!b) {
             throw new BusinessException("保存失败，请联系管理员！");
@@ -139,6 +141,12 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         ReservationRecordEntity reservationRecord = reservationRecordService.getById(reserveId);
         reservationRecord.setStatus(0);
         reservationRecord.setCancelTimes(reservationRecord.getCancelTimes() + 1);
+        ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(reservationRecord.getScheduleId());
+        scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() - reservationRecord.getReserveNums());
+        boolean flag = scheduleRecordService.updateById(scheduleRecord);
+        if (!flag) {
+            throw new BusinessException("保存失败！");
+        }
         boolean b = reservationRecordService.updateById(reservationRecord);
         if (!b) {
             throw new BusinessException("保存失败！");
