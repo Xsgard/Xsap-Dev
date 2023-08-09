@@ -37,4 +37,11 @@ public class ReserveController {
         }
         return R.ok();
     }
+
+    @PostMapping("/cancelReserve.do")
+    @ResponseBody
+    public R cancelReserve(Long reserveId) {
+
+        return null;
+    }
 }

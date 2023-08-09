@@ -3,8 +3,10 @@ package com.kclm.xsap.web.controller;
 import com.kclm.xsap.dto.ReservedInfoDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
+import com.kclm.xsap.entity.CourseEntity;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
+import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +30,12 @@ import java.util.List;
 @Controller
 public class ScheduleController {
     private ScheduleRecordService scheduleRecordService;
+    private CourseService courseService;
 
     @Autowired
-    private void setApplicationContext(ScheduleRecordService scheduleRecordService) {
+    private void setApplicationContext(ScheduleRecordService scheduleRecordService, CourseService courseService) {
         this.scheduleRecordService = scheduleRecordService;
+        this.courseService = courseService;
     }
 
     @GetMapping("/x_course_schedule.do")
@@ -42,6 +46,9 @@ public class ScheduleController {
     @GetMapping("/x_course_schedule_detail.do")
     public String toScheduleDetail(Long id, Model model) {
         model.addAttribute("ID", id);
+        ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(id);
+        CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+        model.addAttribute("courseLimit", courseEntity.getLimitCounts());
         return "course/x_course_schedule_detail";
     }
 
