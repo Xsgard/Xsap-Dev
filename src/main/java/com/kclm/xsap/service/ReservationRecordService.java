@@ -10,4 +10,6 @@ import com.kclm.xsap.entity.ReservationRecordEntity;
  * @date 2023/8/2 16:33
  */
 public interface ReservationRecordService extends IService<ReservationRecordEntity> {
+
+    void addReserve(ReservationRecordEntity reservationRecord);
 }

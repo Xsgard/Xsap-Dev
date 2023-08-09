@@ -1,12 +1,12 @@
 package com.kclm.xsap.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kclm.xsap.dao.ScheduleRecordDao;
+import com.kclm.xsap.dto.ReservedInfoDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
-import com.kclm.xsap.entity.CourseEntity;
-import com.kclm.xsap.entity.EmployeeEntity;
-import com.kclm.xsap.entity.ScheduleRecordEntity;
+import com.kclm.xsap.entity.*;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
@@ -33,14 +33,20 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     private EmployeeService employeeService;
     private CourseCardService courseCardService;
     private MemberService memberService;
+    private ReservationRecordService reservationRecordService;
+    private ScheduleRecordService scheduleRecordService;
 
     @Autowired
     private void setApplicationContext(CourseService courseService, EmployeeService employeeService,
-                                       CourseCardService courseCardService, MemberService memberService) {
+                                       CourseCardService courseCardService, MemberService memberService,
+                                       ReservationRecordService reservationRecordService,
+                                       ScheduleRecordService scheduleRecordService) {
+        this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
         this.employeeService = employeeService;
         this.courseCardService = courseCardService;
         this.memberService = memberService;
+        this.reservationRecordService = reservationRecordService;
     }
 
     @Override
@@ -106,5 +112,37 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         dto.setTimesCost(courseEntity.getTimesCost());
 
         return dto;
+    }
+
+    @Override
+    public List<ReservedInfoDto> getReserveInfoDto(Long scheduleId) {
+        //查询预约记录
+        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId);
+        List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
+        //查询排课记录
+        ScheduleRecordEntity scheduleRecordEntity = scheduleRecordService.getById(scheduleId);
+        //Stream流操作
+        return recordEntityList.stream().map(item -> {
+            //会员信息
+            MemberEntity memberEntity = memberService.getById(item.getMemberId());
+            //课程信息
+            CourseEntity courseEntity = courseService.getById(scheduleRecordEntity.getCourseId());
+
+            //Dto对象
+            ReservedInfoDto reservedInfoDto = new ReservedInfoDto();
+            //设置属性
+            reservedInfoDto.setReserveId(item.getId());
+            reservedInfoDto.setMemberName(memberEntity.getName());
+            reservedInfoDto.setPhone(memberEntity.getPhone());
+            reservedInfoDto.setCardName(item.getCardName());
+            reservedInfoDto.setReserveNumbers(item.getReserveNums());
+            reservedInfoDto.setTimesCost(courseEntity.getTimesCost());
+            reservedInfoDto.setOperateTime(LocalDateTime.now());
+            reservedInfoDto.setOperator(item.getOperator());
+            reservedInfoDto.setReserveNote(item.getNote());
+            reservedInfoDto.setReserveStatus(item.getStatus());
+            return reservedInfoDto;
+        }).collect(Collectors.toList());
     }
 }

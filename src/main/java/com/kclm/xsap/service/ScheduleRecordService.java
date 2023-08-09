@@ -1,6 +1,7 @@
 package com.kclm.xsap.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.kclm.xsap.dto.ReservedInfoDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
@@ -18,7 +19,10 @@ import java.util.List;
  */
 public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
     R scheduleAdd(@Valid ScheduleRecordEntity scheduleRecord, BindingResult bindingResult);
+
     List<ScheduleRecordDto> scheduleList();
 
     ScheduleDetailsDto getScheduleDto(Long id);
+
+    List<ReservedInfoDto> getReserveInfoDto(Long scheduleId);
 }
