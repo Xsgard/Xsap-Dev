@@ -1,5 +1,6 @@
 package com.kclm.xsap.web.controller;
 
+import com.kclm.xsap.dto.ReservedInfoDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
@@ -65,5 +66,13 @@ public class ScheduleController {
     public R scheduleDetail(Long id) {
         ScheduleDetailsDto scheduleDto = scheduleRecordService.getScheduleDto(id);
         return R.ok().put("data", scheduleDto);
+    }
+
+    @PostMapping("/reservedList.do")
+    @ResponseBody
+    public R reserveList(Long id) {
+        List<ReservedInfoDto> reserveInfoDto = scheduleRecordService.getReserveInfoDto(id);
+
+        return R.ok().put("data", reserveInfoDto);
     }
 }
