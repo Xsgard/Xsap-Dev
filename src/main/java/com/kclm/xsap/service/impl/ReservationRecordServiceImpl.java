@@ -26,13 +26,16 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     private CourseService courseService;
     private ScheduleRecordService scheduleRecordService;
     private GlobalReservationSetService reservationSetService;
+    private ReservationRecordService reservationRecordService;
 
     @Autowired
     private void setService(MemberCardService memberCardService,
                             MemberBindRecordService memberBindRecordService,
                             CourseService courseService,
                             ScheduleRecordService scheduleRecordService,
-                            GlobalReservationSetService reservationSetService) {
+                            GlobalReservationSetService reservationSetService,
+                            ReservationRecordService reservationRecordService) {
+        this.reservationRecordService = reservationRecordService;
         this.courseService = courseService;
         this.memberCardService = memberCardService;
         this.memberBindRecordService = memberBindRecordService;
@@ -91,19 +94,55 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
                 throw new BusinessException("已经过了最晚预约日期！");
             }
         }
+        //是否预约过该课程
+        LambdaQueryWrapper<ReservationRecordEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ReservationRecordEntity::getMemberId, reservationRecord.getMemberId())
+                .eq(ReservationRecordEntity::getScheduleId, reservationRecord.getScheduleId())
+                .eq(ReservationRecordEntity::getCardId, reservationRecord.getCardId());
+        ReservationRecordEntity one = reservationRecordService.getOne(wrapper);
+        //flag 为true 查询到预约记录
+        boolean flag = one != null;
+        //已经有预约记录
+        if (one != null && one.getStatus() == 1) {
+            throw new BusinessException("您已预约过该课程！");
+        }
+        //取消次数超过限制的
+        if (one != null && one.getCancelTimes() > courseEntity.getLimitCounts()) {
+            throw new BusinessException("您有过多次重复预约并取消本课程的操作，已限制您继续预约该课程！");
+        }
+        //课堂容量是否足够
+        if (reservationRecord.getReserveNums() > (courseEntity.getContains() - scheduleRecord.getOrderNums()))
+            throw new BusinessException("该课程太过火爆，已经预约不了了！");
         //设置预约记录属性
         reservationRecord.setCreateTime(LocalDateTime.now());
         reservationRecord.setStatus(1);
         //
-        scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() + 1);
-        boolean saved = scheduleRecordService.save(scheduleRecord);
+        scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() + reservationRecord.getReserveNums());
+        boolean saved = scheduleRecordService.updateById(scheduleRecord);
         if (!saved)
-            throw new BusinessException("保存失败");
+            throw new BusinessException("保存失败，请联系管理员！");
         //保存记录
-        boolean b = this.save(reservationRecord);
+        boolean b;
+        if (!flag) {
+            b = this.save(reservationRecord);
+        } else {
+            b = this.updateById(reservationRecord);
+        }
         if (!b) {
-            throw new BusinessException("保存失败");
+            throw new BusinessException("保存失败，请联系管理员！");
         }
 
     }
+
+    @Override
+    public void cancelReserve(Long reserveId) {
+        ReservationRecordEntity reservationRecord = reservationRecordService.getById(reserveId);
+        reservationRecord.setStatus(0);
+        reservationRecord.setCancelTimes(reservationRecord.getCancelTimes() + 1);
+        boolean b = reservationRecordService.updateById(reservationRecord);
+        if (!b) {
+            throw new BusinessException("保存失败！");
+        }
+    }
+
 }

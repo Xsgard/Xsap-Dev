@@ -12,4 +12,6 @@ import com.kclm.xsap.entity.ReservationRecordEntity;
 public interface ReservationRecordService extends IService<ReservationRecordEntity> {
 
     void addReserve(ReservationRecordEntity reservationRecord);
+
+    void cancelReserve(Long reserveId);
 }
