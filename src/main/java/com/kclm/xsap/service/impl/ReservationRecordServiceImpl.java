@@ -67,11 +67,18 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         LocalDateTime startTime = TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime());
         LocalDateTime previousDateTime = TimeUtil.timeMinusDay(startTime, globalSet.getStartDay());
         LocalDateTime now = LocalDateTime.now();
+        //判断课程是否已经开始
         if (now.isAfter(startTime))
             throw new BusinessException("已经开始上课了，不能预约！");
-        if (globalSet.getAppointmentStartMode() != 2 && now.isBefore(previousDateTime)) {
-            throw new BusinessException("还未到预约开放日期！");
+        //预约开始时间
+        if (globalSet.getAppointmentStartMode() == 1) {
+            if (now.isAfter(startTime))
+                throw new BusinessException("已经开始上课了，不能预约！");
+        } else {
+            if (now.isBefore(previousDateTime))
+                throw new BusinessException("还未到预约开放日期！");
         }
+        //预约截止时间
         if (globalSet.getAppointmentDeadlineMode() == 2) {
             LocalDateTime endTime = TimeUtil.timeMinusHour(startTime, globalSet.getEndHour());
             if (now.isAfter(endTime)) {
@@ -84,11 +91,19 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
                 throw new BusinessException("已经过了最晚预约日期！");
             }
         }
-
+        //设置预约记录属性
+        reservationRecord.setCreateTime(LocalDateTime.now());
+        reservationRecord.setStatus(1);
+        //
+        scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() + 1);
+        boolean saved = scheduleRecordService.save(scheduleRecord);
+        if (!saved)
+            throw new BusinessException("保存失败");
         //保存记录
         boolean b = this.save(reservationRecord);
-        if (!b)
+        if (!b) {
             throw new BusinessException("保存失败");
+        }
 
     }
 }

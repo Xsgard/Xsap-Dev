@@ -118,7 +118,8 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     public List<ReservedInfoDto> getReserveInfoDto(Long scheduleId) {
         //查询预约记录
         LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId);
+        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
+                .eq(ReservationRecordEntity::getStatus, 1);
         List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
         //查询排课记录
         ScheduleRecordEntity scheduleRecordEntity = scheduleRecordService.getById(scheduleId);
@@ -138,7 +139,7 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
             reservedInfoDto.setCardName(item.getCardName());
             reservedInfoDto.setReserveNumbers(item.getReserveNums());
             reservedInfoDto.setTimesCost(courseEntity.getTimesCost());
-            reservedInfoDto.setOperateTime(LocalDateTime.now());
+            reservedInfoDto.setOperateTime(item.getCreateTime());
             reservedInfoDto.setOperator(item.getOperator());
             reservedInfoDto.setReserveNote(item.getNote());
             reservedInfoDto.setReserveStatus(item.getStatus());
