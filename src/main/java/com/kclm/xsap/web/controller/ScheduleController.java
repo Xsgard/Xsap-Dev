@@ -72,7 +72,13 @@ public class ScheduleController {
     @ResponseBody
     public R reserveList(Long id) {
         List<ReservedInfoDto> reserveInfoDto = scheduleRecordService.getReserveInfoDto(id);
-
         return R.ok().put("data", reserveInfoDto);
+    }
+
+    @PostMapping("/reserveRecord.do")
+    @ResponseBody
+    public R reverseAllList(Long id) {
+        List<ReservedInfoDto> allReserveInfoDto = scheduleRecordService.getAllReserveInfoDto(id);
+        return R.ok().put("data", allReserveInfoDto);
     }
 }
