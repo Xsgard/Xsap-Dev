@@ -25,4 +25,6 @@ public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
     ScheduleDetailsDto getScheduleDto(Long id);
 
     List<ReservedInfoDto> getReserveInfoDto(Long scheduleId);
+
+    List<ReservedInfoDto> getAllReserveInfoDto(Long scheduleId);
 }

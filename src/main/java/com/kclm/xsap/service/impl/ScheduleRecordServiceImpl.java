@@ -121,6 +121,19 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
                 .eq(ReservationRecordEntity::getStatus, 1);
         List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
+        return getReservedInfoDtos(scheduleId, recordEntityList);
+    }
+
+    @Override
+    public List<ReservedInfoDto> getAllReserveInfoDto(Long scheduleId) {
+        //查询预约记录
+        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId);
+        List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
+        return getReservedInfoDtos(scheduleId, recordEntityList);
+    }
+
+    private List<ReservedInfoDto> getReservedInfoDtos(Long scheduleId, List<ReservationRecordEntity> recordEntityList) {
         //查询排课记录
         ScheduleRecordEntity scheduleRecordEntity = scheduleRecordService.getById(scheduleId);
         //Stream流操作
