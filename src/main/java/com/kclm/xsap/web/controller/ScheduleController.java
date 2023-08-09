@@ -1,6 +1,7 @@
 package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.dto.ReservedInfoDto;
+import com.kclm.xsap.dto.ReverseClassRecordDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.CourseEntity;
@@ -87,5 +88,20 @@ public class ScheduleController {
     public R reverseAllList(Long id) {
         List<ReservedInfoDto> allReserveInfoDto = scheduleRecordService.getAllReserveInfoDto(id);
         return R.ok().put("data", allReserveInfoDto);
+    }
+
+    @PostMapping("/classRecord.do")
+    @ResponseBody
+    public R classRecord(Long id) {
+        List<ReverseClassRecordDto> reverseClassRecordDto = scheduleRecordService.getReverseClassRecordDto(id);
+        return R.ok().put("data", reverseClassRecordDto);
+    }
+
+    //TODO 请求没写完
+    @PostMapping("/queryAmountsPayable.do")
+    @ResponseBody
+    public R queryAmountPayable() {
+
+        return null;
     }
 }
