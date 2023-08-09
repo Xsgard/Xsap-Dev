@@ -43,6 +43,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         this.reservationSetService = reservationSetService;
     }
 
+    //TODO 添加预约时判断会员卡是否支持本课程
     @Override
     public void addReserve(ReservationRecordEntity reservationRecord) {
         //会员卡绑定实体
@@ -136,6 +137,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
 
     }
 
+    //TODO 加上取消时间判断是否课程已经开始
     @Override
     public void cancelReserve(Long reserveId) {
         ReservationRecordEntity reservationRecord = reservationRecordService.getById(reserveId);
