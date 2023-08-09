@@ -602,7 +602,7 @@
                         }, 1000);
                     } else {
                         swal("添加失败！", data.msg, "info");
-                        etTimeout(function () {
+                        setTimeout(function () {
                             window.location.reload();
                         }, 1200);
                     }
