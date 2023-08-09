@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: 处理/reserve请求（预约相关请求）
  * @date 2023/8/8 14:36
  */
 @RequestMapping("/reserve")
@@ -41,7 +41,11 @@ public class ReserveController {
     @PostMapping("/cancelReserve.do")
     @ResponseBody
     public R cancelReserve(Long reserveId) {
-
-        return null;
+        try {
+            reservationRecordService.cancelReserve(reserveId);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok();
     }
 }
