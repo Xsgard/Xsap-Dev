@@ -15,6 +15,14 @@ public class TimeUtil {
         return time.plusDays(day.longValue());
     }
 
+    public static LocalDateTime timeMinusDay(LocalDateTime time, Integer day) {
+        return time.minusDays(day);
+    }
+
+    public static LocalDateTime timeMinusHour(LocalDateTime time, Integer hour) {
+        return time.minusHours(hour);
+    }
+
     public static LocalDateTime timeTransfer(LocalDate date, LocalTime time) {
         return LocalDateTime.of(date, time);
     }
