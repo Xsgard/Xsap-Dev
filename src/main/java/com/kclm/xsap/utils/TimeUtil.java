@@ -7,7 +7,7 @@ import java.time.LocalTime;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: 时间计算工具类
  * @date 2023/8/3 19:15
  */
 public class TimeUtil {
