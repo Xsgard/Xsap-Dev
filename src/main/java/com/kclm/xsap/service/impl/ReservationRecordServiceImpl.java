@@ -145,6 +145,26 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         reservationRecord.setCancelTimes(reservationRecord.getCancelTimes() + 1);
         ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(reservationRecord.getScheduleId());
         scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() - reservationRecord.getReserveNums());
+        GlobalReservationSetEntity set = reservationSetService.getById(1);
+        //对全局设置中的属性进行判断
+        LocalDateTime startTime = TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime());
+        LocalDateTime now = LocalDateTime.now();
+        if (set.getAppointmentCancelMode() == 1) {
+            //对取消无限制，只需在上课时间之前都可以取消
+            if (now.isAfter(startTime))
+                throw new BusinessException("课程已经开始了，不能取消！");
+        } else if (set.getAppointmentCancelMode() == 2) {
+            //在 set中读出可以提前取消的小时数进行判断
+            LocalDateTime cancelTime = TimeUtil.timeMinusHour(startTime, set.getCancelHour());
+            if (now.isAfter(cancelTime))
+                throw new BusinessException("已经过了最晚取消预约时间，不能取消！");
+        } else {
+            //对set中给定的取消的时间点进行判断
+            LocalDateTime cancelDateTime = TimeUtil.timeTransfer(
+                    TimeUtil.timeMinusDay(startTime, set.getCancelDay()).toLocalDate(), set.getCancelTime());
+            if (now.isAfter(cancelDateTime))
+                throw new BusinessException("已经过了最晚取消预约时间，不能取消！");
+        }
         boolean flag = scheduleRecordService.updateById(scheduleRecord);
         if (!flag) {
             throw new BusinessException("保存失败！");
