@@ -3,6 +3,7 @@ package com.kclm.xsap.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.kclm.xsap.entity.ReservationRecordEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * @author Asgard
@@ -12,4 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ReservationRecordDao extends BaseMapper<ReservationRecordEntity> {
+    @Select("select id from t_reservation_record where member_id=#{memberId} and schedule_id=#{scheduleId};")
+    Long getReserveId(Long memberId, Long scheduleId);
 }
