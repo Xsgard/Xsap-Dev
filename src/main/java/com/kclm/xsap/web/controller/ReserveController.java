@@ -48,4 +48,11 @@ public class ReserveController {
         }
         return R.ok();
     }
+
+    @PostMapping("/getReserveId.do")
+    @ResponseBody
+    public R getReserveId(Long memberId, Long scheduleId) {
+        Long reserveId = reservationRecordService.getReserveId(memberId, scheduleId);
+        return R.ok().put("id", reserveId);
+    }
 }
