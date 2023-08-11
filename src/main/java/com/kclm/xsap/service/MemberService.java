@@ -3,6 +3,7 @@ package com.kclm.xsap.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
+import com.kclm.xsap.dto.ReserveRecordDTO;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.utils.R;
 import org.springframework.validation.BindingResult;
@@ -30,4 +31,6 @@ public interface MemberService extends IService<MemberEntity> {
     List<MemberEntity> getMemberList();
 
     List<String> getSupportCardNames(List<Long> cardIds);
+
+    List<ReserveRecordDTO> getReserveRecordDto(Long memberId);
 }

@@ -6,14 +6,11 @@ import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dao.MemberDao;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
+import com.kclm.xsap.dto.ReserveRecordDTO;
 import com.kclm.xsap.dto.convert.MemberConvert;
-import com.kclm.xsap.entity.MemberBindRecordEntity;
-import com.kclm.xsap.entity.MemberCardEntity;
-import com.kclm.xsap.entity.MemberEntity;
+import com.kclm.xsap.entity.*;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.MemberBindRecordService;
-import com.kclm.xsap.service.MemberCardService;
-import com.kclm.xsap.service.MemberService;
+import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
@@ -43,12 +40,22 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     private MemberService memberService;
 
+    private ReservationRecordService reservationRecordService;
+
+    private ScheduleRecordService scheduleRecordService;
+
+    private CourseService courseService;
+
     private MemberCardDao cardDao;
 
     @Autowired
-    private void setApplicationContext(MemberCardService cardService,
-                                       MemberBindRecordService bindRecordService,
-                                       MemberService memberService, MemberCardDao cardDao) {
+    private void setApplicationContext(MemberCardService cardService, MemberBindRecordService bindRecordService,
+                                       MemberService memberService, ReservationRecordService reservationRecordService,
+                                       ScheduleRecordService scheduleRecordService, CourseService courseService,
+                                       MemberCardDao cardDao) {
+        this.scheduleRecordService = scheduleRecordService;
+        this.courseService = courseService;
+        this.reservationRecordService = reservationRecordService;
         this.cardDao = cardDao;
         this.cardService = cardService;
         this.bindRecordService = bindRecordService;
@@ -168,6 +175,39 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         List<String> supportCardNames = new ArrayList<>();
         cardIds.forEach(item -> supportCardNames.add("「" + cardDao.getSupportCardName(item) + "」"));
         return supportCardNames;
+    }
+
+    @Override
+    public List<ReserveRecordDTO> getReserveRecordDto(Long memberId) {
+        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ReservationRecordEntity::getMemberId, memberId);
+        List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
+        return recordEntityList.stream().map(item -> {
+            //排课计划信息
+            ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(item.getScheduleId());
+            //课程信息
+            CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+            ReserveRecordDTO dto = new ReserveRecordDTO();
+            dto.setCourseName(courseEntity.getName());
+            //设置预约时间
+            if (item.getLastModifyTime() == null)
+                dto.setReserveTime(item.getCreateTime());
+            else
+                dto.setReserveTime(item.getCreateTime());
+            dto.setCardName(item.getCardName());
+            dto.setReserveNumbers(item.getReserveNums());
+            dto.setTimesCost(courseEntity.getTimesCost());
+            //设置操作时间
+            if (item.getLastModifyTime() == null)
+                dto.setOperateTime(item.getCreateTime());
+            else
+                dto.setOperateTime(item.getCreateTime());
+            dto.setOperator(item.getOperator());
+            dto.setReserveNote(item.getNote());
+            dto.setReserveStatus(item.getStatus());
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override

@@ -172,7 +172,7 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
             else
                 dto.setOperateTime(one.getLastModifyTime());
             dto.setCheckStatus(item.getCheckStatus());
-            dto.setCardId(one.getCardId());
+            dto.setCardId(item.getBindCardId());
             dto.setMemberId(memberEntity.getId());
             dto.setStartDate(scheduleRecord.getStartDate());
             dto.setClassTime(scheduleRecord.getClassTime());
