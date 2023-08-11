@@ -3,6 +3,7 @@ package com.kclm.xsap.web.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kclm.xsap.dto.MemberCardDTO;
 import com.kclm.xsap.dto.MemberDTO;
+import com.kclm.xsap.dto.ReserveRecordDTO;
 import com.kclm.xsap.entity.ConsumeRecordEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.exceptions.BusinessException;
@@ -143,5 +144,15 @@ public class MemberController {
         return R.ok().put("data", consumeRecordEntities);
     }
 
+    @PostMapping("/reserveInfo.do")
+    @ResponseBody
+    public R reserveInfo(Long id) {
+        try {
+            List<ReserveRecordDTO> reserveRecordDto = memberService.getReserveRecordDto(id);
+            return R.ok().put("data", reserveRecordDto);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+    }
 
 }

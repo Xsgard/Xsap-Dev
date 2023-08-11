@@ -5,9 +5,11 @@ import com.kclm.xsap.dto.ReverseClassRecordDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.CourseEntity;
+import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.CourseService;
+import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +34,12 @@ import java.util.List;
 public class ScheduleController {
     private ScheduleRecordService scheduleRecordService;
     private CourseService courseService;
+    private MemberBindRecordService memberBindRecordService;
 
     @Autowired
-    private void setApplicationContext(ScheduleRecordService scheduleRecordService, CourseService courseService) {
+    private void setApplicationContext(ScheduleRecordService scheduleRecordService, CourseService courseService,
+                                       MemberBindRecordService memberBindRecordService) {
+        this.memberBindRecordService = memberBindRecordService;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
     }
@@ -100,8 +105,9 @@ public class ScheduleController {
     //TODO 请求没写完
     @PostMapping("/queryAmountsPayable.do")
     @ResponseBody
-    public R queryAmountPayable() {
-
-        return null;
+    public R queryAmountPayable(Long bindCardId) {
+        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
+        Double money = 0.0;
+        return R.ok().put("data", money);
     }
 }
