@@ -36,12 +36,15 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     private MemberService memberService;
     private ReservationRecordService reservationRecordService;
     private ScheduleRecordService scheduleRecordService;
+    private ClassRecordService classRecordService;
 
     @Autowired
     private void setApplicationContext(CourseService courseService, EmployeeService employeeService,
                                        CourseCardService courseCardService, MemberService memberService,
                                        ReservationRecordService reservationRecordService,
-                                       ScheduleRecordService scheduleRecordService) {
+                                       ScheduleRecordService scheduleRecordService,
+                                       ClassRecordService classRecordService) {
+        this.classRecordService = classRecordService;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
         this.employeeService = employeeService;
@@ -136,28 +139,45 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
 
     @Override
     public List<ReverseClassRecordDto> getReverseClassRecordDto(Long scheduleId) {
-        //查询预约记录
-        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
-                .eq(ReservationRecordEntity::getStatus, 1);
-        List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
-        return recordEntityList.stream().map(item -> {
-            MemberEntity member = memberService.getById(item.getMemberId());
-            ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(scheduleId);
-            CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+        //查询课程记录信息
+        LambdaQueryWrapper<ClassRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClassRecordEntity::getScheduleId, scheduleId)
+                .eq(ClassRecordEntity::getReserveCheck, 1);
+        List<ClassRecordEntity> classRecordEntities = classRecordService.list(queryWrapper);
+        //预约记录信息
+        ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(scheduleId);
+        //课程信息
+        CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+        //Stream流操作
+        return classRecordEntities.stream().map(item -> {
+            //查询用户实体信息
+            MemberEntity memberEntity = memberService.getById(item.getMemberId());
+            //根据 --memberId + scheduleId-- 查询预约记录信息
+            LambdaQueryWrapper<ReservationRecordEntity> qw = new LambdaQueryWrapper<>();
+            qw.eq(ReservationRecordEntity::getMemberId, memberEntity.getId())
+                    .eq(ReservationRecordEntity::getScheduleId, scheduleId);
+            ReservationRecordEntity one = reservationRecordService.getOne(qw);
+            //课程信息DTO
             ReverseClassRecordDto dto = new ReverseClassRecordDto();
-            dto.setMemberName(member.getName());
-            dto.setReserveNums(item.getReserveNums());
-            dto.setMemberPhone(member.getPhone());
+            dto.setClassRecordId(item.getId());
+            dto.setMemberName(memberEntity.getName());
+            dto.setMemberPhone(memberEntity.getPhone());
             dto.setCardName(item.getCardName());
-            dto.setMemberSex(member.getSex());
-            dto.setMemberBirthday(member.getBirthday());
+            dto.setMemberSex(memberEntity.getSex());
+            dto.setMemberBirthday(memberEntity.getBirthday());
             dto.setTimesCost(courseEntity.getTimesCost());
-            dto.setReserveNums(item.getReserveNums());
-            if (item.getLastModifyTime() != null)
-                dto.setOperateTime(item.getLastModifyTime());
+            dto.setReserveNums(one.getReserveNums());
+            if (one.getLastModifyTime() == null)
+                dto.setOperateTime(one.getCreateTime());
             else
-                dto.setOperateTime(item.getCreateTime());
+                dto.setOperateTime(one.getLastModifyTime());
+            dto.setCheckStatus(item.getCheckStatus());
+            dto.setCardId(one.getCardId());
+            dto.setMemberId(memberEntity.getId());
+            dto.setStartDate(scheduleRecord.getStartDate());
+            dto.setClassTime(scheduleRecord.getClassTime());
+            dto.setCreateTimes(one.getCreateTime());
+
             return dto;
         }).collect(Collectors.toList());
     }

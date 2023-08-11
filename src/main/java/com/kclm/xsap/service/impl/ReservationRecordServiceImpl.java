@@ -116,7 +116,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
             throw new BusinessException("您已预约过该课程！");
         }
         //取消次数超过限制的
-        if (one != null && one.getCancelTimes() > courseEntity.getLimitCounts()) {
+        if (one != null && one.getCancelTimes() >= courseEntity.getLimitCounts()) {
             throw new BusinessException("您有过多次重复预约并取消本课程的操作，已限制您继续预约该课程！");
         }
         //课堂容量是否足够
@@ -130,20 +130,33 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         boolean saved = scheduleRecordService.updateById(scheduleRecord);
         if (!saved)
             throw new BusinessException("保存失败，请联系管理员！");
-
-        //课程记录实体信息
-        ClassRecordEntity classRecordEntity = new ClassRecordEntity();
-        classRecordEntity.setMemberId(reservationRecord.getMemberId());
-        classRecordEntity.setCardName(cardEntity.getName());
-        classRecordEntity.setScheduleId(scheduleRecord.getId());
-        classRecordEntity.setCheckStatus(0);
-        classRecordEntity.setReserveCheck(1);
-        classRecordEntity.setBindCardId(memberBindRecord.getId());
-        classRecordEntity.setCreateTime(LocalDateTime.now());
-        //保存课程实体信息
-        boolean save = classRecordService.save(classRecordEntity);
-        if (!save)
-            throw new BusinessException("保存失败，请联系管理员！");
+        //查询课程记录信息
+        LambdaQueryWrapper<ClassRecordEntity> recordWrapper = new LambdaQueryWrapper<>();
+        recordWrapper.eq(ClassRecordEntity::getMemberId, reservationRecord.getMemberId())
+                .eq(ClassRecordEntity::getScheduleId, scheduleRecord.getId());
+        ClassRecordEntity recordEntity = classRecordService.getOne(recordWrapper);
+        //不为空则有修改记录 空则新增记录
+        if (recordEntity != null) {
+            recordEntity.setReserveCheck(1);
+            recordEntity.setLastModifyTime(LocalDateTime.now());
+            boolean save = classRecordService.updateById(recordEntity);
+            if (!save)
+                throw new BusinessException("保存失败，请联系管理员！");
+        } else {
+            //课程记录实体信息
+            ClassRecordEntity classRecordEntity = new ClassRecordEntity();
+            classRecordEntity.setMemberId(reservationRecord.getMemberId());
+            classRecordEntity.setCardName(cardEntity.getName());
+            classRecordEntity.setScheduleId(scheduleRecord.getId());
+            classRecordEntity.setCheckStatus(0);
+            classRecordEntity.setReserveCheck(1);
+            classRecordEntity.setBindCardId(memberBindRecord.getId());
+            classRecordEntity.setCreateTime(LocalDateTime.now());
+            //保存课程实体信息
+            boolean save = classRecordService.save(classRecordEntity);
+            if (!save)
+                throw new BusinessException("保存失败，请联系管理员！");
+        }
 
         //保存预约记录
         boolean b;
@@ -162,11 +175,13 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
 
     //TODO 加上取消时间判断是否课程已经开始
     @Override
+    @Transactional
     public void cancelReserve(Long reserveId) {
         ReservationRecordEntity reservationRecord = reservationRecordService.getById(reserveId);
         reservationRecord.setStatus(0);
         reservationRecord.setCancelTimes(reservationRecord.getCancelTimes() + 1);
         ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(reservationRecord.getScheduleId());
+        //减去已取消预约的人数
         scheduleRecord.setOrderNums(scheduleRecord.getOrderNums() - reservationRecord.getReserveNums());
         GlobalReservationSetEntity set = reservationSetService.getById(1);
         //对全局设置中的属性进行判断
@@ -188,6 +203,15 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
             if (now.isAfter(cancelDateTime))
                 throw new BusinessException("已经过了最晚取消预约时间，不能取消！");
         }
+        //查询课程记录信息并修改状态
+        LambdaQueryWrapper<ClassRecordEntity> recordWrapper = new LambdaQueryWrapper<>();
+        recordWrapper.eq(ClassRecordEntity::getMemberId, reservationRecord.getMemberId())
+                .eq(ClassRecordEntity::getScheduleId, scheduleRecord.getId());
+        ClassRecordEntity recordEntity = classRecordService.getOne(recordWrapper);
+        recordEntity.setReserveCheck(0);
+        boolean updated = classRecordService.updateById(recordEntity);
+        if (!updated)
+            throw new BusinessException("保存失败！");
         boolean flag = scheduleRecordService.updateById(scheduleRecord);
         if (!flag) {
             throw new BusinessException("保存失败！");
