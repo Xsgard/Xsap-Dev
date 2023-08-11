@@ -9,6 +9,7 @@ import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +28,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     private ScheduleRecordService scheduleRecordService;
     private GlobalReservationSetService reservationSetService;
     private ReservationRecordService reservationRecordService;
+    private ClassRecordService classRecordService;
 
     @Autowired
     private void setService(MemberCardService memberCardService,
@@ -34,7 +36,9 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
                             CourseService courseService,
                             ScheduleRecordService scheduleRecordService,
                             GlobalReservationSetService reservationSetService,
-                            ReservationRecordService reservationRecordService) {
+                            ReservationRecordService reservationRecordService,
+                            ClassRecordService classRecordService) {
+        this.classRecordService = classRecordService;
         this.reservationRecordService = reservationRecordService;
         this.courseService = courseService;
         this.memberCardService = memberCardService;
@@ -45,12 +49,15 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
 
     //TODO 添加预约时判断会员卡是否支持本课程
     @Override
+    @Transactional
     public void addReserve(ReservationRecordEntity reservationRecord) {
         //会员卡绑定实体
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MemberBindRecordEntity::getMemberId, reservationRecord.getMemberId())
                 .eq(MemberBindRecordEntity::getCardId, reservationRecord.getCardId());
         MemberBindRecordEntity memberBindRecord = memberBindRecordService.getOne(queryWrapper);
+        //会员卡实体细信息
+        MemberCardEntity cardEntity = memberCardService.getById(memberBindRecord.getCardId());
         //校验卡是否激活
         if (memberBindRecord.getActiveStatus() != 1)
             throw new BusinessException("该卡未激活，不能进行消费！");
@@ -66,6 +73,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         if ((memberBindRecord.getValidCount() - courseEntity.getTimesCost()) < 0) {
             throw new BusinessException("该卡余额不足以消费该课程！");
         }
+        //全局设置实体信息
         GlobalReservationSetEntity globalSet = reservationSetService.getById(1);
         //预约开始时间
         LocalDateTime startTime = TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime());
@@ -122,7 +130,22 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         boolean saved = scheduleRecordService.updateById(scheduleRecord);
         if (!saved)
             throw new BusinessException("保存失败，请联系管理员！");
-        //保存记录
+
+        //课程记录实体信息
+        ClassRecordEntity classRecordEntity = new ClassRecordEntity();
+        classRecordEntity.setMemberId(reservationRecord.getMemberId());
+        classRecordEntity.setCardName(cardEntity.getName());
+        classRecordEntity.setScheduleId(scheduleRecord.getId());
+        classRecordEntity.setCheckStatus(0);
+        classRecordEntity.setReserveCheck(1);
+        classRecordEntity.setBindCardId(memberBindRecord.getId());
+        classRecordEntity.setCreateTime(LocalDateTime.now());
+        //保存课程实体信息
+        boolean save = classRecordService.save(classRecordEntity);
+        if (!save)
+            throw new BusinessException("保存失败，请联系管理员！");
+
+        //保存预约记录
         boolean b;
         if (!flag) {
             b = this.save(reservationRecord);
