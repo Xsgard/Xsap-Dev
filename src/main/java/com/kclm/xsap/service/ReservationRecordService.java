@@ -14,4 +14,6 @@ public interface ReservationRecordService extends IService<ReservationRecordEnti
     void addReserve(ReservationRecordEntity reservationRecord);
 
     void cancelReserve(Long reserveId);
+
+    Long getReserveId(Long memberId, Long scheduleId);
 }

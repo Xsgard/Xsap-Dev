@@ -29,6 +29,12 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     private GlobalReservationSetService reservationSetService;
     private ReservationRecordService reservationRecordService;
     private ClassRecordService classRecordService;
+    private ReservationRecordDao reservationRecordDao;
+
+    @Autowired
+    private void setDao(ReservationRecordDao reservationRecordDao) {
+        this.reservationRecordDao = reservationRecordDao;
+    }
 
     @Autowired
     private void setService(MemberCardService memberCardService,
@@ -222,4 +228,8 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
     }
 
+    @Override
+    public Long getReserveId(Long memberId, Long scheduleId) {
+        return reservationRecordDao.getReserveId(memberId, scheduleId);
+    }
 }
