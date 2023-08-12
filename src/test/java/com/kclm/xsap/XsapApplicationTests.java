@@ -6,7 +6,9 @@ import com.kclm.xsap.dao.MemberCardDao;
 import com.kclm.xsap.dao.MemberDao;
 import com.kclm.xsap.dto.MemberDTO;
 import com.kclm.xsap.entity.MemberCardEntity;
+import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.MemberCardService;
+import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.TimeUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 class XsapApplicationTests {
@@ -35,7 +40,13 @@ class XsapApplicationTests {
     private MemberCardDao cardDao;
 
     @Autowired
+    private MemberDao memberDao;
+
+    @Autowired
     private CourseCardDao courseCardDao;
+
+    @Autowired
+    private MemberService memberService;
 
     @Test
     public void testSelect() {
@@ -84,6 +95,37 @@ class XsapApplicationTests {
 
         System.out.println(localDateTime);
         System.out.println(localDateTime1);
+    }
+
+    @Test
+    public void testAddAndLost() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // 获取当前日期和时间
+        LocalDateTime now = LocalDateTime.now();
+
+        // 获取本月第一天
+        LocalDateTime firstDayOfMonth = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
+
+        // 获取本月最后一天
+        int lastDay = now.getMonth().length(now.toLocalDate().isLeapYear());
+        int dayOfMonth = now.getDayOfMonth();
+        LocalDateTime lastSecondOfToday = now.withDayOfMonth(dayOfMonth).toLocalDate().atTime(23, 59, 59);
+
+        List<MemberEntity> memberEntityList = memberService.filterAllMemberByTime(firstDayOfMonth, lastSecondOfToday);
+        List<Integer> dataArr = new ArrayList<>();
+        for (int i = 1; i <= dayOfMonth; i++) {
+            dataArr.add(0);
+        }
+
+        List<Integer> data = dataArr;
+        List<Integer> data2 = dataArr;
+
+        data = memberEntityList.stream().filter(item -> item.getIsDeleted() == 1).map(item -> {
+            int day = item.getCreateTime().getDayOfMonth();
+            dataArr.set(day - 1, dataArr.get(day) + 1);
+            return dataArr;
+        }).collect(Collectors.toList()).get(0);
+        System.out.println(Arrays.toString(data.toArray()));
     }
 
 }
