@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     private ScheduleRecordService scheduleRecordService;
     private MemberCardService memberCardService;
     private MemberBindRecordService memberBindRecordService;
+    private MemberLogService memberLogService;
 
     @Autowired
     private void setDao(MemberCardDao cardDao, MemberBindRecordDao memberBindRecordDao) {
@@ -53,7 +55,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
                             MemberCardService memberCardService,
                             MemberBindRecordService memberBindRecordService,
                             CourseService courseService,
-                            ScheduleRecordService scheduleRecordService) {
+                            ScheduleRecordService scheduleRecordService,
+                            MemberLogService memberLogService) {
+        this.memberCardService = memberCardService;
         this.courseService = courseService;
         this.bindRecordService = bindRecordService;
         this.courseCardService = courseCardService;
@@ -79,6 +83,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      * @param info          传入的绑定数据的Dto信息
      */
     @Override
+    @Transactional
     public void memberBind(BindingResult bindingResult, @Valid BindCardInfoDto info) {
         ValidationUtil.getErrors(bindingResult);
         MemberBindRecordEntity bindRecordEntity = new MemberBindRecordEntity();
@@ -94,6 +99,54 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         }
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         bindRecordService.save(bindRecordEntity);
+        //日志信息
+        MemberLogEntity log = new MemberLogEntity();
+        log.setType("绑卡操作");
+        log.setInvolveMoney(BigDecimal.valueOf(info.getReceivedMoney()));
+        log.setOperator(info.getOperator());
+        log.setMemberBindId(bindRecordEntity.getId());
+        log.setCreateTime(LocalDateTime.now());
+        log.setCardCountChange(info.getValidCount());
+        log.setCardDayChange(info.getValidDay());
+        log.setCardActiveStatus(1);
+        boolean b = memberLogService.save(log);
+        if (!b)
+            throw new BusinessException("日志保存失败！");
+    }
+
+    /**
+     * 激活、禁用 卡
+     *
+     * @param memberId     会员id
+     * @param bindId       绑定表id
+     * @param status       修改的状态
+     * @param operatorName 操作人
+     */
+    @Override
+    @Transactional
+    public void activeOpt(Long memberId, Long bindId, Integer status, String operatorName) {
+        MemberBindRecordEntity record = bindRecordService.getById(bindId);
+        record.setActiveStatus(status);
+        boolean b = bindRecordService.updateById(record);
+        if (!b)
+            throw new BusinessException("修改状态失败！");
+        MemberLogEntity log = new MemberLogEntity();
+        String note;
+        if (status == 1)
+            note = "激活会员卡操作";
+        else
+            note = "停用会员卡操作";
+        log.setNote(note);
+        log.setInvolveMoney(BigDecimal.valueOf(0));
+        log.setOperator(operatorName);
+        log.setMemberBindId(bindId);
+        log.setCreateTime(LocalDateTime.now());
+        log.setCardCountChange(0);
+        log.setCardDayChange(0);
+        log.setCardActiveStatus(status);
+        boolean flag = memberLogService.save(log);
+        if (!flag)
+            throw new BusinessException("日志保存失败！");
     }
 
     /**

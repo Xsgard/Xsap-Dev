@@ -29,4 +29,6 @@ public interface MemberCardService extends IService<MemberCardEntity> {
     R getCardTip(Long cardId, Long memberId, Long scheduleId);
 
     List<MemberCardEntity> getActiveCards(Long memberId);
+
+    void activeOpt(Long memberId, Long bindId, Integer status, String operatorName);
 }
