@@ -1,6 +1,6 @@
 package com.kclm.xsap.web.controller;
 
-import com.kclm.xsap.entity.MemberBindRecordEntity;
+import com.kclm.xsap.entity.EmployeeEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.CourseCardService;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -80,14 +81,15 @@ public class CardController {
 
     @PostMapping("/activeOpt.do")
     @ResponseBody
-    public R activeOpt(Long memberId, Long bindId, Integer status) {
-        MemberBindRecordEntity record = bindRecordService.getById(bindId);
-        record.setActiveStatus(status);
-        boolean b = bindRecordService.updateById(record);
-        if (b)
-            return new R().put("data", status);
-        else
-            return R.error();
+    public R activeOpt(Long memberId, Long bindId, Integer status, HttpSession session) {
+        EmployeeEntity loginUser = (EmployeeEntity) session.getAttribute("LOGIN_USER");
+        String operatorName = loginUser.getName();
+        try {
+            memberCardService.activeOpt(memberId, bindId, status, operatorName);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok();
     }
 
     @PostMapping("/cardAdd.do")
