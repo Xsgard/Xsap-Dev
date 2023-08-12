@@ -9,6 +9,7 @@ import com.kclm.xsap.utils.R;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,4 +34,6 @@ public interface MemberService extends IService<MemberEntity> {
     List<String> getSupportCardNames(List<Long> cardIds);
 
     List<ReserveRecordDTO> getReserveRecordDto(Long memberId);
+
+    List<MemberEntity> filterAllMemberByTime(LocalDateTime start, LocalDateTime end);
 }

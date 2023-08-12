@@ -48,11 +48,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     private MemberCardDao cardDao;
 
+    private MemberDao memberDao;
+
     @Autowired
     private void setApplicationContext(MemberCardService cardService, MemberBindRecordService bindRecordService,
                                        MemberService memberService, ReservationRecordService reservationRecordService,
                                        ScheduleRecordService scheduleRecordService, CourseService courseService,
-                                       MemberCardDao cardDao) {
+                                       MemberCardDao cardDao, MemberDao memberDao) {
+        this.memberDao = memberDao;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
         this.reservationRecordService = reservationRecordService;
@@ -208,6 +211,23 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemberEntity> filterAllMemberByTime(LocalDateTime start, LocalDateTime end) {
+        List<MemberEntity> allMember = memberDao.getAllMember();
+        return allMember.stream().map(item -> {
+            if (item.getIsDeleted() == 0) {
+                if (item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
+                    return item;
+            } else {
+                if (item.getLastModifyTime() != null) {
+                    if (item.getLastModifyTime().isAfter(start) && item.getLastModifyTime().isBefore(end))
+                        return item;
+                }
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     @Override
