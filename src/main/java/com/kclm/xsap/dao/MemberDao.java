@@ -23,4 +23,7 @@ public interface MemberDao extends BaseMapper<MemberEntity> {
 
     @Select("select id,name,sex,phone from t_member;")
     List<MemberEntity> selectMemberList();
+
+    @Select("select create_time,last_modify_time,is_deleted from t_member where is_deleted=0  or is_deleted=1;")
+    List<MemberEntity> getAllMember();
 }
