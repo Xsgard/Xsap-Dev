@@ -1,8 +1,15 @@
 package com.kclm.xsap.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.kclm.xsap.entity.MemberBindRecordEntity;
+import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.IndexPageService;
+import com.kclm.xsap.service.MemberBindRecordService;
+import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,11 +20,22 @@ import java.util.stream.Collectors;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: IndexPageServiceImpl
  * @date 2023/8/12 10:14
  */
 @Service
 public class IndexPageServiceImpl implements IndexPageService {
+    private MemberCardService memberCardService;
+
+    private MemberBindRecordService memberBindRecordService;
+
+    @Autowired
+    private void setService(MemberCardService memberCardService,
+                            MemberBindRecordService memberBindRecordService) {
+        this.memberBindRecordService = memberBindRecordService;
+        this.memberCardService = memberCardService;
+    }
+
     @Override
     public IndexAddAndStreamInfoVo getAddAndStreamInfo(List<MemberEntity> memberList, LocalDateTime start, LocalDateTime end) {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
@@ -49,5 +67,22 @@ public class IndexPageServiceImpl implements IndexPageService {
         vo.setData(data);
         vo.setData2(data2);
         return vo;
+    }
+
+    @Override
+    public List<IndexPieChartVo> getMemberCards() {
+        List<MemberCardEntity> cardEntityList = memberCardService.list();
+        return cardEntityList.stream().map(item -> {
+            //查询会员卡绑定记录
+            LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberBindRecordEntity::getCardId, item.getId());
+            List<MemberBindRecordEntity> records = memberBindRecordService.list(queryWrapper);
+            //初始化vo数据
+            IndexPieChartVo vo = new IndexPieChartVo();
+            vo.setName(item.getName());
+            vo.setValue(records.size());
+            return vo;
+        }).collect(Collectors.toList());
+
     }
 }
