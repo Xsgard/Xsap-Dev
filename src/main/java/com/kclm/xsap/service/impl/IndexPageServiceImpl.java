@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,28 +43,30 @@ public class IndexPageServiceImpl implements IndexPageService {
         vo.setXname("日");
         int dayOfMonth = end.getDayOfMonth();
         List<String> time = new ArrayList<>();
-        List<Integer> dataArr = new ArrayList<>();
+        Integer[] arr = new Integer[dayOfMonth];
         for (int i = 1; i <= dayOfMonth; i++) {
             time.add(String.valueOf(i));
-            dataArr.add(0);
+            arr[i - 1] = 0;
         }
+        List<Integer> dataArr = new ArrayList<>(Arrays.asList(arr));
         vo.setTime(time);
-        List<Integer> data = memberList.stream().filter(item -> item.getIsDeleted() == 0).map(item -> {
-            int day = item.getCreateTime().getDayOfMonth();
-            dataArr.set(day - 1, dataArr.get(day) + 1);
-            return dataArr;
-        }).collect(Collectors.toList()).get(0);
+        List<Integer> data = memberList.stream()
+                .filter(item -> item.getIsDeleted() == 0)
+                .map(item -> {
+                    int day = item.getCreateTime().getDayOfMonth();
+                    dataArr.set(day - 1, dataArr.get(day) + 1);
+                    return dataArr;
+                }).collect(Collectors.toList()).get(0);
 
-        List<Integer> dataArr2 = new ArrayList<>();
-        for (int i = 1; i <= dayOfMonth; i++) {
-            dataArr2.add(0);
-        }
+        List<Integer> dataArr2 = new ArrayList<>(Arrays.asList(arr));
 
-        List<Integer> data2 = memberList.stream().filter(item -> item.getIsDeleted() == 1).map(item -> {
-            int day = item.getCreateTime().getDayOfMonth();
-            dataArr2.set(day - 1, dataArr2.get(day) + 1);
-            return dataArr2;
-        }).collect(Collectors.toList()).get(0);
+        List<Integer> data2 = memberList.stream()
+                .filter(item -> item.getIsDeleted() == 1)
+                .map(item -> {
+                    int day = item.getCreateTime().getDayOfMonth();
+                    dataArr2.set(day - 1, dataArr2.get(day) + 1);
+                    return dataArr2;
+                }).collect(Collectors.toList()).get(0);
         vo.setData(data);
         vo.setData2(data2);
         return vo;
