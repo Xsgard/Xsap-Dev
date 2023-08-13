@@ -5,9 +5,11 @@ import com.kclm.xsap.service.IndexPageService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -57,6 +59,16 @@ public class IndexController {
     }
 
     /**
+     * @return R
+     */
+    @PostMapping("/homePageInfo.do")
+    @ResponseBody
+    public R getHomePageInfo() {
+
+        return null;
+    }
+
+    /**
      * TODO 每月会员新增流失图
      *
      * @return R
@@ -75,5 +87,17 @@ public class IndexController {
         IndexAddAndStreamInfoVo addAndStreamInfo = indexPageService.getAddAndStreamInfo(memberEntityList, firstDayOfMonth, nowDayOfMonth);
 
         return R.ok().put("data", addAndStreamInfo);
+    }
+
+    /**
+     * 卡类型及对应的数量
+     *
+     * @return R.data 封装IndexPieChartVo
+     */
+    @PostMapping("/homePageInfo/statisticsOfMemberCard.do")
+    @ResponseBody
+    public R memberCards() {
+        List<IndexPieChartVo> vo = indexPageService.getMemberCards();
+        return R.ok().put("data", vo);
     }
 }
