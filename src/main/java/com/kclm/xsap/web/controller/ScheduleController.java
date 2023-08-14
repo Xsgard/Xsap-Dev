@@ -103,7 +103,7 @@ public class ScheduleController {
         return R.ok().put("data", reverseClassRecordDto);
     }
 
-    //TODO 请求没写完
+    //TODO 对应的Service层方法没写完
     @PostMapping("/queryAmountsPayable.do")
     @ResponseBody
     public R queryAmountPayable(Long bindCardId) {
