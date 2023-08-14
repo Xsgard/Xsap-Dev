@@ -6,6 +6,7 @@ import com.kclm.xsap.dto.MemberDTO;
 import com.kclm.xsap.dto.ReserveRecordDTO;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.vo.ConsumeInfoVo;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
@@ -36,4 +37,6 @@ public interface MemberService extends IService<MemberEntity> {
     List<ReserveRecordDTO> getReserveRecordDto(Long memberId);
 
     List<MemberEntity> filterAllMemberByTime(LocalDateTime start, LocalDateTime end);
+
+    List<ConsumeInfoVo> getMemberConsumeList(Long memberId);
 }

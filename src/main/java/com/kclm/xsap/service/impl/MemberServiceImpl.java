@@ -14,6 +14,7 @@ import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.ConsumeInfoVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     private CourseService courseService;
 
+    private ConsumeRecordService consumeRecordService;
+
     private MemberCardDao cardDao;
 
     private MemberDao memberDao;
@@ -54,7 +57,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     private void setApplicationContext(MemberCardService cardService, MemberBindRecordService bindRecordService,
                                        MemberService memberService, ReservationRecordService reservationRecordService,
                                        ScheduleRecordService scheduleRecordService, CourseService courseService,
+                                       ConsumeRecordService consumeRecordService,
                                        MemberCardDao cardDao, MemberDao memberDao) {
+        this.consumeRecordService = consumeRecordService;
         this.memberDao = memberDao;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
@@ -228,6 +233,53 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    /**
+     * TODO 会员消费记录
+     *
+     * @param memberId 会员Id
+     * @return List<ConsumeInfoVo>
+     */
+    @Override
+    public List<ConsumeInfoVo> getMemberConsumeList(Long memberId) {
+        LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberBindRecordEntity::getMemberId, memberId);
+        List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
+        List<ConsumeInfoVo> voList = bindRecordEntities.stream().map(item -> {
+            //
+            LambdaQueryWrapper<ConsumeRecordEntity> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(ConsumeRecordEntity::getMemberBindId, item.getId());
+            List<ConsumeRecordEntity> consumeRecords = consumeRecordService.list(wrapper);
+            //查询会员卡信息
+            MemberCardEntity card = cardService.getById(item.getCardId());
+            return consumeRecords.stream().map(e -> {
+                //VO对象
+                ConsumeInfoVo vo = new ConsumeInfoVo();
+                vo.setConsumeId(e.getId());
+                vo.setCardName(card.getName());
+                //使用三目运算设置操作时间 --获取最后修改时间 如果为空则设置创建时间，否则为最后修改时间
+                vo.setOperateTime(e.getLastModifyTime() == null ? e.getCreateTime() : e.getLastModifyTime());
+
+
+                return vo;
+            }).collect(Collectors.toList());
+
+        }).collect(Collectors.toList()).get(0);
+
+//        bindRecordEntities.stream().map(item -> {
+//            ConsumeInfoVo vo = new ConsumeInfoVo();
+//            LambdaQueryWrapper<ConsumeRecordEntity> wrapper = new LambdaQueryWrapper<>();
+//            wrapper.eq(ConsumeRecordEntity::getMemberBindId, item.getId());
+//            List<ConsumeRecordEntity> consumeRecords = consumeRecordService.list(wrapper);
+//            consumeRecords.forEach(e -> {
+//                vo.setOperator(e.getOperator());
+//                vo.setConsumeId(e.getId());
+//            });
+//
+//            return vo;
+//        }).collect(Collectors.toList());
+        return null;
     }
 
     @Override

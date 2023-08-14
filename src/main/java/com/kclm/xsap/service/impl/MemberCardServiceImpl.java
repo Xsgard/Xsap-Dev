@@ -84,7 +84,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      */
     @Override
     @Transactional
-    public void memberBind(BindingResult bindingResult, @Valid BindCardInfoDto info) {
+    public void memberBind(@Valid BindCardInfoDto info, BindingResult bindingResult) {
         ValidationUtil.getErrors(bindingResult);
         MemberBindRecordEntity bindRecordEntity = new MemberBindRecordEntity();
         BeanUtils.copyProperties(info, bindRecordEntity);
