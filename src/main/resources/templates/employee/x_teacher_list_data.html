@@ -9,7 +9,8 @@
 
     <title>X+ 约课系统 - 老师资料</title>
     <meta content="H+后台主题,后台bootstrap框架,会员中心主题,后台HTML,响应式后台" name="keywords">
-    <meta content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术" name="description">
+    <meta content="H+是一个完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术"
+          name="description">
 
     <link href="../../static/favicon.ico" rel="shortcut icon" th:href="@{/static/favicon.ico}">
     <link href="../../static/css/bootstrap.min.css?v=3.3.6" rel="stylesheet"
@@ -66,7 +67,7 @@
                    th:href="@{/user/x_teacher_update.do?id={id_val}(id_val=${ID})}">编辑信息</a>
             </div>
             <div class="col-md-1">
-                <a class="btn btn-default pull-right" onclick="window.history.go(-1)" >返回</a>
+                <a class="btn btn-default pull-right" onclick="window.history.go(-1)">返回</a>
             </div>
         </div>
 
@@ -82,7 +83,8 @@
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab-1">
                             <div class="panel-body">
-                                <p>老师对待教学认真负责，语言生动，条例清晰，举例充分得当，对待学生严格要求，能够鼓励学生踊跃发言，使课堂气氛比较积极热烈</p>
+                                <p>
+                                    老师对待教学认真负责，语言生动，条例清晰，举例充分得当，对待学生严格要求，能够鼓励学生踊跃发言，使课堂气氛比较积极热烈</p>
                             </div>
                         </div>
                         <div class="tab-pane" id="tab-2">
@@ -161,8 +163,9 @@
                     // 读取的URL结果：this.result	@{/static/img/{avatar}(avatar=${userInfo.avatarUrl})}
                     console.log("之后的图片信息：" + userData.avatarUrl);
 
-                    $("#avatar_img").attr("src", "/images/teacher_img/" + userData.avatarUrl);
+                    $("#avatar_img").attr("src", "/upload/images/teacher_img/" + userData.avatarUrl);
                 }
+                window.location.reload();
             },
             error: function (jqXHR) {
                 alert("更新失败, 请重新再试!");
@@ -181,7 +184,7 @@
             if (teacherMsg.avatarUrl == null) {
                 teacherMsg.avatarUrl = "user.png";
             }
-            $("#avatar_img").attr("src", "/images/teacher_img/" + teacherMsg.avatarUrl);
+            $("#avatar_img").attr("src", "/upload/images/teacher_img/" + teacherMsg.avatarUrl);
             // $("#avatar_img").attr("src", "/static/img/" + teacherMsg.avatarUrl);
             console.log("url==>" + teacherMsg.avatarUrl)
             $("#detail h2").html(teacherMsg.name);
