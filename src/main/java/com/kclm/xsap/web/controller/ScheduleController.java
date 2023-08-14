@@ -8,6 +8,7 @@ import com.kclm.xsap.entity.CourseEntity;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
+import com.kclm.xsap.service.ConsumeRecordService;
 import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
@@ -36,10 +37,13 @@ public class ScheduleController {
     private ScheduleRecordService scheduleRecordService;
     private CourseService courseService;
     private MemberBindRecordService memberBindRecordService;
+    private ConsumeRecordService consumeRecordService;
 
     @Autowired
     private void setApplicationContext(ScheduleRecordService scheduleRecordService, CourseService courseService,
-                                       MemberBindRecordService memberBindRecordService) {
+                                       MemberBindRecordService memberBindRecordService,
+                                       ConsumeRecordService consumeRecordService) {
+        this.consumeRecordService = consumeRecordService;
         this.memberBindRecordService = memberBindRecordService;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
@@ -109,9 +113,11 @@ public class ScheduleController {
     public R queryAmountPayable(Long bindCardId) {
         MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
         BigDecimal receivedMoney = record.getReceivedMoney();
+        BigDecimal moneyCostPlus = consumeRecordService.getMoneyCostPlus(bindCardId);
         if (receivedMoney != null) {
             double validCount = record.getValidCount().doubleValue();
-            BigDecimal money = receivedMoney.divide(BigDecimal.valueOf(validCount));
+            BigDecimal money = receivedMoney.subtract(moneyCostPlus)
+                    .divide(BigDecimal.valueOf(validCount));
             return R.ok().put("data", money);
         } else
             return R.error("请求出错，请稍后重试或联系管理员！");
