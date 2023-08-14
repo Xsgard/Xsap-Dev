@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -301,18 +302,40 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     @Override
     @Transactional
     public void consumeEnsureAll(Long scheduleId, String operator) {
+        //预约记录
         ScheduleRecordEntity schedule = scheduleRecordService.getById(scheduleId);
+        //课程信息
         CourseEntity course = courseService.getById(schedule.getCourseId());
-
+        //课程记录集合
         LambdaQueryWrapper<ClassRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ClassRecordEntity::getScheduleId, scheduleId)
                 .eq(ClassRecordEntity::getCheckStatus, 0)
                 .eq(ClassRecordEntity::getReserveCheck, 1);
         List<ClassRecordEntity> classRecords = classRecordService.list(queryWrapper);
-
-        classRecords.stream().map(item -> {
-            return null;
-        });
+        //通过Stream流生成Vo集合
+        List<ConsumeFormVo> voList = classRecords.stream().map(e -> {
+            //查询用户对应的预约记录
+            LambdaQueryWrapper<ReservationRecordEntity> qw = new LambdaQueryWrapper<>();
+            qw.eq(ReservationRecordEntity::getMemberId, e.getMemberId())
+                    .eq(ReservationRecordEntity::getScheduleId, e.getScheduleId());
+            ReservationRecordEntity reservation = reservationRecordService.getOne(qw);
+            BigDecimal money = consumeRecordService.queryAmountPayable(e.getBindCardId());
+            //Vo对象
+            ConsumeFormVo vo = new ConsumeFormVo();
+            vo.setScheduleId(scheduleId);
+            vo.setOperator(operator);
+            vo.setMemberId(e.getMemberId());
+            vo.setCardBindId(e.getBindCardId());
+            vo.setAmountOfConsumption(money.multiply(BigDecimal.valueOf(
+                    (long) course.getTimesCost() * reservation.getReserveNums())));
+            vo.setCardCountChange(course.getTimesCost() * reservation.getReserveNums());
+            vo.setCardDayChange(0);
+            vo.setClassId(e.getId());
+            vo.setNote("");
+            return vo;
+        }).collect(Collectors.toList());
+        //遍历调用单个扣费
+        voList.forEach(this::consumeEnsure);
     }
 
     /**
