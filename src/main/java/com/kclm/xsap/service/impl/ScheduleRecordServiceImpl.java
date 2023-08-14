@@ -219,7 +219,7 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     }
 
     /**
-     * 计算对应会员卡的单词课程消费金额
+     * TODO 计算对应会员卡的单词课程消费金额
      *
      * @param bindCardId 会员卡绑定表Id
      * @return Double 课程金额

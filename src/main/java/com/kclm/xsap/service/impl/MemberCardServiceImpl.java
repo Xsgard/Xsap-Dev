@@ -61,7 +61,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         this.courseService = courseService;
         this.bindRecordService = bindRecordService;
         this.courseCardService = courseCardService;
-        this.memberCardService = memberCardService;
+        this.memberLogService = memberLogService;
         this.memberBindRecordService = memberBindRecordService;
         this.scheduleRecordService = scheduleRecordService;
     }
