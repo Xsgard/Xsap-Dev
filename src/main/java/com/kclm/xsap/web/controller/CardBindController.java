@@ -44,7 +44,7 @@ public class CardBindController {
     public R memberBind(BindCardInfoDto infoDto, BindingResult bindingResult) {
         //绑定会员卡信息
         try {
-            memberCardService.memberBind(bindingResult, infoDto);
+            memberCardService.memberBind(infoDto, bindingResult);
             return R.ok();
         } catch (BusinessException e) {
             return R.error(e.getMsg());
