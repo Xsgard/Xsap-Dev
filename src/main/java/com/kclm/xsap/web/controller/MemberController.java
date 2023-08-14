@@ -10,6 +10,7 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.vo.ClassInfoVo;
 import com.kclm.xsap.vo.ConsumeInfoVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -150,6 +151,14 @@ public class MemberController {
         } catch (BusinessException e) {
             return R.error(e.getMsg());
         }
+    }
+
+    @PostMapping("/classInfo.do")
+    @ResponseBody
+    public R classInfo(Long id) {
+        List<ClassInfoVo> classInfoList = memberService.getClassInfoList(id);
+
+        return R.ok().put("data", classInfoList);
     }
 
 }
