@@ -42,6 +42,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     private MemberCardService memberCardService;
     private MemberBindRecordService memberBindRecordService;
     private MemberLogService memberLogService;
+    private ConsumeRecordService consumeRecordService;
 
     @Autowired
     private void setDao(MemberCardDao cardDao, MemberBindRecordDao memberBindRecordDao) {
@@ -56,7 +57,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
                             MemberBindRecordService memberBindRecordService,
                             CourseService courseService,
                             ScheduleRecordService scheduleRecordService,
-                            MemberLogService memberLogService) {
+                            MemberLogService memberLogService,
+                            ConsumeRecordService consumeRecordService) {
+        this.consumeRecordService = consumeRecordService;
         this.memberCardService = memberCardService;
         this.courseService = courseService;
         this.bindRecordService = bindRecordService;
@@ -98,13 +101,13 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         }
         MemberCardEntity cardEntity = memberCardService.getById(info.getCardId());
         //加上会员卡默认的次数
-        bindRecordEntity.setValidCount((info.getValidCount()) + cardEntity.getTotalCount());
+        //bindRecordEntity.setValidCount((info.getValidCount()) + cardEntity.getTotalCount());
         //加上会员卡默认天数
-        bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
+        //bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         bindRecordService.save(bindRecordEntity);
 
-        //日志信息
+        //操作记录日志信息
         MemberLogEntity log = new MemberLogEntity();
         log.setType("绑卡操作");
         log.setInvolveMoney(BigDecimal.valueOf(info.getReceivedMoney()));
@@ -117,6 +120,23 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         boolean b = memberLogService.save(log);
         if (!b)
             throw new BusinessException("日志保存失败！");
+        //消费记录
+        String operateType = "绑卡操作";
+        if (info.getReceivedMoney() != null) {
+            operateType = "绑卡充值操作";
+        }
+        ConsumeRecordEntity consumeRecord = new ConsumeRecordEntity();
+        consumeRecord.setOperateType(operateType);
+        consumeRecord.setCardCountChange(info.getValidCount());
+        consumeRecord.setCardDayChange(info.getValidDay());
+        consumeRecord.setMoneyCost(BigDecimal.valueOf(info.getReceivedMoney()));
+        consumeRecord.setOperator(info.getOperator());
+        consumeRecord.setNote("办卡的费用");
+        consumeRecord.setMemberBindId(bindRecordEntity.getId());
+        consumeRecord.setCreateTime(LocalDateTime.now());
+        boolean saved = consumeRecordService.save(consumeRecord);
+        if (!saved)
+            throw new BusinessException("消费日志日志保存失败！");
     }
 
     /**
