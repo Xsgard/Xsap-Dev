@@ -2,6 +2,7 @@ package com.kclm.xsap.service.impl;
 
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.MemberBindRecordService;
+import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.service.StatisticsService;
 import com.kclm.xsap.vo.MemberCardStatisticsVo;
@@ -21,10 +22,12 @@ import java.util.List;
 public class StatisticsServiceImpl implements StatisticsService {
     private MemberService memberService;
     private MemberBindRecordService memberBindRecordService;
+    private MemberCardService memberCardService;
 
     @Autowired
     public void setMemberBindRecordService(MemberBindRecordService memberBindRecordService,
-                                           MemberService memberService) {
+                                           MemberService memberService, MemberCardService memberCardService) {
+        this.memberCardService = memberCardService;
         this.memberService = memberService;
         this.memberBindRecordService = memberBindRecordService;
     }
@@ -40,6 +43,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<MemberCardStatisticsVo> voList = new ArrayList<>();
         members.stream().forEach(item -> {
             MemberCardStatisticsVo vo = new MemberCardStatisticsVo();
+
             vo.setMemberName(item.getName());
 
 
