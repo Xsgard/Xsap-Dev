@@ -1,23 +1,31 @@
 package com.kclm.xsap.web.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.kclm.xsap.entity.EmployeeEntity;
-import com.kclm.xsap.service.EmployeeService;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.kclm.xsap.entity.*;
+import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.UploadImg;
+import com.kclm.xsap.utils.exception.RRException;
+import com.kclm.xsap.vo.ModifyPassword;
+import com.kclm.xsap.vo.TeacherClassRecordVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 /**
@@ -33,9 +41,17 @@ import java.util.regex.Pattern;
 @RequestMapping("/user")
 public class EmployeeController {
 
-    private static final String UPLOAD_IMAGES_TEACHER_IMG = "upload/images/teacher_img/";
+    private static final String UPLOAD_IMAGES_TEACHER_IMG = "/upload/images/teacher_img/";
 
     private EmployeeService employeeService;
+
+    private MemberService memberService;
+
+    private ScheduleRecordService scheduleRecordService;
+
+    private CourseService courseService;
+
+    private ClassRecordService classRecordService;
 
     @Autowired
     private void setApplicationContext(EmployeeService employeeService) {
@@ -210,13 +226,13 @@ public class EmployeeController {
     }
 
 
-    /*    *//**
+    /**
      * 修改密码操作
      *
      * @param entity 修改密码页面传入的表单数据
      * @param model  跳转页面携带数据
      * @return 跳转页面
-     *//*
+     */
     @PostMapping("/modifyPwd.do")
     public String modifyPwd(ModifyPassword entity, Model model) {
         log.debug("\n==>打印前台传入的修改密码表单数据==>{}", entity);
@@ -250,7 +266,7 @@ public class EmployeeController {
                 }
             }
         }
-    }*/
+    }
 
 
     /**
@@ -331,12 +347,12 @@ public class EmployeeController {
     }
 
 
-    /* *//**
+    /**
      * 封装老师管理中的上课记录信息
      *
      * @param id 老师id
      * @return r-> 上课记录
-     *//*
+     */
     @PostMapping("/teacherClassRecord.do")
     @ResponseBody
     public R teacherClassRecord(@RequestParam("tid") Long id) {
@@ -392,17 +408,17 @@ public class EmployeeController {
         log.debug("\n==>打印返回到前台的老师上课记录信息是：==>{}", teacherClassRecordVos);
 
         return R.ok().put("data", teacherClassRecordVos);
-    }*/
+    }
 
 
-    /*    *//**
+    /**
      * 头像更新
      * todo 回显。。
      *
      * @param id   要更新头像的老师的id
      * @param file 要更新的头像图片文件
      * @return r -> 更新结果
-     *//*
+     */
     @PostMapping("/modifyUserImg.do")
     @ResponseBody
     public R modifyUserImg(@RequestParam("id") Long id,
@@ -411,6 +427,9 @@ public class EmployeeController {
         if (!file.isEmpty()) {
             log.debug("\n==>文件上传...");
             String fileName = UploadImg.uploadImg(file, UPLOAD_IMAGES_TEACHER_IMG);
+            if (fileName == null) {
+                return R.error("头像上传失败");
+            }
             if (StringUtils.isNotBlank(fileName)) {
                 EmployeeEntity entity = new EmployeeEntity().setId(id).setAvatarUrl(fileName).setVersion(+1);
                 boolean isUpdateAvatarUrl = employeeService.updateById(entity);
@@ -423,7 +442,7 @@ public class EmployeeController {
         }
         return R.error("头像未上传");
 
-    }*/
+    }
 
 
     /**
