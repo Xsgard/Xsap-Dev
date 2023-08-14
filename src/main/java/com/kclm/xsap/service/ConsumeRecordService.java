@@ -12,5 +12,5 @@ import java.math.BigDecimal;
  * @date 2023/8/2 16:17
  */
 public interface ConsumeRecordService extends IService<ConsumeRecordEntity> {
-    BigDecimal getMoneyCostPlus(Long memberBindId);
+    BigDecimal queryAmountPayable(Long bindCardId);
 }

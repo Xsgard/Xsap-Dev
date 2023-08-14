@@ -13,12 +13,13 @@ import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.ConsumeFormVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,13 +40,17 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     private ReservationRecordService reservationRecordService;
     private ScheduleRecordService scheduleRecordService;
     private ClassRecordService classRecordService;
+    private MemberLogService logService;
+    private ConsumeRecordService consumeRecordService;
 
     @Autowired
     private void setApplicationContext(CourseService courseService, EmployeeService employeeService,
                                        CourseCardService courseCardService, MemberService memberService,
                                        ReservationRecordService reservationRecordService, MemberBindRecordService memberBindRecordService,
-                                       ScheduleRecordService scheduleRecordService,
-                                       ClassRecordService classRecordService) {
+                                       ScheduleRecordService scheduleRecordService, ConsumeRecordService consumeRecordService,
+                                       ClassRecordService classRecordService, MemberLogService logService) {
+        this.logService = logService;
+        this.consumeRecordService = consumeRecordService;
         this.classRecordService = classRecordService;
         this.memberBindRecordService = memberBindRecordService;
         this.scheduleRecordService = scheduleRecordService;
@@ -152,7 +157,10 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
                 .eq(ReservationRecordEntity::getStatus, 1);
         List<ReservationRecordEntity> recordEntityList = reservationRecordService.list(queryWrapper);
-        return getReservedInfoDtos(scheduleId, recordEntityList);
+        return getReservedInfoDtos(scheduleId, recordEntityList)
+                .stream()
+                .filter(item -> item.getClassStartTime().isAfter(LocalDateTime.now()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -218,17 +226,93 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         }).collect(Collectors.toList());
     }
 
+//    /**
+//     * 计算对应会员卡的单词课程消费金额
+//     *
+//     * @param bindCardId 会员卡绑定表Id
+//     * @return Double 课程金额
+//     */
+//    @Override
+//    public Double queryAmountPayable(Long bindCardId) {
+//        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
+//        BigDecimal receivedMoney = record.getReceivedMoney();
+//        return null;
+//    }
+
     /**
-     * TODO 计算对应会员卡的单词课程消费金额
+     * 预约扣费
      *
-     * @param bindCardId 会员卡绑定表Id
-     * @return Double 课程金额
+     * @param vo 前端传递的ConsumeFormVo信息
      */
     @Override
-    public Double queryAmountPayable(Long bindCardId) {
-        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
-        BigDecimal receivedMoney = record.getReceivedMoney();
-        return null;
+    @Transactional
+    public void consumeEnsure(ConsumeFormVo vo) {
+        LambdaQueryWrapper<ClassRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClassRecordEntity::getScheduleId, vo.getScheduleId())
+                .eq(ClassRecordEntity::getMemberId, vo.getMemberId());
+        ClassRecordEntity classRecord = classRecordService.getOne(queryWrapper);
+        //1为确认上课
+        classRecord.setCheckStatus(1);
+        classRecord.setLastModifyTime(LocalDateTime.now());
+        classRecord.setNote("正常预约客户");
+        boolean b = classRecordService.updateById(classRecord);
+        if (!b)
+            throw new BusinessException("更新课程记录出现异常！");
+
+        //会员卡绑定信息
+        MemberBindRecordEntity bindRecord = memberBindRecordService.getById(vo.getCardBindId());
+        //减去本次消耗的卡次
+        bindRecord.setValidCount(bindRecord.getValidCount() - vo.getCardCountChange());
+        boolean b1 = memberBindRecordService.updateById(bindRecord);
+        if (!b1)
+            throw new BusinessException("更新会员绑定记录出现异常！");
+
+        //操作日志
+        MemberLogEntity log = new MemberLogEntity();
+        log.setType("会员上课扣费操作");
+        log.setInvolveMoney(vo.getAmountOfConsumption());
+        log.setOperator(vo.getOperator());
+        log.setMemberBindId(vo.getCardBindId());
+        log.setCreateTime(LocalDateTime.now());
+        log.setCardCountChange(vo.getCardCountChange());
+        log.setCardDayChange(vo.getCardDayChange());
+        log.setCardActiveStatus(1);
+        boolean b2 = logService.save(log);
+        if (!b2)
+            throw new BusinessException("保存操作记录出现异常！");
+
+        //消费记录
+        ConsumeRecordEntity consumeRecord = new ConsumeRecordEntity();
+        consumeRecord.setOperateType("会员上课扣费操作");
+        consumeRecord.setCardCountChange(vo.getCardCountChange());
+        consumeRecord.setCardDayChange(vo.getCardDayChange());
+        consumeRecord.setMoneyCost(vo.getAmountOfConsumption());
+        consumeRecord.setOperator(vo.getOperator());
+        consumeRecord.setNote(vo.getNote());
+        consumeRecord.setMemberBindId(vo.getCardBindId());
+        consumeRecord.setCreateTime(LocalDateTime.now());
+        consumeRecord.setLogId(log.getId());
+        consumeRecord.setScheduleId(vo.getScheduleId());
+        boolean b3 = consumeRecordService.save(consumeRecord);
+        if (!b3)
+            throw new BusinessException("保存消费记录出现异常！");
+    }
+
+    @Override
+    @Transactional
+    public void consumeEnsureAll(Long scheduleId, String operator) {
+        ScheduleRecordEntity schedule = scheduleRecordService.getById(scheduleId);
+        CourseEntity course = courseService.getById(schedule.getCourseId());
+
+        LambdaQueryWrapper<ClassRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClassRecordEntity::getScheduleId, scheduleId)
+                .eq(ClassRecordEntity::getCheckStatus, 0)
+                .eq(ClassRecordEntity::getReserveCheck, 1);
+        List<ClassRecordEntity> classRecords = classRecordService.list(queryWrapper);
+
+        classRecords.stream().map(item -> {
+            return null;
+        });
     }
 
     /**
@@ -261,6 +345,8 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
             reservedInfoDto.setOperator(item.getOperator());
             reservedInfoDto.setReserveNote(item.getNote());
             reservedInfoDto.setReserveStatus(item.getStatus());
+            reservedInfoDto.setClassStartTime(TimeUtil.timeTransfer(
+                    scheduleRecordEntity.getStartDate(), scheduleRecordEntity.getClassTime()));
             return reservedInfoDto;
         }).collect(Collectors.toList());
     }

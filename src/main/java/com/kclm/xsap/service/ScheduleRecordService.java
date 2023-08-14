@@ -7,6 +7,7 @@ import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.vo.ConsumeFormVo;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
@@ -31,5 +32,7 @@ public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
 
     List<ReverseClassRecordDto> getReverseClassRecordDto(Long scheduleId);
 
-    Double queryAmountPayable(Long bindCardId);
+    void consumeEnsure(ConsumeFormVo vo);
+
+    void consumeEnsureAll(Long scheduleId, String operator);
 }
