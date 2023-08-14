@@ -5,7 +5,6 @@ import com.kclm.xsap.dto.ReverseClassRecordDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.CourseEntity;
-import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.ConsumeRecordService;
@@ -13,6 +12,7 @@ import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.vo.ConsumeFormVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -107,19 +107,28 @@ public class ScheduleController {
         return R.ok().put("data", reverseClassRecordDto);
     }
 
-    //TODO 对应的Service层方法没写完
+    //获取单节课程的价钱
     @PostMapping("/queryAmountsPayable.do")
     @ResponseBody
     public R queryAmountPayable(Long bindCardId) {
-        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
-        BigDecimal receivedMoney = record.getReceivedMoney();
-        BigDecimal moneyCostPlus = consumeRecordService.getMoneyCostPlus(bindCardId);
-        if (receivedMoney != null) {
-            double validCount = record.getValidCount().doubleValue();
-            BigDecimal money = receivedMoney.subtract(moneyCostPlus)
-                    .divide(BigDecimal.valueOf(validCount));
-            return R.ok().put("data", money);
-        } else
-            return R.error("请求出错，请稍后重试或联系管理员！");
+        BigDecimal money = consumeRecordService.queryAmountPayable(bindCardId);
+        return R.ok().put("data", money);
+    }
+
+    @PostMapping("/consumeEnsure.do")
+    @ResponseBody
+    public R consumeEnsure(ConsumeFormVo vo) {
+        try {
+            scheduleRecordService.consumeEnsure(vo);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("扣费成功！");
+    }
+
+    @PostMapping("/consumeEnsureAll.do")
+    @ResponseBody
+    public R consumeEnsureAll(Long scheduleId, String operators) {
+        return null;
     }
 }
