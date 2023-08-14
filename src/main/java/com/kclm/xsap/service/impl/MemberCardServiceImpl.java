@@ -107,9 +107,13 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         bindRecordService.save(bindRecordEntity);
 
+        String operateType = "绑卡操作";
+        if (info.getReceivedMoney() != null) {
+            operateType = "绑卡充值操作";
+        }
         //操作记录日志信息
         MemberLogEntity log = new MemberLogEntity();
-        log.setType("绑卡操作");
+        log.setType(operateType);
         log.setInvolveMoney(BigDecimal.valueOf(info.getReceivedMoney()));
         log.setOperator(info.getOperator());
         log.setMemberBindId(bindRecordEntity.getId());
@@ -121,12 +125,8 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         if (!b)
             throw new BusinessException("日志保存失败！");
         //消费记录
-        String operateType = "绑卡操作";
-        if (info.getReceivedMoney() != null) {
-            operateType = "绑卡充值操作";
-        }
         ConsumeRecordEntity consumeRecord = new ConsumeRecordEntity();
-        consumeRecord.setOperateType(operateType);
+        consumeRecord.setOperateType("绑卡操作");
         consumeRecord.setCardCountChange(info.getValidCount());
         consumeRecord.setCardDayChange(info.getValidDay());
         consumeRecord.setMoneyCost(BigDecimal.valueOf(info.getReceivedMoney()));
