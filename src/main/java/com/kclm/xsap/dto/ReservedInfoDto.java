@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class ReservedInfoDto {
     private Long reserveId;
     private String memberName;
+    private LocalDateTime classStartTime;
     private String phone;
     private String cardName;
     private Integer reserveNumbers;
