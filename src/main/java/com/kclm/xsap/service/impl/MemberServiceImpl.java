@@ -236,7 +236,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     /**
-     * TODO 会员消费记录
+     * 会员消费记录
      *
      * @param memberId 会员Id
      * @return List<ConsumeInfoVo>
@@ -246,40 +246,37 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MemberBindRecordEntity::getMemberId, memberId);
         List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
-        List<ConsumeInfoVo> voList = bindRecordEntities.stream().map(item -> {
+        List<ConsumeInfoVo> voList = new ArrayList<>();
+        bindRecordEntities.forEach(item -> {
+            //
+            ConsumeInfoVo vo = new ConsumeInfoVo();
+            //会员卡实体信息
+            MemberCardEntity card = cardService.getById(item.getCardId());
             //
             LambdaQueryWrapper<ConsumeRecordEntity> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(ConsumeRecordEntity::getMemberBindId, item.getId());
-            List<ConsumeRecordEntity> consumeRecords = consumeRecordService.list(wrapper);
-            //查询会员卡信息
-            MemberCardEntity card = cardService.getById(item.getCardId());
-            return consumeRecords.stream().map(e -> {
-                //VO对象
-                ConsumeInfoVo vo = new ConsumeInfoVo();
-                vo.setConsumeId(e.getId());
+            //
+            List<ConsumeRecordEntity> consumeList = consumeRecordService.list(wrapper);
+            //
+            consumeList.forEach(e -> {
                 vo.setCardName(card.getName());
-                //使用三目运算设置操作时间 --获取最后修改时间 如果为空则设置创建时间，否则为最后修改时间
-                vo.setOperateTime(e.getLastModifyTime() == null ? e.getCreateTime() : e.getLastModifyTime());
+                vo.setConsumeId(e.getId());
+                vo.setOperateTime(e.getCreateTime());
+                vo.setCardCountChange(e.getCardCountChange());
+                vo.setTimesRemainder(item.getValidCount());
+                vo.setMoneyCostBigD(e.getMoneyCost());
+                vo.setMoneyCost(e.getMoneyCost().toString());
+                vo.setOperateType(e.getOperateType());
+                vo.setOperator(e.getOperator());
+                vo.setNote(e.getNote());
+                vo.setCreateTime(e.getCreateTime());
+                if (e.getLastModifyTime() != null)
+                    vo.setLastModifyTime(e.getLastModifyTime());
+                voList.add(vo);
+            });
+        });
 
-
-                return vo;
-            }).collect(Collectors.toList());
-
-        }).collect(Collectors.toList()).get(0);
-
-//        bindRecordEntities.stream().map(item -> {
-//            ConsumeInfoVo vo = new ConsumeInfoVo();
-//            LambdaQueryWrapper<ConsumeRecordEntity> wrapper = new LambdaQueryWrapper<>();
-//            wrapper.eq(ConsumeRecordEntity::getMemberBindId, item.getId());
-//            List<ConsumeRecordEntity> consumeRecords = consumeRecordService.list(wrapper);
-//            consumeRecords.forEach(e -> {
-//                vo.setOperator(e.getOperator());
-//                vo.setConsumeId(e.getId());
-//            });
-//
-//            return vo;
-//        }).collect(Collectors.toList());
-        return null;
+        return voList;
     }
 
     @Override
