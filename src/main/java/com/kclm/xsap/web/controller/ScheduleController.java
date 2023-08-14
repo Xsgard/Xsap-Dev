@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -107,7 +108,12 @@ public class ScheduleController {
     @ResponseBody
     public R queryAmountPayable(Long bindCardId) {
         MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
-        Double money = 0.0;
-        return R.ok().put("data", money);
+        BigDecimal receivedMoney = record.getReceivedMoney();
+        if (receivedMoney != null) {
+            double validCount = record.getValidCount().doubleValue();
+            BigDecimal money = receivedMoney.divide(BigDecimal.valueOf(validCount));
+            return R.ok().put("data", money);
+        } else
+            return R.error("请求出错，请稍后重试或联系管理员！");
     }
 }
