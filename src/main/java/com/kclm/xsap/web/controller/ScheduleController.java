@@ -129,6 +129,11 @@ public class ScheduleController {
     @PostMapping("/consumeEnsureAll.do")
     @ResponseBody
     public R consumeEnsureAll(Long scheduleId, String operators) {
-        return null;
+        try {
+            scheduleRecordService.consumeEnsureAll(scheduleId, operators);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("一件扣费成功！");
     }
 }
