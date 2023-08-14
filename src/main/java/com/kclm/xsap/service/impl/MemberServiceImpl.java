@@ -14,6 +14,7 @@ import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.ClassInfoVo;
 import com.kclm.xsap.vo.ConsumeInfoVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     private ConsumeRecordService consumeRecordService;
 
+    private ClassRecordService classRecordService;
+
+    private EmployeeService employeeService;
+
     private MemberCardDao cardDao;
 
     private MemberDao memberDao;
@@ -57,9 +62,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     private void setApplicationContext(MemberCardService cardService, MemberBindRecordService bindRecordService,
                                        MemberService memberService, ReservationRecordService reservationRecordService,
                                        ScheduleRecordService scheduleRecordService, CourseService courseService,
-                                       ConsumeRecordService consumeRecordService,
+                                       ConsumeRecordService consumeRecordService, ClassRecordService classRecordService,
+                                       EmployeeService employeeService,
                                        MemberCardDao cardDao, MemberDao memberDao) {
         this.consumeRecordService = consumeRecordService;
+        this.classRecordService = classRecordService;
+        this.employeeService = employeeService;
         this.memberDao = memberDao;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
@@ -277,6 +285,43 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         });
 
         return voList;
+    }
+
+    @Override
+    public List<ClassInfoVo> getClassInfoList(Long memberId) {
+        //
+        LambdaQueryWrapper<ClassRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ClassRecordEntity::getMemberId, memberId);
+        List<ClassRecordEntity> classRecords = classRecordService.list(queryWrapper);
+        List<ClassInfoVo> voList = new ArrayList<>();
+        return classRecords.stream().map(item -> {
+            //预约记录
+            LambdaQueryWrapper<ReservationRecordEntity> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(ReservationRecordEntity::getMemberId, item.getMemberId())
+                    .eq(ReservationRecordEntity::getScheduleId, item.getScheduleId());
+            ReservationRecordEntity reservation = reservationRecordService.getOne(wrapper);
+            //预约记录信息
+            ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(item.getScheduleId());
+            //老师信息
+            EmployeeEntity teacher = employeeService.getById(scheduleRecord.getTeacherId());
+            //
+            CourseEntity course = courseService.getById(scheduleRecord.getCourseId());
+            //
+            ClassInfoVo vo = new ClassInfoVo();
+            vo.setClassRecordId(item.getId());
+            vo.setCourseName(course.getName());
+            vo.setClassTime(TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime()));
+            vo.setTeacherName(teacher.getName());
+            vo.setCardName(item.getCardName());
+            vo.setClassNumbers(reservation.getReserveNums());
+            vo.setTimesCost(course.getTimesCost());
+            vo.setComment(item.getComment());
+            vo.setCheckStatus(item.getCheckStatus());
+            vo.setScheduleStartDate(scheduleRecord.getStartDate());
+            vo.setScheduleStartTime(scheduleRecord.getClassTime());
+
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     @Override
