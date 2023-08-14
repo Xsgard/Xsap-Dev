@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +35,7 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     private EmployeeService employeeService;
     private CourseCardService courseCardService;
     private MemberService memberService;
+    private MemberBindRecordService memberBindRecordService;
     private ReservationRecordService reservationRecordService;
     private ScheduleRecordService scheduleRecordService;
     private ClassRecordService classRecordService;
@@ -41,10 +43,11 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     @Autowired
     private void setApplicationContext(CourseService courseService, EmployeeService employeeService,
                                        CourseCardService courseCardService, MemberService memberService,
-                                       ReservationRecordService reservationRecordService,
+                                       ReservationRecordService reservationRecordService, MemberBindRecordService memberBindRecordService,
                                        ScheduleRecordService scheduleRecordService,
                                        ClassRecordService classRecordService) {
         this.classRecordService = classRecordService;
+        this.memberBindRecordService = memberBindRecordService;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
         this.employeeService = employeeService;
@@ -53,6 +56,13 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         this.reservationRecordService = reservationRecordService;
     }
 
+    /**
+     * 添加排课
+     *
+     * @param scheduleRecord 排课信息
+     * @param bindingResult  校验结果集
+     * @return R
+     */
     @Override
     public R scheduleAdd(@Valid ScheduleRecordEntity scheduleRecord, BindingResult bindingResult) {
         ValidationUtil.getErrors(bindingResult);
@@ -63,6 +73,11 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         return R.ok();
     }
 
+    /**
+     * 获取全部排课信息
+     *
+     * @return List
+     */
     @Override
     public List<ScheduleRecordDto> scheduleList() {
         List<ScheduleRecordEntity> scheduleRecordEntities = this.list();
@@ -87,6 +102,12 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         return dtoList;
     }
 
+    /**
+     * 获取排课计划详细信息
+     *
+     * @param id 排课计划Id
+     * @return ScheduleDetailsDto 排课信息DTO
+     */
     @Override
     public ScheduleDetailsDto getScheduleDto(Long id) {
         //查询排课计划信息
@@ -101,7 +122,7 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         //
         LocalDateTime start = TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime());
         LocalDateTime end = TimeUtil.toEndTime(start, courseEntity.getDuration());
-        //
+        //设置Dto属性
         ScheduleDetailsDto dto = new ScheduleDetailsDto();
         dto.setCourseName(courseEntity.getName());
         dto.setStartTime(start);
@@ -118,6 +139,12 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         return dto;
     }
 
+    /**
+     * 获取排课的预约记录（不包括取消的）
+     *
+     * @param scheduleId 排课计划Id
+     * @return List
+     */
     @Override
     public List<ReservedInfoDto> getReserveInfoDto(Long scheduleId) {
         //查询预约记录
@@ -128,6 +155,12 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         return getReservedInfoDtos(scheduleId, recordEntityList);
     }
 
+    /**
+     * 获取排课的预约记录（包括取消的）
+     *
+     * @param scheduleId 排课计划Id
+     * @return List
+     */
     @Override
     public List<ReservedInfoDto> getAllReserveInfoDto(Long scheduleId) {
         //查询预约记录
@@ -137,6 +170,12 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         return getReservedInfoDtos(scheduleId, recordEntityList);
     }
 
+    /**
+     * 获取预约课程记录
+     *
+     * @param scheduleId 排课计划Id
+     * @return List
+     */
     @Override
     public List<ReverseClassRecordDto> getReverseClassRecordDto(Long scheduleId) {
         //查询课程记录信息
@@ -179,6 +218,26 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 计算对应会员卡的单词课程消费金额
+     *
+     * @param bindCardId 会员卡绑定表Id
+     * @return Double 课程金额
+     */
+    @Override
+    public Double queryAmountPayable(Long bindCardId) {
+        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
+        BigDecimal receivedMoney = record.getReceivedMoney();
+        return null;
+    }
+
+    /**
+     * 获取预约记录信息Dto
+     *
+     * @param scheduleId       预约记录Id
+     * @param recordEntityList 预约记录实体信息集合
+     * @return List<ReservedInfoDto>
+     */
     private List<ReservedInfoDto> getReservedInfoDtos(Long scheduleId, List<ReservationRecordEntity> recordEntityList) {
         //查询排课记录
         ScheduleRecordEntity scheduleRecordEntity = scheduleRecordService.getById(scheduleId);

@@ -93,12 +93,17 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         queryWrapper.eq(MemberBindRecordEntity::getMemberId, bindRecordEntity.getMemberId())
                 .and(wrapper -> wrapper.eq(MemberBindRecordEntity::getCardId, bindRecordEntity.getCardId()));
         List<MemberBindRecordEntity> list = bindRecordService.list(queryWrapper);
-
         if (!list.isEmpty()) {
             throw new BusinessException("此卡已经绑定到该用户，请勿重复绑定！");
         }
+        MemberCardEntity cardEntity = memberCardService.getById(info.getCardId());
+        //加上会员卡默认的次数
+        bindRecordEntity.setValidCount((info.getValidCount()) + cardEntity.getTotalCount());
+        //加上会员卡默认天数
+        bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         bindRecordService.save(bindRecordEntity);
+
         //日志信息
         MemberLogEntity log = new MemberLogEntity();
         log.setType("绑卡操作");

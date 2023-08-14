@@ -30,4 +30,6 @@ public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
     List<ReservedInfoDto> getAllReserveInfoDto(Long scheduleId);
 
     List<ReverseClassRecordDto> getReverseClassRecordDto(Long scheduleId);
+
+    Double queryAmountPayable(Long bindCardId);
 }
