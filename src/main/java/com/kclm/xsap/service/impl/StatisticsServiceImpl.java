@@ -7,6 +7,8 @@ import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.vo.MemberCardStatisticsVo;
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
+import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -122,6 +124,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         return infoVo;
     }
 
+    /**
+     * 获取年份的集合
+     *
+     * @return List
+     */
     @Override
     public List<Integer> getYearList() {
         List<LocalDateTime> localDateTimes = rechargeRecordDao.getLocalDateTimes();
@@ -131,5 +138,73 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public IndexAddAndStreamInfoVo cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
 
+        if (vo.getUnit() == 1) {
+            //统计时段 --月
+            return cardCostHandler(vo.getYearOfSelect());
+        } else if (vo.getUnit() == 2) {
+            //统计时段 --季
+            return cardCostHandler(vo.getYearOfSelect(), vo.getUnit());
+        } else {
+            //统计时段 --年
+            return cardCostHandler(vo);
+        }
+
+    }
+
+    /**
+     * 按月份收费统计
+     *
+     * @param year 查找年份
+     * @return IndexAddAndStreamInfoVo
+     */
+    private static IndexAddAndStreamInfoVo cardCostHandler(Integer year) {
+        IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
+        result.setTitle("月收费模式");
+        result.setXname("月");
+        List<String> time = new ArrayList<>();
+        //先判断查找年份是否为本年
+        LocalDateTime now = LocalDateTime.now();
+        if (now.getYear() == year) {
+            int month = now.getMonth().getValue();
+            for (int i = 0; i < month; i++) {
+                String temp = i + "月份";
+                time.add(temp);
+            }
+        }
+
+        result.setTime(time);
+        return result;
+    }
+
+    /**
+     * 按季度收费统计
+     *
+     * @param yearOfSelect 查找年份
+     * @param unit         标志为（季度）重载
+     * @return IndexAddAndStreamInfoVo
+     */
+    private static IndexAddAndStreamInfoVo cardCostHandler(Integer yearOfSelect, Integer unit) {
+        IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
+        result.setTitle("季度收费模式");
+        result.setXname("季度");
+
+        return result;
+    }
+
+    /**
+     * 按年份收费统计
+     *
+     * @param vo 封装的统计条件
+     * @return IndexAddAndStreamInfoVo
+     */
+    private static IndexAddAndStreamInfoVo cardCostHandler(StatisticsOfCardCostVo vo) {
+        IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
+        result.setTitle("年收费模式");
+        result.setXname("年");
+
+        return result;
+    }
 }

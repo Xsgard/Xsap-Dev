@@ -1,6 +1,8 @@
 package com.kclm.xsap.service;
 
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
+import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 
 import java.util.List;
 
@@ -14,4 +16,6 @@ public interface StatisticsService {
     MemberCardStatisticsWithTotalDataInfoVo getCardStatisticsVo();
 
     List<Integer> getYearList();
+
+    IndexAddAndStreamInfoVo cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo);
 }
