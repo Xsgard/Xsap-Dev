@@ -103,7 +103,7 @@ public class IndexPageServiceImpl implements IndexPageService {
     }
 
     /**
-     * TODO 当月每日新增流失图
+     * TODO 当月每日收费统计
      *
      * @return IndexAddAndStreamInfoVo
      */
