@@ -104,7 +104,7 @@ public class IndexController {
     @GetMapping("/homePageInfo/statisticsOfDailyCharge.do")
     @ResponseBody
     public R DailyCharge() {
-
-        return null;
+        IndexAddAndStreamInfoVo vo = indexPageService.DailyCharge();
+        return R.ok().put("data", vo);
     }
 }
