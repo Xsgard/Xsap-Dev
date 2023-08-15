@@ -3,6 +3,7 @@ package com.kclm.xsap.web.controller;
 import com.kclm.xsap.service.StatisticsService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
+import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,6 +89,13 @@ public class StatisticsController {
     public R getYearList() {
         List<Integer> yearList = statisticsService.getYearList();
         return R.ok().put("data", yearList);
+    }
+
+    @PostMapping("/cardCostMonthOrSeasonOrYear")
+    @ResponseBody
+    public R cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
+
+        return null;
     }
 
 }
