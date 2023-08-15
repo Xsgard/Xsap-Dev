@@ -101,9 +101,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         }
         MemberCardEntity cardEntity = memberCardService.getById(info.getCardId());
         //加上会员卡默认的次数
-        //bindRecordEntity.setValidCount((info.getValidCount()) + cardEntity.getTotalCount());
+        bindRecordEntity.setValidCount((info.getValidCount()) + cardEntity.getTotalCount());
         //加上会员卡默认天数
-        //bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
+        bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         bindRecordService.save(bindRecordEntity);
 
