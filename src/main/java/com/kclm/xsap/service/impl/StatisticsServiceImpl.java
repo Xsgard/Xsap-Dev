@@ -1,7 +1,7 @@
 package com.kclm.xsap.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.kclm.xsap.dao.ConsumeRecordDao;
+import com.kclm.xsap.dao.RechargeRecordDao;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.*;
@@ -29,11 +29,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     private MemberCardService memberCardService;
     private ConsumeRecordService consumeRecordService;
 
-    private ConsumeRecordDao consumeRecordDao;
+    private RechargeRecordDao rechargeRecordDao;
 
     @Autowired
-    public void setDao(ConsumeRecordDao consumeRecordDao) {
-        this.consumeRecordDao = consumeRecordDao;
+    public void setDao(RechargeRecordDao rechargeRecordDao) {
+        this.rechargeRecordDao = rechargeRecordDao;
     }
 
     @Autowired
@@ -124,7 +124,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public List<Integer> getYearList() {
-        List<LocalDateTime> localDateTimes = consumeRecordDao.getLocalDateTimes();
+        List<LocalDateTime> localDateTimes = rechargeRecordDao.getLocalDateTimes();
         return localDateTimes.stream()
                 .map(LocalDateTime::getYear)
                 .distinct()

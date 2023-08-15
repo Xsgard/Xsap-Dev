@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.MemberEntity;
+import com.kclm.xsap.entity.RechargeRecordEntity;
 import com.kclm.xsap.service.IndexPageService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
+import com.kclm.xsap.service.RechargeRecordService;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +32,13 @@ public class IndexPageServiceImpl implements IndexPageService {
 
     private MemberBindRecordService memberBindRecordService;
 
+    private RechargeRecordService rechargeRecordService;
+
     @Autowired
-    private void setService(MemberCardService memberCardService,
+    private void setService(MemberCardService memberCardService, RechargeRecordService rechargeRecordService,
                             MemberBindRecordService memberBindRecordService) {
         this.memberBindRecordService = memberBindRecordService;
+        this.rechargeRecordService = rechargeRecordService;
         this.memberCardService = memberCardService;
     }
 
@@ -109,7 +114,39 @@ public class IndexPageServiceImpl implements IndexPageService {
      */
     @Override
     public IndexAddAndStreamInfoVo DailyCharge() {
+        IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
+        vo.setTitle("当月每日收费统计");
+        vo.setXname("日");
+        // 获取当前日期和时间
+        LocalDateTime now = LocalDateTime.now();
+        // 获取本月第一天
+        LocalDateTime firstDayOfMonth = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
+        // 获取今天的最后时间
+        int dayOfMonth = now.getDayOfMonth();
+        LocalDateTime nowDayOfMonth = now.withDayOfMonth(dayOfMonth)
+                .toLocalDate().atTime(23, 59, 59);
+        //时间轴
+        List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        for (int i = 0; i < dayOfMonth; i++) {
+            time.add(String.valueOf(i + 1));
+            data.add(0);
+        }
+        vo.setTime(time);
 
-        return null;
+        LambdaQueryWrapper<RechargeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.between(RechargeRecordEntity::getCreateTime, firstDayOfMonth, nowDayOfMonth);
+        List<RechargeRecordEntity> recharges = rechargeRecordService.list(queryWrapper);
+        for (int i = 0; i < dayOfMonth; i++) {
+            int finalI = i;
+            Integer money = (int) recharges.stream()
+                    .filter(e -> e.getCreateTime().getDayOfMonth() == (finalI + 1))
+                    .mapToDouble(item -> item.getReceivedMoney().doubleValue())
+                    .sum();
+            data.set(i, money);
+        }
+        vo.setData(data);
+
+        return vo;
     }
 }

@@ -43,6 +43,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     private MemberBindRecordService memberBindRecordService;
     private MemberLogService memberLogService;
     private ConsumeRecordService consumeRecordService;
+    private RechargeRecordService rechargeRecordService;
 
     @Autowired
     private void setDao(MemberCardDao cardDao, MemberBindRecordDao memberBindRecordDao) {
@@ -58,7 +59,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
                             CourseService courseService,
                             ScheduleRecordService scheduleRecordService,
                             MemberLogService memberLogService,
-                            ConsumeRecordService consumeRecordService) {
+                            ConsumeRecordService consumeRecordService,
+                            RechargeRecordService rechargeRecordService) {
+        this.rechargeRecordService = rechargeRecordService;
         this.consumeRecordService = consumeRecordService;
         this.memberCardService = memberCardService;
         this.courseService = courseService;
@@ -137,6 +140,23 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         boolean saved = consumeRecordService.save(consumeRecord);
         if (!saved)
             throw new BusinessException("消费日志日志保存失败！");
+        //充值记录
+        if (info.getReceivedMoney() != null) {
+            RechargeRecordEntity rechargeRecord = new RechargeRecordEntity();
+            rechargeRecord.setAddCount(info.getValidCount());
+            rechargeRecord.setAddDay(info.getValidDay());
+            rechargeRecord.setReceivedMoney(BigDecimal.valueOf(info.getReceivedMoney()));
+            rechargeRecord.setPayMode(info.getPayMode());
+            rechargeRecord.setOperator(info.getOperator());
+            rechargeRecord.setNote(info.getNote());
+            rechargeRecord.setMemberBindId(bindRecordEntity.getId());
+            rechargeRecord.setCreateTime(LocalDateTime.now());
+            rechargeRecord.setLogId(log.getId());
+
+            boolean save = rechargeRecordService.save(rechargeRecord);
+            if (!save)
+                throw new BusinessException("充值记录保存失败！");
+        }
     }
 
     /**
