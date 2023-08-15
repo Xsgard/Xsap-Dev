@@ -100,4 +100,11 @@ public class IndexController {
         List<IndexPieChartVo> vo = indexPageService.getMemberCards();
         return R.ok().put("data", vo);
     }
+
+    @GetMapping("/homePageInfo/statisticsOfDailyCharge.do")
+    @ResponseBody
+    public R DailyCharge() {
+
+        return null;
+    }
 }
