@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -213,21 +212,22 @@ public class StatisticsServiceImpl implements StatisticsService {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
         result.setTitle("季度收费模式");
         result.setXname("季度");
-        List<String> time;
+        List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
         //
         LocalDateTime now = LocalDateTime.now();
         //
-        if (now.getYear() == year) {
-            int month = now.getMonthValue();
-
-            time = new ArrayList<>();
-
-        } else {
-            time = new ArrayList<>(Arrays.asList("第1季度", "第2季度", "第3季度", "第4季度"));
-
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        for (int i = 1; i <= 4; i++) {
+            time.add("第" + i + "季度");
+            LocalDateTime endDateTime = startDateTime.plusMonths(3);
+            data.add(rechargeRecordService.getRechargeList(startDateTime, endDateTime).get(0));
+            startDateTime = startDateTime.plusMonths(3);
+            if (endDateTime.isAfter(now))
+                break;
         }
-
         result.setTime(time);
+        result.setData(data);
         return result;
     }
 
@@ -241,6 +241,17 @@ public class StatisticsServiceImpl implements StatisticsService {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
         result.setTitle("年收费模式");
         result.setXname("年");
+        List<Integer> data = new ArrayList<>();
+        List<String> time = new ArrayList<>();
+        LocalDateTime start = LocalDateTime.of(vo.getBeginYear(), 1, 1, 0, 0, 0);
+        for (int i = vo.getBeginYear(); i <= vo.getEndYear(); i++) {
+            time.add(String.valueOf(i));
+            LocalDateTime end = start.plusYears(1);
+            data.add(rechargeRecordService.getRechargeList(start, end).get(0));
+            start = start.plusYears(1);
+        }
+        result.setTime(time);
+        result.setData(data);
 
         return result;
     }
