@@ -37,6 +37,14 @@ public class IndexPageServiceImpl implements IndexPageService {
         this.memberCardService = memberCardService;
     }
 
+    /**
+     * 会员新增流失图
+     *
+     * @param memberList 会员信息集合
+     * @param start      开始时间
+     * @param end        本日时间
+     * @return IndexAddAndStreamInfoVo
+     */
     @Override
     public IndexAddAndStreamInfoVo getAddAndStreamInfo(List<MemberEntity> memberList, LocalDateTime start, LocalDateTime end) {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
@@ -72,6 +80,11 @@ public class IndexPageServiceImpl implements IndexPageService {
         return vo;
     }
 
+    /**
+     * 会员卡统计图
+     *
+     * @return List<IndexPieChartVo>
+     */
     @Override
     public List<IndexPieChartVo> getMemberCards() {
         List<MemberCardEntity> cardEntityList = memberCardService.list();
@@ -87,5 +100,16 @@ public class IndexPageServiceImpl implements IndexPageService {
             return vo;
         }).collect(Collectors.toList());
 
+    }
+
+    /**
+     * TODO 当月每日新增流失图
+     *
+     * @return IndexAddAndStreamInfoVo
+     */
+    @Override
+    public IndexAddAndStreamInfoVo DailyCharge() {
+
+        return null;
     }
 }

@@ -18,5 +18,5 @@ public interface IndexPageService {
 
     List<IndexPieChartVo> getMemberCards();
 
-
+    IndexAddAndStreamInfoVo DailyCharge();
 }
