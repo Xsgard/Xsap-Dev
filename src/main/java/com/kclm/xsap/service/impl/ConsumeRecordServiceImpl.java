@@ -46,5 +46,21 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
                 .divide(BigDecimal.valueOf(validCount), 0, RoundingMode.DOWN);
     }
 
+    @Override
+    public Integer queryUsedClassCost(Long bindCardId) {
+        //绑定记录
+        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
+        //
+        LambdaQueryWrapper<ConsumeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ConsumeRecordEntity::getMemberBindId, record.getId());
+        //消费记录集合
+        List<ConsumeRecordEntity> consumes = consumeRecordService.list(queryWrapper);
+        //过滤绑卡操作 对卡次变化求和
+        return consumes.stream()
+                .filter(e -> !e.getOperateType().equals("绑卡操作"))
+                .mapToInt(ConsumeRecordEntity::getCardCountChange)
+                .sum();
+    }
+
 
 }

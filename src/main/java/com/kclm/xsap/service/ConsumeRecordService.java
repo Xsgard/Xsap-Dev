@@ -13,4 +13,6 @@ import java.math.BigDecimal;
  */
 public interface ConsumeRecordService extends IService<ConsumeRecordEntity> {
     BigDecimal queryAmountPayable(Long bindCardId);
+
+    Integer queryUsedClassCost(Long bindCardId);
 }
