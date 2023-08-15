@@ -36,4 +36,20 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
         }
         return data;
     }
+
+    public List<Integer> getRechargeList(LocalDateTime start, LocalDateTime end, String s) {
+        LambdaQueryWrapper<RechargeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.between(RechargeRecordEntity::getCreateTime, start, end);
+        List<RechargeRecordEntity> recharges = this.list(queryWrapper);
+        List<Integer> data = new ArrayList<>();
+        for (int i = 1; i <= end.getMonthValue(); i++) {
+            int finalI = i;
+            Integer monthMoney = (int) recharges.stream()
+                    .filter(e -> e.getCreateTime().getMonthValue() == finalI)
+                    .mapToDouble(item -> item.getReceivedMoney().doubleValue())
+                    .sum();
+            data.set(i - 1, monthMoney);
+        }
+        return data;
+    }
 }

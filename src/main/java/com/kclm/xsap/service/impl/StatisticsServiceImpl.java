@@ -5,6 +5,7 @@ import com.kclm.xsap.dao.RechargeRecordDao;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.*;
+import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.vo.MemberCardStatisticsVo;
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
@@ -13,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,11 +30,17 @@ import java.util.stream.Collectors;
  */
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
+    //
+    private static final LocalTime startTime = LocalTime.of(0, 0, 0);
+    //
+    private static final LocalTime endTime = LocalTime.of(23, 59, 59);
+
+
     private MemberService memberService;
     private MemberBindRecordService memberBindRecordService;
     private MemberCardService memberCardService;
     private ConsumeRecordService consumeRecordService;
-
+    private RechargeRecordService rechargeRecordService;
     private RechargeRecordDao rechargeRecordDao;
 
     @Autowired
@@ -40,8 +50,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Autowired
     public void setMemberBindRecordService(MemberBindRecordService memberBindRecordService, ConsumeRecordService consumeRecordService,
-                                           MemberService memberService, MemberCardService memberCardService) {
-
+                                           MemberService memberService, MemberCardService memberCardService,
+                                           RechargeRecordService rechargeRecordService) {
+        this.rechargeRecordService = rechargeRecordService;
         this.memberCardService = memberCardService;
         this.consumeRecordService = consumeRecordService;
         this.memberService = memberService;
@@ -160,21 +171,33 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @param year 查找年份
      * @return IndexAddAndStreamInfoVo
      */
-    private static IndexAddAndStreamInfoVo cardCostHandler(Integer year) {
+    private IndexAddAndStreamInfoVo cardCostHandler(Integer year) {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
         result.setTitle("月收费模式");
         result.setXname("月");
         List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        //本年第一天
+        LocalDate startDate = LocalDate.of(year, 1, 1);
         //先判断查找年份是否为本年
         LocalDateTime now = LocalDateTime.now();
         if (now.getYear() == year) {
             int month = now.getMonth().getValue();
             for (int i = 0; i < month; i++) {
-                String temp = i + "月份";
-                time.add(temp);
+                time.add((i + 1) + "月份");
             }
+            data = rechargeRecordService.getRechargeList(
+                    TimeUtil.timeTransfer(startDate, startTime), now);
+        } else {
+            for (int i = 0; i < 12; i++) {
+                time.add((i + 1) + "月份");
+            }
+            LocalDate endDate = LocalDate.of(year, 12, 31);
+            data = rechargeRecordService.getRechargeList(
+                    TimeUtil.timeTransfer(startDate, startTime),
+                    TimeUtil.timeTransfer(endDate, endTime));
         }
-
+        result.setData(data);
         result.setTime(time);
         return result;
     }
@@ -182,15 +205,29 @@ public class StatisticsServiceImpl implements StatisticsService {
     /**
      * 按季度收费统计
      *
-     * @param yearOfSelect 查找年份
-     * @param unit         标志为（季度）重载
+     * @param year 查找年份
+     * @param unit 标志为（季度）重载
      * @return IndexAddAndStreamInfoVo
      */
-    private static IndexAddAndStreamInfoVo cardCostHandler(Integer yearOfSelect, Integer unit) {
+    private IndexAddAndStreamInfoVo cardCostHandler(Integer year, Integer unit) {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
         result.setTitle("季度收费模式");
         result.setXname("季度");
+        List<String> time;
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        if (now.getYear() == year) {
+            int month = now.getMonthValue();
 
+            time = new ArrayList<>();
+
+        } else {
+            time = new ArrayList<>(Arrays.asList("第1季度", "第2季度", "第3季度", "第4季度"));
+
+        }
+
+        result.setTime(time);
         return result;
     }
 
@@ -200,7 +237,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @param vo 封装的统计条件
      * @return IndexAddAndStreamInfoVo
      */
-    private static IndexAddAndStreamInfoVo cardCostHandler(StatisticsOfCardCostVo vo) {
+    private IndexAddAndStreamInfoVo cardCostHandler(StatisticsOfCardCostVo vo) {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
         result.setTitle("年收费模式");
         result.setXname("年");
