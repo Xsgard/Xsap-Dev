@@ -8,7 +8,10 @@ import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.vo.MemberCardStatisticsVo;
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
+import com.kclm.xsap.vo.TeacherConsumeVo;
+import com.kclm.xsap.vo.TempList;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +43,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     private ConsumeRecordService consumeRecordService;
     private RechargeRecordService rechargeRecordService;
     private RechargeRecordDao rechargeRecordDao;
+    private EmployeeService employeeService;
+    private ScheduleRecordService scheduleRecordService;
 
     @Autowired
     public void setDao(RechargeRecordDao rechargeRecordDao) {
@@ -50,7 +54,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Autowired
     public void setMemberBindRecordService(MemberBindRecordService memberBindRecordService, ConsumeRecordService consumeRecordService,
                                            MemberService memberService, MemberCardService memberCardService,
-                                           RechargeRecordService rechargeRecordService) {
+                                           RechargeRecordService rechargeRecordService,
+                                           EmployeeService employeeService,
+                                           ScheduleRecordService scheduleRecordService) {
+        this.scheduleRecordService = scheduleRecordService;
+        this.employeeService = employeeService;
         this.rechargeRecordService = rechargeRecordService;
         this.memberCardService = memberCardService;
         this.consumeRecordService = consumeRecordService;
@@ -165,6 +173,24 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * 老师课时消费月统计
+     *
+     * @param vo 封装的查询年份等
+     * @return IndexAddAndStreamInfoVo
+     */
+    @Override
+    public ClassCostVo classCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
+        if (vo.getUnit() == 1) {
+            return classCostHandler(vo.getYearOfSelect());
+        } else if (vo.getUnit() == 2) {
+            return classCostHandler(vo.getYearOfSelect(), vo.getUnit());
+        } else {
+            return classCostMonthOrSeasonOrYear(vo);
+        }
+    }
+
+
+    /**
      * 按月份收费统计
      *
      * @param year 查找年份
@@ -255,4 +281,90 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         return result;
     }
+
+
+    /**
+     * 按月份课消统计
+     *
+     * @param year 查找年份
+     * @return IndexAddAndStreamInfoVo
+     */
+    private ClassCostVo classCostHandler(Integer year) {
+        ClassCostVo vo = new ClassCostVo();
+        vo.setTitle("老师课时消费月统计");
+        vo.setXname("月");
+        List<List<Integer>> data = new ArrayList<>();
+        List<List<Float>> data2 = new ArrayList<>();
+        List<String> tName = new ArrayList<>();
+        List<String> time = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        Map<String, TempList> dataMap = new HashMap<>();
+        for (int i = 0; i < 12; i++) {
+            time.add((i + 1) + "月");
+            LocalDateTime endTime = startDateTime.plusMonths(1);
+            List<TeacherConsumeVo> teacherConsume = consumeRecordService.getTeacherConsume(startDateTime, endTime);
+            teacherConsume.forEach(item -> {
+                if (dataMap.containsKey(item.getTeacherName())) {
+                    TempList tempList = dataMap.get(item.getTeacherName());
+                    tempList.getCountChanges().add(item.getCountChange() == null ? 0 : item.getCountChange());
+                    tempList.getMoneyCosts().add(item.getMoneyCost() == null ? 0 : item.getMoneyCost().floatValue());
+                } else {
+                    TempList tempList = new TempList();
+                    //
+                    List<Integer> counts = new ArrayList<>();
+                    counts.add(item.getCountChange() == null ? 0 : item.getCountChange());
+                    //
+                    List<Float> moneys = new ArrayList<>();
+                    moneys.add(item.getMoneyCost() == null ? 0 : item.getMoneyCost().floatValue());
+                    //
+                    tempList.setCountChanges(counts);
+                    tempList.setMoneyCosts(moneys);
+                    dataMap.put(item.getTeacherName(), tempList);
+                }
+            });
+            startDateTime = startDateTime.plusMonths(1);
+            if (startDateTime.isAfter(now))
+                break;
+        }
+        Set<String> keySet = dataMap.keySet();
+        for (String s : keySet) {
+            TempList tempList = dataMap.get(s);
+            tName.add(s);
+            data.add(tempList.getCountChanges());
+            data2.add(tempList.getMoneyCosts());
+        }
+
+        vo.setTname(tName);
+        vo.setTime(time);
+        vo.setData(data);
+        vo.setData2(data2);
+        return vo;
+    }
+
+    /**
+     * 按季度课消统计
+     *
+     * @param year 查找年份
+     * @param unit 标志为（季度）重载
+     * @return IndexAddAndStreamInfoVo
+     */
+    private ClassCostVo classCostHandler(Integer year, Integer unit) {
+
+        return null;
+    }
+
+    /**
+     * 按年份课消统计
+     *
+     * @param vo 封装的统计条件
+     * @return IndexAddAndStreamInfoVo
+     */
+    private ClassCostVo classCostHandler(StatisticsOfCardCostVo vo) {
+
+        return null;
+    }
+
 }
