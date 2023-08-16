@@ -16,6 +16,7 @@ import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.ClassInfoVo;
 import com.kclm.xsap.vo.ConsumeInfoVo;
+import com.kclm.xsap.vo.MemberCountVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -322,6 +323,25 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public MemberCountVo queryMemberBetweenByCondition(LocalDateTime start, LocalDateTime end) {
+        MemberCountVo vo = new MemberCountVo();
+        List<MemberEntity> members = memberDao.getAllMember();
+        //未删除
+        Integer newNum = Math.toIntExact(members.stream()
+                .filter(m -> m.getIsDeleted() == 0) //过滤出未删除的会员信息
+                .filter(e -> e.getCreateTime().isAfter(start) && e.getCreateTime().isBefore(end)) //根据时间过滤
+                .count());
+        //已删除
+        Integer streamMun = Math.toIntExact(members.stream()
+                .filter(m -> m.getIsDeleted() == 1) //过滤出已删除的会员信息
+                .filter(e -> e.getLastModifyTime().isAfter(start) && e.getLastModifyTime().isBefore(end)) //根据时间过滤
+                .count());
+        vo.setNewNum(newNum);
+        vo.setStreamNum(streamMun);
+        return vo;
     }
 
     @Override

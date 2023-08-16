@@ -6,10 +6,7 @@ import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.TimeUtil;
-import com.kclm.xsap.vo.MemberCardStatisticsVo;
-import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
-import com.kclm.xsap.vo.TeacherConsumeVo;
-import com.kclm.xsap.vo.TempList;
+import com.kclm.xsap.vo.*;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
@@ -215,6 +212,26 @@ public class StatisticsServiceImpl implements StatisticsService {
         } else {
             //统计时段 --年
             return classCountHandler(vo);
+        }
+    }
+
+    /**
+     * 新增与流失统计
+     *
+     * @param vo 封装的查询条件
+     * @return IndexAddAndStreamInfoVo
+     */
+    @Override
+    public IndexAddAndStreamInfoVo addAndStreamCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
+        if (vo.getUnit() == 1) {
+            //统计时段 --月
+            return addAndStreamCount(vo.getYearOfSelect());
+        } else if (vo.getUnit() == 2) {
+            //统计时段 --季
+            return addAndStreamCount(vo.getYearOfSelect(), vo.getUnit());
+        } else {
+            //统计时段 --年
+            return addAndStreamCount(vo);
         }
     }
 
@@ -493,6 +510,105 @@ public class StatisticsServiceImpl implements StatisticsService {
         vo.setData(data);
 
         return vo;
+    }
+
+    /**
+     * 新增与流失统计
+     * 按月份统计
+     *
+     * @param year 查找年份
+     * @return IndexAddAndStreamInfoVo
+     */
+    public IndexAddAndStreamInfoVo addAndStreamCount(Integer year) {
+        IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
+        result.setTitle("新增与流失统计");
+        result.setXname("月");
+        List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        List<Integer> data2 = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        for (int i = 1; i <= 12; i++) {
+            time.add(i + "月");
+            LocalDateTime endDateTime = startDateTime.plusMonths(1);
+            MemberCountVo memberCountVo = memberService.queryMemberBetweenByCondition(startDateTime, endDateTime);
+            data.add(memberCountVo.getNewNum());
+            data2.add(memberCountVo.getStreamNum());
+            startDateTime = startDateTime.plusMonths(1);
+            if (endDateTime.isAfter(now))
+                break;
+        }
+        result.setTime(time);
+        result.setData(data);
+        result.setData2(data2);
+        return result;
+    }
+
+    /**
+     * 新增与流失统计
+     * 按季度统计
+     *
+     * @param year 查找年份
+     * @param unit 标志为（季度）重载
+     * @return IndexAddAndStreamInfoVo
+     */
+    public IndexAddAndStreamInfoVo addAndStreamCount(Integer year, Integer unit) {
+        IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
+        result.setTitle("新增与流失统计");
+        result.setXname("季度");
+        List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        List<Integer> data2 = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        for (int i = 1; i <= 4; i++) {
+            time.add("第" + i + "季度");
+            LocalDateTime endDateTime = startDateTime.plusMonths(3);
+            MemberCountVo memberCountVo = memberService.queryMemberBetweenByCondition(startDateTime, endDateTime);
+            data.add(memberCountVo.getNewNum());
+            data2.add(memberCountVo.getStreamNum());
+            startDateTime = startDateTime.plusMonths(3);
+            if (endDateTime.isAfter(now))
+                break;
+        }
+        result.setTime(time);
+        result.setData(data);
+        result.setData2(data2);
+        return result;
+    }
+
+    /**
+     * 新增与流失统计
+     * 按年份统计
+     *
+     * @param costVo 封装的统计条件
+     * @return IndexAddAndStreamInfoVo
+     */
+    public IndexAddAndStreamInfoVo addAndStreamCount(StatisticsOfCardCostVo costVo) {
+        IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
+        result.setTitle("新增与流失统计");
+        result.setXname("年");
+        List<Integer> data = new ArrayList<>();
+        List<Integer> data2 = new ArrayList<>();
+        List<String> time = new ArrayList<>();
+        LocalDateTime start = LocalDateTime.of(costVo.getBeginYear(), 1, 1, 0, 0, 0);
+        for (int i = costVo.getBeginYear(); i <= costVo.getEndYear(); i++) {
+            time.add(String.valueOf(i));
+            LocalDateTime end = start.plusYears(1);
+            MemberCountVo memberCountVo = memberService.queryMemberBetweenByCondition(start, end);
+            data.add(memberCountVo.getNewNum());
+            data2.add(memberCountVo.getStreamNum());
+            start = start.plusYears(1);
+        }
+        result.setTime(time);
+        result.setData(data);
+        result.setData2(data2);
+
+        return result;
     }
 
     /**

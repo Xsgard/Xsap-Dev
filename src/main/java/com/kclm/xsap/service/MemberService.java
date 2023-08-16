@@ -8,6 +8,7 @@ import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.ClassInfoVo;
 import com.kclm.xsap.vo.ConsumeInfoVo;
+import com.kclm.xsap.vo.MemberCountVo;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
@@ -42,4 +43,6 @@ public interface MemberService extends IService<MemberEntity> {
     List<ConsumeInfoVo> getMemberConsumeList(Long memberId);
 
     List<ClassInfoVo> getClassInfoList(Long memberId);
+
+    MemberCountVo queryMemberBetweenByCondition(LocalDateTime start, LocalDateTime end);
 }
