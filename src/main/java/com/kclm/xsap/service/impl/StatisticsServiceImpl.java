@@ -192,6 +192,18 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
+    public IndexAddAndStreamInfoVo classCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
+        if (vo.getUnit() == 1) {
+            //统计时段 --月
+            return cardCostHandler(vo.getYearOfSelect());
+        } else if (vo.getUnit() == 2) {
+            //统计时段 --季
+            return cardCostHandler(vo.getYearOfSelect(), vo.getUnit());
+        } else {
+            //统计时段 --年
+            return cardCostHandler(vo);
+        }
+    }
 
     /**
      * 收费统计
@@ -381,6 +393,31 @@ public class StatisticsServiceImpl implements StatisticsService {
                 break;
         }
         return getClassCostVo(costVo, data, data2, tName, time, dataMap);
+    }
+
+    public IndexAddAndStreamInfoVo classCountHandler(Integer year) {
+        IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
+        vo.setTitle("老师课次月统计");
+        vo.setXname("月");
+
+
+        return vo;
+    }
+
+    public IndexAddAndStreamInfoVo classCountHandler(Integer year, Integer unit) {
+        IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
+        vo.setTitle("老师课次季度统计");
+        vo.setXname("季度");
+
+        return vo;
+    }
+
+    public IndexAddAndStreamInfoVo classCountHandler(StatisticsOfCardCostVo costVo) {
+        IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
+        vo.setTitle("老师课次年统计");
+        vo.setXname("年");
+
+        return vo;
     }
 
     /**
