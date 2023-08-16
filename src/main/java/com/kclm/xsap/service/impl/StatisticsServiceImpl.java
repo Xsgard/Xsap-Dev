@@ -181,10 +181,13 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public ClassCostVo classCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
         if (vo.getUnit() == 1) {
+            //课消统计时段 --月
             return classCostHandler(vo.getYearOfSelect());
         } else if (vo.getUnit() == 2) {
+            //课消统计时段 --季
             return classCostHandler(vo.getYearOfSelect(), vo.getUnit());
         } else {
+            //课消统计时段 --年
             return classCostHandler(vo);
         }
     }
