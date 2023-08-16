@@ -191,6 +191,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 
     /**
+     * 收费统计
      * 按月份收费统计
      *
      * @param year 查找年份
@@ -228,6 +229,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * 收费统计
      * 按季度收费统计
      *
      * @param year 查找年份
@@ -258,6 +260,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * 收费统计
      * 按年份收费统计
      *
      * @param vo 封装的统计条件
@@ -284,6 +287,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
 
     /**
+     * 课消统计
      * 按月份课消统计
      *
      * @param year 查找年份
@@ -314,6 +318,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * 课消统计
      * 按季度课消统计
      *
      * @param year 查找年份
@@ -345,6 +350,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * 课消统计
      * 按年份课消统计
      *
      * @param vo 封装的统计条件
@@ -352,8 +358,8 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     private ClassCostVo classCostHandler(StatisticsOfCardCostVo vo) {
         ClassCostVo costVo = new ClassCostVo();
-        costVo.setTitle("老师课时消费月统计");
-        costVo.setXname("月");
+        costVo.setTitle("老师课时消费年统计");
+        costVo.setXname("年");
         List<List<Integer>> data = new ArrayList<>();
         List<List<Float>> data2 = new ArrayList<>();
         List<String> tName = new ArrayList<>();
@@ -374,6 +380,14 @@ public class StatisticsServiceImpl implements StatisticsService {
         return getClassCostVo(costVo, data, data2, tName, time, dataMap);
     }
 
+    /**
+     * 课消统计
+     * 对数据库查询出的数据进行封装
+     *
+     * @param startDateTime 开始时间
+     * @param dataMap       数据集合
+     * @param endTime       结束时间
+     */
     private void teacherConsumeVoHandler(LocalDateTime startDateTime, Map<String, TempList> dataMap, LocalDateTime endTime) {
         List<TeacherConsumeVo> teacherConsume = consumeRecordService.getTeacherConsume(startDateTime, endTime);
         teacherConsume.forEach(item -> {
@@ -398,6 +412,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     /**
+     * 课消统计
      * 填充数据
      *
      * @param vo      封装的查询条件
