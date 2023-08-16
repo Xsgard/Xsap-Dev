@@ -395,6 +395,13 @@ public class StatisticsServiceImpl implements StatisticsService {
         return getClassCostVo(costVo, data, data2, tName, time, dataMap);
     }
 
+    /**
+     * 总课次统计
+     * 按月份课消统计
+     *
+     * @param year 查找年份
+     * @return IndexAddAndStreamInfoVo
+     */
     public IndexAddAndStreamInfoVo classCountHandler(Integer year) {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setTitle("老师课次月统计");
@@ -404,6 +411,14 @@ public class StatisticsServiceImpl implements StatisticsService {
         return vo;
     }
 
+    /**
+     * 总课次统计
+     * 按季度课消统计
+     *
+     * @param year 查找年份
+     * @param unit 标志为（季度）重载
+     * @return IndexAddAndStreamInfoVo
+     */
     public IndexAddAndStreamInfoVo classCountHandler(Integer year, Integer unit) {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setTitle("老师课次季度统计");
@@ -412,6 +427,13 @@ public class StatisticsServiceImpl implements StatisticsService {
         return vo;
     }
 
+    /**
+     * 总课次统计
+     * 按年份课消统计
+     *
+     * @param costVo 封装的统计条件
+     * @return IndexAddAndStreamInfoVo
+     */
     public IndexAddAndStreamInfoVo classCountHandler(StatisticsOfCardCostVo costVo) {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setTitle("老师课次年统计");
