@@ -9,6 +9,7 @@ import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,5 +128,12 @@ public class CardController {
         } catch (BusinessException e) {
             return R.error(e.getMsg());
         }
+    }
+
+    @PostMapping("/operateRecord.do")
+    @ResponseBody
+    public R operateRecord(Long memberId, Long cardId) {
+        List<OperateRecordVo> operateRecords = memberCardService.getOperateRecords(memberId, cardId);
+        return R.ok().put("data", operateRecords);
     }
 }
