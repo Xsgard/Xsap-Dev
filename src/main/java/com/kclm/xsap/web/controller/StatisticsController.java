@@ -4,6 +4,7 @@ import com.kclm.xsap.service.StatisticsService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -97,6 +98,13 @@ public class StatisticsController {
     public R cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
         IndexAddAndStreamInfoVo indexAddAndStreamInfoVo = statisticsService.cardCostMonthOrSeasonOrYear(vo);
         return R.ok().put("data", indexAddAndStreamInfoVo);
+    }
+
+    @PostMapping("/classCostMonthOrSeasonOrYear")
+    @ResponseBody
+    public R classCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
+        ClassCostVo classCostVo = statisticsService.classCostMonthOrSeasonOrYear(vo);
+        return R.ok().put("data", classCostVo);
     }
 
 }
