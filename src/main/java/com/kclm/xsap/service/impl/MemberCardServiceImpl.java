@@ -212,7 +212,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
             vo.setChangeMoney(String.valueOf(item.getInvolveMoney()));
             vo.setOperator(item.getOperator());
             vo.setCardNote(item.getNote());
-            vo.setStatus(cardEntity.getStatus());
+            vo.setStatus(item.getCardActiveStatus());
 
             return vo;
         }).collect(Collectors.toList());
