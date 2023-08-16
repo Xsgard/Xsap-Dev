@@ -6,6 +6,7 @@ import com.kclm.xsap.entity.MemberEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -26,4 +27,10 @@ public interface MemberDao extends BaseMapper<MemberEntity> {
 
     @Select("select create_time,last_modify_time,is_deleted from t_member where is_deleted=0  or is_deleted=1;")
     List<MemberEntity> getAllMember();
+
+    @Select("select name, create_time, last_modify_time, is_deleted\n" +
+            "from t_member\n" +
+            "where (is_deleted = 0 or is_deleted = 1)\n" +
+            "  and (create_time between #{start} and #{end});")
+    List<MemberEntity> selectMemberBetween(LocalDateTime start, LocalDateTime end);
 }
