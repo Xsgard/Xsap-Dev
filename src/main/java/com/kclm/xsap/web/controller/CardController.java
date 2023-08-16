@@ -2,11 +2,9 @@ package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.entity.EmployeeEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
+import com.kclm.xsap.entity.RechargeRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.CourseCardService;
-import com.kclm.xsap.service.MemberBindRecordService;
-import com.kclm.xsap.service.MemberCardService;
-import com.kclm.xsap.service.MemberService;
+import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.OperateRecordVo;
@@ -33,20 +31,25 @@ import java.util.List;
 @Controller
 @RequestMapping("/card")
 public class CardController {
+    //会员业务方法
     private MemberService memberService;
-
+    //会员卡业务方法
     private MemberCardService memberCardService;
-
+    //会员卡-课程绑定业务方法
     private CourseCardService courseCardService;
-
+    //会员卡绑定业务方法
     private MemberBindRecordService bindRecordService;
+    //充值业务方法
+    private RechargeRecordService rechargeRecordService;
 
     @Autowired
     private void setApplicationContext(MemberService memberService,
                                        MemberCardService cardService,
                                        MemberBindRecordService bindRecordService,
-                                       CourseCardService courseCardService) {
-        //
+                                       CourseCardService courseCardService,
+                                       RechargeRecordService rechargeRecordService) {
+
+        this.rechargeRecordService = rechargeRecordService;
         this.memberService = memberService;
         this.memberCardService = cardService;
         this.bindRecordService = bindRecordService;
@@ -135,5 +138,18 @@ public class CardController {
     public R operateRecord(Long memberId, Long cardId) {
         List<OperateRecordVo> operateRecords = memberCardService.getOperateRecords(memberId, cardId);
         return R.ok().put("data", operateRecords);
+    }
+
+    @PostMapping("/rechargeOpt.do")
+    @ResponseBody
+    public R rechargeOpt(@Valid RechargeRecordEntity rechargeRecord, BindingResult bindingResult) {
+        //BeanValidation
+        ValidationUtil.getErrors(bindingResult);
+        try {
+            rechargeRecordService.memberRecharge(rechargeRecord);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("充值成功！");
     }
 }
