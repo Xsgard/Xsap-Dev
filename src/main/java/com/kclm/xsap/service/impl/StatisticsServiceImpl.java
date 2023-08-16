@@ -156,6 +156,12 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 收费统计
+     *
+     * @param vo 封装的查询条件
+     * @return IndexAddAndStreamInfoVo
+     */
     @Override
     public IndexAddAndStreamInfoVo cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
 
@@ -192,16 +198,23 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
     }
 
+    /**
+     * 总课次统计
+     *
+     * @param vo 封装的查询条件
+     * @return IndexAddAndStreamInfoVo
+     */
+    @Override
     public IndexAddAndStreamInfoVo classCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
         if (vo.getUnit() == 1) {
             //统计时段 --月
-            return cardCostHandler(vo.getYearOfSelect());
+            return classCountHandler(vo.getYearOfSelect());
         } else if (vo.getUnit() == 2) {
             //统计时段 --季
-            return cardCostHandler(vo.getYearOfSelect(), vo.getUnit());
+            return classCountHandler(vo.getYearOfSelect(), vo.getUnit());
         } else {
             //统计时段 --年
-            return cardCostHandler(vo);
+            return classCountHandler(vo);
         }
     }
 
@@ -404,10 +417,24 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     public IndexAddAndStreamInfoVo classCountHandler(Integer year) {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
-        vo.setTitle("老师课次月统计");
+        vo.setTitle("月课时数统计");
         vo.setXname("月");
-
-
+        List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        for (int i = 1; i <= 12; i++) {
+            time.add(i + "月");
+            LocalDateTime endDateTime = startDateTime.plusMonths(1);
+            data.add(consumeRecordService.consumeRecordsBetween(startDateTime, endDateTime));
+            startDateTime = startDateTime.plusMonths(1);
+            if (endDateTime.isAfter(now))
+                break;
+        }
+        vo.setTime(time);
+        vo.setData(data);
         return vo;
     }
 
@@ -423,7 +450,22 @@ public class StatisticsServiceImpl implements StatisticsService {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setTitle("老师课次季度统计");
         vo.setXname("季度");
-
+        List<String> time = new ArrayList<>();
+        List<Integer> data = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        for (int i = 1; i <= 4; i++) {
+            time.add("第" + i + "季度");
+            LocalDateTime endDateTime = startDateTime.plusMonths(3);
+            data.add(consumeRecordService.consumeRecordsBetween(startDateTime, endDateTime));
+            startDateTime = startDateTime.plusMonths(3);
+            if (endDateTime.isAfter(now))
+                break;
+        }
+        vo.setTime(time);
+        vo.setData(data);
         return vo;
     }
 
@@ -438,6 +480,17 @@ public class StatisticsServiceImpl implements StatisticsService {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setTitle("老师课次年统计");
         vo.setXname("年");
+        List<Integer> data = new ArrayList<>();
+        List<String> time = new ArrayList<>();
+        LocalDateTime start = LocalDateTime.of(costVo.getBeginYear(), 1, 1, 0, 0, 0);
+        for (int i = costVo.getBeginYear(); i <= costVo.getEndYear(); i++) {
+            time.add(String.valueOf(i));
+            LocalDateTime end = start.plusYears(1);
+            data.add(rechargeRecordService.getRechargeList(start, end).get(0));
+            start = start.plusYears(1);
+        }
+        vo.setTime(time);
+        vo.setData(data);
 
         return vo;
     }

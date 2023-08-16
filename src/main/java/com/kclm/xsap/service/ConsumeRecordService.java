@@ -20,4 +20,6 @@ public interface ConsumeRecordService extends IService<ConsumeRecordEntity> {
     Integer queryUsedClassCost(Long bindCardId);
 
     List<TeacherConsumeVo> getTeacherConsume(LocalDateTime start, LocalDateTime end);
+
+    Integer consumeRecordsBetween(LocalDateTime start, LocalDateTime end);
 }

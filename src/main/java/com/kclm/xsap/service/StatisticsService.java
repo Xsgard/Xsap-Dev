@@ -21,4 +21,6 @@ public interface StatisticsService {
     IndexAddAndStreamInfoVo cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo);
 
     ClassCostVo classCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo);
+
+    IndexAddAndStreamInfoVo classCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo);
 }

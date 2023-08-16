@@ -79,4 +79,15 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
         return consumeRecordDao.getTeacherConsume(start, end);
     }
 
+    @Override
+    public Integer consumeRecordsBetween(LocalDateTime start, LocalDateTime end) {
+        LambdaQueryWrapper<ConsumeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.between(ConsumeRecordEntity::getCreateTime, start, end);
+        List<ConsumeRecordEntity> consumeRecords = this.list(queryWrapper);
+        return consumeRecords.stream()
+                .filter(e -> !e.getOperateType().equals("绑卡操作"))
+                .mapToInt(ConsumeRecordEntity::getCardCountChange)
+                .sum();
+    }
+
 }
