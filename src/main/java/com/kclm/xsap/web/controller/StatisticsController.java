@@ -107,4 +107,10 @@ public class StatisticsController {
         return R.ok().put("data", classCostVo);
     }
 
+    @PostMapping("/classCountMonthOrSeasonOrYear")
+    @ResponseBody
+    public R classCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
+        IndexAddAndStreamInfoVo indexAddAndStreamInfoVo = statisticsService.classCountMonthOrSeasonOrYear(vo);
+        return R.ok().put("data", indexAddAndStreamInfoVo);
+    }
 }
