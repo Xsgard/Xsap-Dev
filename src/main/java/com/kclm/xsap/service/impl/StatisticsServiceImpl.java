@@ -309,16 +309,16 @@ public class StatisticsServiceImpl implements StatisticsService {
             teacherConsume.forEach(item -> {
                 if (dataMap.containsKey(item.getTeacherName())) {
                     TempList tempList = dataMap.get(item.getTeacherName());
-                    tempList.getCountChanges().add(item.getCountChange() == null ? 0 : item.getCountChange());
-                    tempList.getMoneyCosts().add(item.getMoneyCost() == null ? 0 : item.getMoneyCost().floatValue());
+                    tempList.getCountChanges().add(item.getCountChange());
+                    tempList.getMoneyCosts().add(item.getMoneyCost() == null ? null : item.getMoneyCost().floatValue());
                 } else {
                     TempList tempList = new TempList();
                     //
                     List<Integer> counts = new ArrayList<>();
-                    counts.add(item.getCountChange() == null ? 0 : item.getCountChange());
+                    counts.add(item.getCountChange());
                     //
                     List<Float> moneys = new ArrayList<>();
-                    moneys.add(item.getMoneyCost() == null ? 0 : item.getMoneyCost().floatValue());
+                    moneys.add(item.getMoneyCost() == null ? null : item.getMoneyCost().floatValue());
                     //
                     tempList.setCountChanges(counts);
                     tempList.setMoneyCosts(moneys);
