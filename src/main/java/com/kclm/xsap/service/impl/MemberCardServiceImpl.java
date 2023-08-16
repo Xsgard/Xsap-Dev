@@ -11,6 +11,7 @@ import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -182,6 +183,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         else
             note = "停用会员卡操作";
         log.setNote(note);
+        log.setType(note);
         log.setInvolveMoney(BigDecimal.valueOf(0));
         log.setOperator(operatorName);
         log.setMemberBindId(bindId);
@@ -192,6 +194,28 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         boolean flag = memberLogService.save(log);
         if (!flag)
             throw new BusinessException("日志保存失败！");
+    }
+
+    @Override
+    public List<OperateRecordVo> getOperateRecords(Long memberId, Long bindCardId) {
+        LambdaQueryWrapper<MemberLogEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberLogEntity::getMemberBindId, bindCardId);
+        List<MemberLogEntity> memberLogs = memberLogService.list(queryWrapper);
+        return memberLogs.stream().map(item -> {
+            MemberBindRecordEntity bindRecord = memberBindRecordService.getById(bindCardId);
+            MemberCardEntity cardEntity = memberCardService.getById(bindRecord.getCardId());
+            OperateRecordVo vo = new OperateRecordVo();
+            vo.setId(item.getId());
+            vo.setOperateTime(item.getCreateTime());
+            vo.setOperateType(item.getType());
+            vo.setChangeCount(item.getCardCountChange());
+            vo.setChangeMoney(String.valueOf(item.getInvolveMoney()));
+            vo.setOperator(item.getOperator());
+            vo.setCardNote(item.getNote());
+            vo.setStatus(cardEntity.getStatus());
+
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**

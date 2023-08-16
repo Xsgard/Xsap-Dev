@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.dto.BindCardInfoDto;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.validation.BindingResult;
 
 import javax.validation.Valid;
@@ -31,4 +32,6 @@ public interface MemberCardService extends IService<MemberCardEntity> {
     List<MemberCardEntity> getActiveCards(Long memberId);
 
     void activeOpt(Long memberId, Long bindId, Integer status, String operatorName);
+
+    List<OperateRecordVo> getOperateRecords(Long memberId, Long bindCardId);
 }
