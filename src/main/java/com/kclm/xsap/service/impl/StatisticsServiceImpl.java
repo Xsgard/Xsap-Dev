@@ -185,7 +185,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         } else if (vo.getUnit() == 2) {
             return classCostHandler(vo.getYearOfSelect(), vo.getUnit());
         } else {
-            return classCostMonthOrSeasonOrYear(vo);
+            return classCostHandler(vo);
         }
     }
 
@@ -305,30 +305,110 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = 0; i < 12; i++) {
             time.add((i + 1) + "月");
             LocalDateTime endTime = startDateTime.plusMonths(1);
-            List<TeacherConsumeVo> teacherConsume = consumeRecordService.getTeacherConsume(startDateTime, endTime);
-            teacherConsume.forEach(item -> {
-                if (dataMap.containsKey(item.getTeacherName())) {
-                    TempList tempList = dataMap.get(item.getTeacherName());
-                    tempList.getCountChanges().add(item.getCountChange());
-                    tempList.getMoneyCosts().add(item.getMoneyCost() == null ? null : item.getMoneyCost().floatValue());
-                } else {
-                    TempList tempList = new TempList();
-                    //
-                    List<Integer> counts = new ArrayList<>();
-                    counts.add(item.getCountChange());
-                    //
-                    List<Float> moneys = new ArrayList<>();
-                    moneys.add(item.getMoneyCost() == null ? null : item.getMoneyCost().floatValue());
-                    //
-                    tempList.setCountChanges(counts);
-                    tempList.setMoneyCosts(moneys);
-                    dataMap.put(item.getTeacherName(), tempList);
-                }
-            });
+            teacherConsumeVoHandler(startDateTime, dataMap, endTime);
             startDateTime = startDateTime.plusMonths(1);
             if (startDateTime.isAfter(now))
                 break;
         }
+        return getClassCostVo(vo, data, data2, tName, time, dataMap);
+    }
+
+    /**
+     * 按季度课消统计
+     *
+     * @param year 查找年份
+     * @param unit 标志为（季度）重载
+     * @return IndexAddAndStreamInfoVo
+     */
+    private ClassCostVo classCostHandler(Integer year, Integer unit) {
+        ClassCostVo vo = new ClassCostVo();
+        vo.setTitle("老师课时消费季度统计");
+        vo.setXname("季度");
+        List<List<Integer>> data = new ArrayList<>();
+        List<List<Float>> data2 = new ArrayList<>();
+        List<String> tName = new ArrayList<>();
+        List<String> time = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(year, 1, 1), startTime);
+        Map<String, TempList> dataMap = new HashMap<>();
+        for (int i = 0; i < 4; i++) {
+            time.add((i + 1) + "季");
+            LocalDateTime endTime = startDateTime.plusMonths(3);
+            teacherConsumeVoHandler(startDateTime, dataMap, endTime);
+            startDateTime = startDateTime.plusMonths(3);
+            if (startDateTime.isAfter(now))
+                break;
+        }
+        return getClassCostVo(vo, data, data2, tName, time, dataMap);
+    }
+
+    /**
+     * 按年份课消统计
+     *
+     * @param vo 封装的统计条件
+     * @return IndexAddAndStreamInfoVo
+     */
+    private ClassCostVo classCostHandler(StatisticsOfCardCostVo vo) {
+        ClassCostVo costVo = new ClassCostVo();
+        costVo.setTitle("老师课时消费月统计");
+        costVo.setXname("月");
+        List<List<Integer>> data = new ArrayList<>();
+        List<List<Float>> data2 = new ArrayList<>();
+        List<String> tName = new ArrayList<>();
+        List<String> time = new ArrayList<>();
+        //
+        LocalDateTime now = LocalDateTime.now();
+        //
+        LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(vo.getBeginYear(), 1, 1), startTime);
+        Map<String, TempList> dataMap = new HashMap<>();
+        for (int i = vo.getBeginYear(); i < vo.getEndYear(); i++) {
+            time.add(String.valueOf(i));
+            LocalDateTime endTime = startDateTime.plusYears(1);
+            teacherConsumeVoHandler(startDateTime, dataMap, endTime);
+            startDateTime = startDateTime.plusYears(1);
+            if (startDateTime.isAfter(now))
+                break;
+        }
+        return getClassCostVo(costVo, data, data2, tName, time, dataMap);
+    }
+
+    private void teacherConsumeVoHandler(LocalDateTime startDateTime, Map<String, TempList> dataMap, LocalDateTime endTime) {
+        List<TeacherConsumeVo> teacherConsume = consumeRecordService.getTeacherConsume(startDateTime, endTime);
+        teacherConsume.forEach(item -> {
+            if (dataMap.containsKey(item.getTeacherName())) {
+                TempList tempList = dataMap.get(item.getTeacherName());
+                tempList.getCountChanges().add(item.getCountChange());
+                tempList.getMoneyCosts().add(item.getMoneyCost() == null ? null : item.getMoneyCost().floatValue());
+            } else {
+                TempList tempList = new TempList();
+                //
+                List<Integer> counts = new ArrayList<>();
+                counts.add(item.getCountChange());
+                //
+                List<Float> moneys = new ArrayList<>();
+                moneys.add(item.getMoneyCost() == null ? null : item.getMoneyCost().floatValue());
+                //
+                tempList.setCountChanges(counts);
+                tempList.setMoneyCosts(moneys);
+                dataMap.put(item.getTeacherName(), tempList);
+            }
+        });
+    }
+
+    /**
+     * 填充数据
+     *
+     * @param vo      封装的查询条件
+     * @param data    老师的课消次数集合
+     * @param data2   老师的课消金额集合
+     * @param tName   老师名字集合
+     * @param time    X轴
+     * @param dataMap 从数据库查询出来的数据封装进集合
+     * @return ClassCostVo 封装的数据返回对象
+     */
+    private ClassCostVo getClassCostVo(ClassCostVo vo, List<List<Integer>> data, List<List<Float>> data2, List<String> tName, List<String> time, Map<String, TempList> dataMap) {
         Set<String> keySet = dataMap.keySet();
         for (String s : keySet) {
             TempList tempList = dataMap.get(s);
@@ -343,28 +423,4 @@ public class StatisticsServiceImpl implements StatisticsService {
         vo.setData2(data2);
         return vo;
     }
-
-    /**
-     * 按季度课消统计
-     *
-     * @param year 查找年份
-     * @param unit 标志为（季度）重载
-     * @return IndexAddAndStreamInfoVo
-     */
-    private ClassCostVo classCostHandler(Integer year, Integer unit) {
-
-        return null;
-    }
-
-    /**
-     * 按年份课消统计
-     *
-     * @param vo 封装的统计条件
-     * @return IndexAddAndStreamInfoVo
-     */
-    private ClassCostVo classCostHandler(StatisticsOfCardCostVo vo) {
-
-        return null;
-    }
-
 }
