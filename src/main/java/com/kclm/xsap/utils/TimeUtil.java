@@ -11,7 +11,7 @@ import java.time.LocalTime;
  * @date 2023/8/3 19:15
  */
 public class TimeUtil {
-    public static LocalDateTime timeSub(LocalDateTime time, Integer day) {
+    public static LocalDateTime timeSubDays(LocalDateTime time, Integer day) {
         return time.plusDays(day.longValue());
     }
 
