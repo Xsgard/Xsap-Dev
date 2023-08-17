@@ -14,6 +14,7 @@ import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.ConsumeFormVo;
+import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -336,6 +337,33 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         }).collect(Collectors.toList());
         //遍历调用单个扣费
         voList.forEach(this::consumeEnsure);
+    }
+
+    @Override
+    public List<ScheduleForConsumeSearchVo> getForConsumeSearch() {
+        //当前时间
+        LocalDateTime now = LocalDateTime.now();
+        //两周前的时间
+        LocalDateTime start = now.minusDays(14);
+        //查询两周内的排课记录
+        LambdaQueryWrapper<ScheduleRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.between(ScheduleRecordEntity::getCreateTime, start, now);
+        List<ScheduleRecordEntity> schedules = scheduleRecordService.list(queryWrapper);
+        //对预约记录集合处理
+        return schedules.stream().map(item -> {
+            //查询课程信息
+            CourseEntity course = courseService.getById(item.getCourseId());
+            //查询老师信息
+            EmployeeEntity teacher = employeeService.getById(item.getTeacherId());
+            //返回信息实体
+            ScheduleForConsumeSearchVo vo = new ScheduleForConsumeSearchVo();
+            vo.setScheduleId(item.getId());
+            vo.setCourseName(course.getName());
+            vo.setTeacherName(teacher.getName());
+            vo.setClassDateTime(TimeUtil.timeTransfer(item.getStartDate(), item.getClassTime()));
+
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**
