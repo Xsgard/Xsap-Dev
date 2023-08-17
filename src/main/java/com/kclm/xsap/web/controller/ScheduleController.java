@@ -13,6 +13,7 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.ConsumeFormVo;
+import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -135,5 +136,12 @@ public class ScheduleController {
             return R.error(e.getMsg());
         }
         return R.ok("一件扣费成功！");
+    }
+
+    @GetMapping("/toSearch.do")
+    @ResponseBody
+    public R toSearch() {
+        List<ScheduleForConsumeSearchVo> forConsumeSearch = scheduleRecordService.getForConsumeSearch();
+        return R.ok().put("value", forConsumeSearch);
     }
 }
