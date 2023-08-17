@@ -7,6 +7,7 @@ import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -151,5 +152,15 @@ public class CardController {
             return R.error(e.getMsg());
         }
         return R.ok("充值成功！");
+    }
+
+    @PostMapping("/consumeOpt.do")
+    @ResponseBody
+    public R consumeOpt(@Valid ConsumeFormVo vo, BindingResult bindingResult) {
+        //BeanValidation
+        ValidationUtil.getErrors(bindingResult);
+
+
+        return null;
     }
 }
