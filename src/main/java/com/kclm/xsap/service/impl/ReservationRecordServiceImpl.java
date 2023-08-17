@@ -71,7 +71,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(reservationRecord.getScheduleId());
         //课程实体信息
         CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
-        LocalDateTime valDay = TimeUtil.timeSub(memberBindRecord.getCreateTime(), memberBindRecord.getValidDay());
+        LocalDateTime valDay = TimeUtil.timeSubDays(memberBindRecord.getCreateTime(), memberBindRecord.getValidDay());
         //校验卡是否在有效期
         if (valDay.isBefore(LocalDateTime.now()))
             throw new BusinessException("该卡已不在有效期！");

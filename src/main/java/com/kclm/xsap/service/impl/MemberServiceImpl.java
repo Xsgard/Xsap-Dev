@@ -86,7 +86,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
         return bindRecordEntities.stream().map((item) -> {
             MemberCardEntity card = cardService.getById(item.getCardId());
-            LocalDateTime endTime = TimeUtil.timeSub(item.getCreateTime(), item.getValidDay());
+            LocalDateTime endTime = TimeUtil.timeSubDays(item.getCreateTime(), item.getValidDay());
             return new MemberCardDTO(
                     item.getId(), card.getName(), card.getType(),
                     item.getValidCount(), item.getValidDay(), endTime,

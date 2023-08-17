@@ -10,7 +10,9 @@ import com.kclm.xsap.entity.*;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
+import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +38,6 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
     private MemberCardDao cardDao;
     private MemberBindRecordDao memberBindRecordDao;
-    private MemberBindRecordService bindRecordService;
     private CourseCardService courseCardService;
     private CourseService courseService;
     private ScheduleRecordService scheduleRecordService;
@@ -53,8 +54,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     }
 
     @Autowired
-    private void setService(MemberBindRecordService bindRecordService,
-                            CourseCardService courseCardService,
+    private void setService(CourseCardService courseCardService,
                             MemberCardService memberCardService,
                             MemberBindRecordService memberBindRecordService,
                             CourseService courseService,
@@ -66,7 +66,6 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         this.consumeRecordService = consumeRecordService;
         this.memberCardService = memberCardService;
         this.courseService = courseService;
-        this.bindRecordService = bindRecordService;
         this.courseCardService = courseCardService;
         this.memberLogService = memberLogService;
         this.memberBindRecordService = memberBindRecordService;
@@ -99,7 +98,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MemberBindRecordEntity::getMemberId, bindRecordEntity.getMemberId())
                 .and(wrapper -> wrapper.eq(MemberBindRecordEntity::getCardId, bindRecordEntity.getCardId()));
-        List<MemberBindRecordEntity> list = bindRecordService.list(queryWrapper);
+        List<MemberBindRecordEntity> list = memberBindRecordService.list(queryWrapper);
         if (!list.isEmpty()) {
             throw new BusinessException("此卡已经绑定到该用户，请勿重复绑定！");
         }
@@ -109,7 +108,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         //加上会员卡默认天数
         bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
         bindRecordEntity.setCreateTime(LocalDateTime.now());
-        bindRecordService.save(bindRecordEntity);
+        memberBindRecordService.save(bindRecordEntity);
 
         String operateType = "绑卡操作";
         if (info.getReceivedMoney() != null) {
@@ -171,9 +170,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     @Override
     @Transactional
     public void activeOpt(Long memberId, Long bindId, Integer status, String operatorName) {
-        MemberBindRecordEntity record = bindRecordService.getById(bindId);
+        MemberBindRecordEntity record = memberBindRecordService.getById(bindId);
         record.setActiveStatus(status);
-        boolean b = bindRecordService.updateById(record);
+        boolean b = memberBindRecordService.updateById(record);
         if (!b)
             throw new BusinessException("修改状态失败！");
         MemberLogEntity log = new MemberLogEntity();
@@ -216,6 +215,64 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void consumeOpt(ConsumeFormVo vo) {
+        if (vo.getCardDayChange() < 0) {
+            throw new BusinessException("您输入的扣除课次不能 小于0");
+        }
+        if (vo.getAmountOfConsumption().doubleValue() < 0)
+            throw new BusinessException("您输入的扣除金额不能 小于0");
+        MemberBindRecordEntity bindRecord = memberBindRecordService.getById(vo.getCardBindId());
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime validDateTime = TimeUtil.timeSubDays(bindRecord.getCreateTime(), bindRecord.getValidDay());
+        //有效期判断
+        if (validDateTime.isBefore(now))
+            throw new BusinessException("该会员卡已过有效期！");
+        //剩余卡次判断
+        if (bindRecord.getValidCount() - vo.getCardCountChange() < 0)
+            throw new BusinessException("该会员卡剩余课次不足，请先充值！");
+        //减去扣除课次
+        bindRecord.setValidCount(bindRecord.getValidCount() - vo.getCardCountChange());
+        //设置修改时间
+        bindRecord.setLastModifyTime(LocalDateTime.now());
+        //更新信息
+        boolean b = memberBindRecordService.updateById(bindRecord);
+        if (!b)
+            throw new BusinessException("扣费失败，请重试或联系管理员！");
+        //日志信息
+        MemberLogEntity log = new MemberLogEntity();
+        log.setType("会员上课扣费操作");
+        log.setInvolveMoney(vo.getAmountOfConsumption());
+        log.setOperator(vo.getOperator());
+        log.setMemberBindId(vo.getCardBindId());
+        log.setCreateTime(LocalDateTime.now());
+        log.setCardCountChange(vo.getCardCountChange());
+        log.setCardDayChange(vo.getCardDayChange());
+        log.setNote(vo.getNote());
+        log.setCardActiveStatus(1);
+        //保存日志信息
+        boolean save = memberLogService.save(log);
+        if (!save)
+            throw new BusinessException("保存日志失败！");
+        //消费记录
+        ConsumeRecordEntity consumeRecord = new ConsumeRecordEntity();
+        consumeRecord.setOperateType("会员上课扣费操作");
+        consumeRecord.setCardCountChange(vo.getCardCountChange());
+        consumeRecord.setCardDayChange(0);
+        consumeRecord.setMoneyCost(vo.getAmountOfConsumption());
+        consumeRecord.setOperator(vo.getOperator());
+        consumeRecord.setNote(vo.getNote());
+        consumeRecord.setMemberBindId(vo.getCardBindId());
+        consumeRecord.setCreateTime(LocalDateTime.now());
+        consumeRecord.setLogId(log.getId());
+        consumeRecord.setScheduleId(vo.getScheduleId());
+        //保存消费记录
+        boolean saved = consumeRecordService.save(consumeRecord);
+        if (!saved)
+            throw new BusinessException("消费记录保存失败！");
     }
 
     /**
