@@ -45,4 +45,6 @@ public interface MemberService extends IService<MemberEntity> {
     List<ClassInfoVo> getClassInfoList(Long memberId);
 
     MemberCountVo queryMemberBetweenByCondition(LocalDateTime start, LocalDateTime end);
+
+    void deleteMember(Long memberId);
 }

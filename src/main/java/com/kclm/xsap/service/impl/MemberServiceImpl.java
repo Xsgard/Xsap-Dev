@@ -345,6 +345,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     @Override
+    public void deleteMember(Long memberId) {
+
+    }
+
+    @Override
     public List<MemberEntity> getMemberList() {
         List<MemberEntity> memberList = memberService.getMemberList();
         return null;
