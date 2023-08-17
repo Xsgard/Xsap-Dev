@@ -113,6 +113,7 @@ public class MemberController {
         return new R().put("data", memberEntity);
     }
 
+    //修改会员信息
     @PostMapping("/memberEdit.do")
     @ResponseBody
     public R memberEdit(@Valid MemberEntity member, BindingResult bindingResult) {
@@ -124,17 +125,19 @@ public class MemberController {
         }
     }
 
-
+    //删除会员
     @PostMapping("/deleteOne.do")
     @ResponseBody
     public R deleteMember(Long id) {
-        boolean b = memberService.removeById(id);
-        if (b)
-            return R.ok();
-        else
-            return R.error();
+        try {
+            memberService.deleteMember(id);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("删除成功！");
     }
 
+    //消费记录
     @PostMapping("/consumeInfo.do")
     @ResponseBody
     public R getConsumeInfo(Long id) {
@@ -142,6 +145,7 @@ public class MemberController {
         return R.ok().put("data", memberConsumeList);
     }
 
+    //预约记录
     @PostMapping("/reserveInfo.do")
     @ResponseBody
     public R reserveInfo(Long id) {
@@ -153,6 +157,7 @@ public class MemberController {
         }
     }
 
+    //上课信息
     @PostMapping("/classInfo.do")
     @ResponseBody
     public R classInfo(Long id) {
