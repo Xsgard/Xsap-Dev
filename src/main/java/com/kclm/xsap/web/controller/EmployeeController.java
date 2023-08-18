@@ -12,6 +12,7 @@ import com.kclm.xsap.vo.TeacherClassRecordVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -53,8 +54,17 @@ public class EmployeeController {
 
     private ClassRecordService classRecordService;
 
+    private ReservationRecordService reservationRecordService;
+
     @Autowired
-    private void setApplicationContext(EmployeeService employeeService) {
+    private void setApplicationContext(EmployeeService employeeService, MemberService memberService,
+                                       ScheduleRecordService scheduleRecordService, CourseService courseService,
+                                       ClassRecordService classRecordService, ReservationRecordService reservationRecordService) {
+        this.memberService = memberService;
+        this.scheduleRecordService = scheduleRecordService;
+        this.courseService = courseService;
+        this.classRecordService = classRecordService;
+        this.reservationRecordService = reservationRecordService;
         this.employeeService = employeeService;
     }
 
@@ -410,6 +420,114 @@ public class EmployeeController {
         return R.ok().put("data", teacherClassRecordVos);
     }
 
+    /**
+     * 删除老师
+     * 1.删除成功。该老师已没有排课记录和计划）
+     * 2.删除成功。该老师存在未完成的排课计划，但尚没有预约记录，
+     * 2.1该老师没有已完成的排课记录，删除该老师信息后未完成的排课计划也会被删除
+     * 2.2该老师存在已完成的排课记录，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留
+     * 3.删除失败。该老师存在未完成的排课记录且有预约，无法删除该老师
+     * 4.删除成功。该老师没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录
+     *
+     * @param id 老师id
+     * @return r -> 删除结果和信息
+     */
+    //全在控制层异常都不好抛！！！找时间改回来！todo
+    @PostMapping("/deleteOne.do")
+    @ResponseBody
+    @Transactional
+    public R deleteOne(@RequestParam("id") Long id) {
+        log.debug("\n==>前端传入的要删除的老师id：==>{}", id);
+        //检查该老师的排课计划表
+        List<ScheduleRecordEntity> allScheduleForCurrentTeacher = scheduleRecordService.list(new QueryWrapper<ScheduleRecordEntity>()
+                .select("id", "order_nums", "start_date", "class_time").eq("teacher_id", id));
+        log.debug("\n==>打印该老师的所有排课计划表==>{}", allScheduleForCurrentTeacher);
+        //当该老师没有排课记录和计划时,直接删除老师信息
+        if (allScheduleForCurrentTeacher.isEmpty()) {
+            log.debug("\n==>该老师已没有排课记录和计划,删除成功！！");
+            boolean isRemove = employeeService.removeById(id);
+            if (isRemove) {
+                log.debug("\n==>删除成功@！");
+                return R.ok("该老师已没有排课记录和计划");
+            } else {
+                log.debug("\n==>删除老师失败");
+                throw new RuntimeException("删除失败！");
+            }
+        } else {
+            //该老师有排课记录
+            //取出该老师所有还未完成的排课计划
+            List<ScheduleRecordEntity> allScheduleAfterThisMoment = allScheduleForCurrentTeacher.stream().filter(schedule -> {
+                //获取上课精确完整日期
+                LocalDateTime classStartDateTime = LocalDateTime.of(schedule.getStartDate(), schedule.getClassTime());
+                //过滤留下该老师所有还未完成的排课计划【即此时此刻之后的排课计划】
+                return classStartDateTime.isAfter(LocalDateTime.now());
+            }).collect(Collectors.toList());
+
+            if (allScheduleAfterThisMoment.isEmpty()) {
+                //该老师没有未完成的排课计划，删除该老师信息后保留已有的排课记录
+                boolean isRemove = employeeService.removeById(id);
+                log.debug("\n==>该老师没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录");
+                if (isRemove) {
+                    log.debug("\n==>删除老师信息成功!");
+                    return R.ok("该老师存在排课记录但没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录");
+                } else {
+                    log.debug("\n==>删除老师失败");
+                    throw new RuntimeException("删除失败！");
+                }
+            } else {
+                //该老师存在未完成的排课记录
+                //获取所有未完成的排课计划的预约人数的和
+                int sum = allScheduleAfterThisMoment.stream().mapToInt(ScheduleRecordEntity::getOrderNums).sum();
+                log.debug("\n==>打印未完成的排课计划的预约人数之和==>{}", sum);
+                if (sum > 0) {
+                    //未完成的计划中已有会员进行预约，无法删除
+                    log.debug("\n==>该老师未完成的排课计划中已有预约，预约总数：==>{}", sum);
+                    return R.error("该老师存在未完成的排课记录且有预约，无法删除该老师");
+                } else {
+                    //获取未开始的全部排课的id-list
+                    List<Long> scheduleIds = allScheduleAfterThisMoment.stream().map(ScheduleRecordEntity::getId).collect(Collectors.toList());
+                    if (allScheduleAfterThisMoment.size() == allScheduleForCurrentTeacher.size()) {
+                        //该老师只有未完成的排课记录，删除该老师信息后未完成的排课计划也会被删除，且没有预约记录
+                        //删除老师
+                        boolean isRemoveTeacher = employeeService.removeById(id);
+                        //删除预约后取消预约导致预约人数显示0 的预约记录
+                        reservationRecordService.remove(new QueryWrapper<ReservationRecordEntity>().in("schedule_id", scheduleIds));
+                        //最后删除该老师的全部排课记录【因为没有已完成的记录】
+                        boolean isRemoveSchedule = scheduleRecordService.remove(new QueryWrapper<ScheduleRecordEntity>().eq("teacher_id", id));
+                        if (isRemoveSchedule && isRemoveTeacher) {
+                            log.debug("\n==>删除成功");
+                            return R.ok("该老师只有未完成的排课记录，删除该老师信息后未完成的排课计划也会被删除");
+                        } else {
+                            log.debug("\n==>删除老师信息或该老师排课记录失败");
+                            //抛出异常回滚
+                            throw new RRException("删除老师信息或该老师排课记录失败", 22405);
+                        }
+                    } else {
+
+                        //该老师有已完成和未完成的排课记录，但未完成的排课计划没有预约记录 ，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留
+                        //首先通过老师id删除该老师
+                        boolean isRemoveTeacher = employeeService.removeById(id);
+                        //再通过该老师的所有未开始的全部排课计划的排课id删除所有未开始的排课的预约记录【目的是删除有预约但取消了的记录，此时预约人数未0，不用担心删错预约记录；而先删预约记录为了避免外键冲突】
+                        boolean isRemoveReserveOfCancel = reservationRecordService.remove(new QueryWrapper<ReservationRecordEntity>().in("schedule_id", scheduleIds));
+                        if (isRemoveReserveOfCancel) {
+                            log.debug("\n==>删除了这些预约id==>{}在预约该课程后取消的用户", scheduleIds);
+                        }
+                        //最后删除这些未完成的排课记录【此时已经没有了外键约束】
+                        boolean isRemoveSchedule = scheduleRecordService.removeByIds(scheduleIds);
+
+                        if (isRemoveSchedule && isRemoveTeacher) {
+                            log.debug("\n==>删除成功！");
+                            return R.ok("该老师存在未完成的排课计划，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留");
+                        } else {
+                            log.debug("\n==>删除老师信息或该老师排课记录失败");
+                            //抛出异常 回滚
+                            throw new RRException("删除老师信息或该老师排课记录失败", 22406);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * 头像更新
