@@ -67,33 +67,37 @@ public class IndexPageServiceImpl implements IndexPageService {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setXname("日");
         int dayOfMonth = end.getDayOfMonth();
+        //
         List<String> time = new ArrayList<>();
+        //
         Integer[] arr = new Integer[dayOfMonth];
+        Integer[] arr2 = new Integer[dayOfMonth];
+        //
         for (int i = 1; i <= dayOfMonth; i++) {
             time.add(String.valueOf(i));
             arr[i - 1] = 0;
+            arr2[i - 1] = 0;
         }
-        List<Integer> dataArr = new ArrayList<>(Arrays.asList(arr));
-        vo.setTime(time);
-        List<Integer> data = memberList.stream()
-                .filter(item -> item.getIsDeleted() == 0)
-                .map(item -> {
-                    int day = item.getCreateTime().getDayOfMonth();
-                    dataArr.set(day - 1, dataArr.get(day) + 1);
-                    return dataArr;
-                }).collect(Collectors.toList()).get(0);
-
-        List<Integer> dataArr2 = new ArrayList<>(Arrays.asList(arr));
-
-        List<Integer> data2 = memberList.stream()
-                .filter(item -> item.getIsDeleted() == 1)
-                .map(item -> {
-                    int day = item.getCreateTime().getDayOfMonth();
-                    dataArr2.set(day - 1, dataArr2.get(day) + 1);
-                    return dataArr2;
-                }).collect(Collectors.toList()).get(0);
+        //初始化数据
+        List<Integer> data = Arrays.asList(arr);
+        List<Integer> data2 = Arrays.asList(arr2);
+        //过滤未删除的会员数据
+        memberList.stream()
+                .filter(m -> m.getIsDeleted() == 0)
+                .forEach(item -> {
+                    int index = item.getCreateTime().getDayOfMonth() - 1;
+                    data.set(index, data.get(index) + 1);
+                });
+        //过滤删除的会员数据
+        memberList.stream()
+                .filter(m -> m.getIsDeleted() == 1)
+                .forEach(item -> {
+                    int index = item.getLastModifyTime().getDayOfMonth() - 1;
+                    data2.set(index, data2.get(index) + 1);
+                });
         vo.setData(data);
         vo.setData2(data2);
+        vo.setTime(time);
         return vo;
     }
 

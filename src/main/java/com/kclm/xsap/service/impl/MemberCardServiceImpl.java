@@ -405,6 +405,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      * @param cardId 会员卡Id
      */
     @Override
+    @Transactional
     public void deleteOneCard(Long cardId) {
         //查询绑定该卡的绑定记录
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();

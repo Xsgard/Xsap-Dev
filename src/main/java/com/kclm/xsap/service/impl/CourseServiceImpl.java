@@ -112,6 +112,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
      * @param cardListStr cardId数组
      */
     @Override
+    @Transactional
     public void addCourse(CourseEntity course, Long[] cardListStr) {
         //保存课程实体信息
         course.setCreateTime(LocalDateTime.now());
@@ -136,6 +137,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
      * @param courseId 课程Id
      */
     @Override
+    @Transactional
     public void deleteOne(Long courseId) {
         LambdaQueryWrapper<ScheduleRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ScheduleRecordEntity::getCourseId, courseId);
