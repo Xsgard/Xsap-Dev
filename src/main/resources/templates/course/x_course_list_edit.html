@@ -61,12 +61,15 @@
                         <!-- 隐藏域，课程 id -->
                         <div class="form-group">
                             <label class="col-sm-2 control-label"><i class="red">*</i>课程名称</label>
-                            <div class="col-sm-10">
+                            <div class="col-sm-6">
                                 <input type="hidden" name="id" value="1" th:value="${courseInfo.id}"/>
 
                                 <input type="text" class="form-control" id="course_name" placeholder="请输入课程名称"
                                        value="钢琴课" th:value="${courseInfo.name}" name="name">
                                 <span class="text-danger">[[${NAME_EXIST}]]</span>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="control-label" tip="name"></label>
                             </div>
                         </div>
                         <!--课程时长-->
@@ -75,6 +78,9 @@
                             <div class="col-sm-3 col-md-2">
                                 <input type="number" class="form-control" name="duration" value="45" min="0"
                                        th:value="${courseInfo.duration}">
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="control-label" tip="duration"></label>
                             </div>
                         </div>
 
@@ -85,6 +91,9 @@
                                 <input type="number" class="form-control" name="contains" value="1" min="0"
                                        th:value="${courseInfo.contains}">
                             </div>
+                            <div class="col-sm-4">
+                                <label class="control-label" tip="contains"></label>
+                            </div>
                         </div>
 
                         <!--每节消耗次数-->
@@ -93,6 +102,9 @@
                             <div class="col-sm-3 col-md-2">
                                 <input type="number" class="form-control" name="timesCost" value="0" min="0" max="5"
                                        th:value="${courseInfo.timesCost}">
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="control-label" tip="timeCost"></label>
                             </div>
                         </div>
 
@@ -104,6 +116,9 @@
                                     <input type="text" name="color" value="" th:value="${courseInfo.color}"
                                            class="form-control" readonly id="color_picker_kc"/>
                                 </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <label class="control-label" tip="color"></label>
                             </div>
                         </div>
 
