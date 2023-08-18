@@ -153,4 +153,16 @@ public class ScheduleController {
         List<ScheduleForConsumeSearchVo> forConsumeSearch = scheduleRecordService.getForConsumeSearch();
         return R.ok().put("value", forConsumeSearch);
     }
+
+    //删除排课计划
+    @PostMapping("/deleteOne.do")
+    @ResponseBody
+    public R deleteOne(Long id) {
+        try {
+            scheduleRecordService.deleteScheduleById(id);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("排课计划删除失败！");
+    }
 }
