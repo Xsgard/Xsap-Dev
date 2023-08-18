@@ -43,7 +43,10 @@ public class GlobalSetController {
     @PostMapping("/globalSetUpdate.do")
     @ResponseBody
     public R updateGlobalSet(@Valid GlobalReservationSetEntity setEntity, BindingResult bindingResult) {
-        ValidationUtil.getErrors(bindingResult);
+        //BeanValidation
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         boolean b = globalReservationSetService.updateById(setEntity);
         if (b)
             return R.ok("修改成功！");

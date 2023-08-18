@@ -152,7 +152,9 @@ public class CardController {
     @ResponseBody
     public R rechargeOpt(@Valid RechargeRecordEntity rechargeRecord, BindingResult bindingResult) {
         //BeanValidation
-        ValidationUtil.getErrors(bindingResult);
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         try {
             rechargeRecordService.memberRecharge(rechargeRecord);
         } catch (BusinessException e) {
@@ -178,7 +180,9 @@ public class CardController {
     @ResponseBody
     public R consumeOpt(@Valid ConsumeFormVo vo, BindingResult bindingResult) {
         //BeanValidation
-        ValidationUtil.getErrors(bindingResult);
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         try {
             memberCardService.consumeOpt(vo);
         } catch (BusinessException e) {

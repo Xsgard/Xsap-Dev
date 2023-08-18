@@ -46,7 +46,9 @@ public class CardBindController {
     @ResponseBody
     public R memberBind(@Valid BindCardInfoDto infoDto, BindingResult bindingResult) {
         //BeanValidation
-        ValidationUtil.getErrors(bindingResult);
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         //绑定会员卡信息
         try {
             memberCardService.memberBind(infoDto, bindingResult);

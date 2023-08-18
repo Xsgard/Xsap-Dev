@@ -60,6 +60,7 @@ public class CourseController {
         return "course/x_course_list_add";
     }
 
+    //获取课程信息
     @GetMapping("/toSearch.do")
     @ResponseBody
     public R toSearch() {
@@ -67,6 +68,7 @@ public class CourseController {
         return R.ok().put("value", courseEntities);
     }
 
+    //获取课程信息
     @PostMapping("/courseList.do")
     @ResponseBody
     public R getCourseList() {
@@ -74,6 +76,7 @@ public class CourseController {
         return R.ok().put("data", courseEntities);
     }
 
+    //删除课程信息
     @PostMapping("/deleteOne.do")
     @ResponseBody
     public R deleteOneCourse(Long id) {
@@ -85,9 +88,10 @@ public class CourseController {
         return R.ok("删除成功！");
     }
 
+    //修改课程信息
     @PostMapping("/courseEdit.do")
     @ResponseBody
-    public R editCourse(@Valid CourseEntity course, Long[] cardListStr, Integer limitAgeRadio, Integer limitCountsRadio, BindingResult bindingResult) {
+    public R editCourse(@Valid CourseEntity course, BindingResult bindingResult, Long[] cardListStr, Integer limitAgeRadio, Integer limitCountsRadio) {
         //校验前端传入的数据
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
@@ -100,6 +104,7 @@ public class CourseController {
         }
     }
 
+    //添加课程
     @PostMapping("/courseAdd.do")
     @ResponseBody
     public R addCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
@@ -115,6 +120,7 @@ public class CourseController {
         }
     }
 
+    //根据Id获取课程信息
     @PostMapping("/getOneCourse.do")
     @ResponseBody
     public R getOneCourse(Long id) {
