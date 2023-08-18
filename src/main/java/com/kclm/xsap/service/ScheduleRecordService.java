@@ -38,4 +38,6 @@ public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
     void consumeEnsureAll(Long scheduleId, String operator);
 
     List<ScheduleForConsumeSearchVo> getForConsumeSearch();
+
+    void deleteScheduleById(Long scheduleId);
 }

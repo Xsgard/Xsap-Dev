@@ -378,6 +378,24 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     }
 
     /**
+     * 删除排课计划
+     *
+     * @param scheduleId 排课计划Id
+     */
+    @Override
+    public void deleteScheduleById(Long scheduleId) {
+        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
+                .eq(ReservationRecordEntity::getStatus, 1);
+        List<ReservationRecordEntity> reservations = reservationRecordService.list(queryWrapper);
+        if (!reservations.isEmpty())
+            throw new BusinessException("该排课计划已有预约记录，不能删除！");
+        boolean b = scheduleRecordService.removeById(scheduleId);
+        if (!b)
+            throw new BusinessException("排课计划删除失败！");
+    }
+
+    /**
      * 获取预约记录信息Dto
      *
      * @param scheduleId       预约记录Id
