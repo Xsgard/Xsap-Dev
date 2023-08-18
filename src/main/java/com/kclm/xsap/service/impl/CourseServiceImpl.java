@@ -125,6 +125,16 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
     }
 
     /**
+     * 删除课程
+     *
+     * @param courseId 课程Id
+     */
+    @Override
+    public void deleteOne(Long courseId) {
+
+    }
+
+    /**
      * 转换课程和卡号为 CourseCard
      *
      * @param course      课程实体

@@ -16,4 +16,6 @@ public interface CourseService extends IService<CourseEntity> {
     void updateCourse(CourseEntity course, Long[] cardListStr, Integer limitAgeRadio, Integer limitCountsRadio);
 
     void addCourse(CourseEntity course, Long[] cardListStr);
+
+    void deleteOne(Long courseId);
 }

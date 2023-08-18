@@ -417,10 +417,11 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         //获取会员卡实体信息
         MemberCardEntity card = memberCardService.getById(cardId);
         //设置为不激活
-        card.setStatus(1);
+        //card.setStatus(1);
         card.setLastModifyTime(LocalDateTime.now());
+        memberCardService.updateById(card);
         //保存信息
-        boolean save = memberCardService.updateById(card);
+        boolean save = memberCardService.removeById(card);
         if (!save)
             throw new BusinessException("删除会员卡失败！");
     }
