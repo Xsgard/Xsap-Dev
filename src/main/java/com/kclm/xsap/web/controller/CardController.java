@@ -1,5 +1,6 @@
 package com.kclm.xsap.web.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kclm.xsap.entity.EmployeeEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.RechargeRecordEntity;
@@ -70,7 +71,9 @@ public class CardController {
     @PostMapping("/cardList.do")
     @ResponseBody
     public R cardList() {
-        List<MemberCardEntity> cardEntityList = memberCardService.list();
+        LambdaQueryWrapper<MemberCardEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberCardEntity::getStatus, 0);
+        List<MemberCardEntity> cardEntityList = memberCardService.list(queryWrapper);
         return new R().setData(cardEntityList);
     }
 
