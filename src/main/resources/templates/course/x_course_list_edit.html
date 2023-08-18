@@ -354,11 +354,15 @@
                         setTimeout(function () {
                             window.location.href = '[[${#request.getContextPath()}]]/course/x_course_list.do';
                         }, 1000);
+                    } else if (data.code === 400) {
+                        let errors = data.errorMap;
+                        for (const key in errors) {
+                            $(`[tip=${key}]`).html("");
+                            //错误提示回显
+                            $("<span class='text-danger'>" + errors[key] + "</span>").appendTo($("[tip=" + key + "]"));
+                        }
                     } else {
-                        swal("更新失败！", data.msg, "error");
-                        // setTimeout(function () {
-                        //     window.location.reload();
-                        // }, 1000);
+                        swal("保存失败！", data.msg, "info");
                     }
                 },
                 error: function (data) {
