@@ -346,7 +346,45 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     @Override
     public void deleteMember(Long memberId) {
-
+        LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        //查询预约记录条件 --1.会员id --2.预约状态为1（有效）
+        queryWrapper.eq(ReservationRecordEntity::getMemberId, memberId)
+                .eq(ReservationRecordEntity::getStatus, 1);
+        //预约记录
+        List<ReservationRecordEntity> reservations = reservationRecordService.list(queryWrapper);
+        reservations.forEach(item -> {
+            //查询消费记录 是否有对应约课的消费记录
+            LambdaQueryWrapper<ConsumeRecordEntity> consumeWrapper = new LambdaQueryWrapper<>();
+            //查询条件 --1.排课计划Id  --2.绑卡Id
+            consumeWrapper.eq(ConsumeRecordEntity::getScheduleId, item.getScheduleId())
+                    .eq(ConsumeRecordEntity::getMemberBindId, item.getCardId());
+            //预约记录信息
+            ConsumeRecordEntity one = consumeRecordService.getOne(consumeWrapper);
+            //为空则没有消费
+            if (one == null) {
+                throw new BusinessException("该会员还有约课尚未完成扣费！");
+            }
+        });
+        LambdaQueryWrapper<MemberBindRecordEntity> wrapper = new LambdaQueryWrapper<>();
+        //查询该会员仍激活的会员卡
+        wrapper.eq(MemberBindRecordEntity::getMemberId, memberId)
+                .eq(MemberBindRecordEntity::getActiveStatus, 1);
+        //绑定的激活的会员卡信息
+        List<MemberBindRecordEntity> bindRecords = bindRecordService.list(wrapper);
+        //修改集合中绑定会员卡的状态
+        bindRecords = bindRecords.stream()
+                .peek(item -> {
+                    item.setActiveStatus(0);
+                    item.setLastModifyTime(LocalDateTime.now());
+                })
+                .collect(Collectors.toList());
+        boolean b = bindRecordService.updateBatchById(bindRecords);
+        if (!b)
+            throw new BusinessException("会员卡信息更新失败！");
+        //逻辑删除会员
+        boolean b1 = this.removeById(memberId);
+        if (!b1)
+            throw new BusinessException("会员卡删除失败！");
     }
 
     @Override
