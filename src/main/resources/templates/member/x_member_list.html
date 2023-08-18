@@ -195,7 +195,7 @@
                             var id = row.id;
                             var html = "<a href='#?id=" + id + "' onclick='saveID(" + id + ")' class='btn btn-success btn-xs edit'  data-toggle='modal' data-target='#edit_model'> 编辑 <i class='fa fa-edit'></i></a>&nbsp &nbsp"
                             html += "<a href='/member/x_member_list_details.do?id=" + id + "'  class='btn btn-primary btn-xs'> 详情 <i class='fa fa-eye'></i></a>&nbsp &nbsp"
-                            html += "<a href='#?id=" + id + "' onclick='deteleConfirm(" + id + ")'  class='delete btn btn-danger btn-xs' > 注销会员 <i class='fa fa-times'></i></a>"
+                            html += "<a href='#?id=" + id + "' onclick='deleteConfirm(" + id + ")'  class='delete btn btn-danger btn-xs' > 注销会员 <i class='fa fa-times'></i></a>"
                             return html;
                         }
                     }],
@@ -242,7 +242,7 @@
     });
 
     /* 删除提示 */
-    function deteleConfirm(tid) {
+    function deleteConfirm(tid) {
         console.log(tid);
         swal({
             title: "注销确认",
@@ -264,8 +264,8 @@
                         window.location.href = "[[${#request.getContextPath()}]]/member/x_member_list.do";
                     }, 1000);
                 },
-                error: function () {
-                    swal("注销失败！", "未知错误。。。", "info");
+                error: function (data) {
+                    swal("注销失败！", data.msg, "error");
                 }
             });
         });
