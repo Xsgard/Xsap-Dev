@@ -4,6 +4,7 @@ import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.IndexPageService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.vo.IndexHomeDateVo;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,12 +65,12 @@ public class IndexController {
     @PostMapping("/homePageInfo.do")
     @ResponseBody
     public R getHomePageInfo() {
-
-        return null;
+        IndexHomeDateVo homeDateVo = indexPageService.getHomeDateVo();
+        return R.ok().put("data", homeDateVo);
     }
 
     /**
-     * TODO 每月会员新增流失图
+     * 每月会员新增流失图
      *
      * @return R
      */
