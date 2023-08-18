@@ -6,9 +6,11 @@ import com.kclm.xsap.dao.CourseCardDao;
 import com.kclm.xsap.dao.CourseDao;
 import com.kclm.xsap.entity.CourseCardEntity;
 import com.kclm.xsap.entity.CourseEntity;
+import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.CourseCardService;
 import com.kclm.xsap.service.CourseService;
+import com.kclm.xsap.service.ScheduleRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +32,12 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
 
     private CourseCardService courseCardService;
 
+    private ScheduleRecordService scheduleRecordService;
+
     @Autowired
-    private void setApplicationContext(CourseCardDao courseCardDao, CourseCardService courseCardService) {
+    private void setApplicationContext(CourseCardDao courseCardDao, CourseCardService courseCardService,
+                                       ScheduleRecordService scheduleRecordService) {
+        this.scheduleRecordService = scheduleRecordService;
         this.courseCardDao = courseCardDao;
         this.courseCardService = courseCardService;
     }
@@ -131,7 +137,14 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
      */
     @Override
     public void deleteOne(Long courseId) {
-
+        LambdaQueryWrapper<ScheduleRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ScheduleRecordEntity::getCourseId, courseId);
+        List<ScheduleRecordEntity> schedules = scheduleRecordService.list(queryWrapper);
+        if (!schedules.isEmpty())
+            throw new BusinessException("该课程已有排课计划，无法删除！");
+        boolean b = this.removeById(courseId);
+        if (!b)
+            throw new BusinessException("删除课程失败，请重试或与管理员联系！");
     }
 
     /**
