@@ -407,7 +407,7 @@
                             } else if (data.code === 400) {
                                 let errors = data.errorMap;
                                 for (const key in errors) {
-                                    $('[tip=${key}]').html("");
+                                    $(`[tip=${key}]`).html("");
                                     //错误提示回显
                                     $("<span class='text-danger'>" + errors[key] + "</span>").appendTo($("[tip=" + key + "]"));
                                 }
