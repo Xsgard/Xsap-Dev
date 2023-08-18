@@ -1,6 +1,8 @@
 package com.kclm.xsap.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.kclm.xsap.dao.MemberDao;
+import com.kclm.xsap.dao.ReservationRecordDao;
 import com.kclm.xsap.entity.MemberBindRecordEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.MemberEntity;
@@ -9,6 +11,7 @@ import com.kclm.xsap.service.IndexPageService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.RechargeRecordService;
+import com.kclm.xsap.vo.IndexHomeDateVo;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +31,20 @@ import java.util.stream.Collectors;
  */
 @Service
 public class IndexPageServiceImpl implements IndexPageService {
+    private MemberDao memberDao;
+    private ReservationRecordDao reservationRecordDao;
+
     private MemberCardService memberCardService;
 
     private MemberBindRecordService memberBindRecordService;
 
     private RechargeRecordService rechargeRecordService;
+
+    @Autowired
+    private void setDao(MemberDao memberDao, ReservationRecordDao reservationRecordDao) {
+        this.reservationRecordDao = reservationRecordDao;
+        this.memberDao = memberDao;
+    }
 
     @Autowired
     private void setService(MemberCardService memberCardService, RechargeRecordService rechargeRecordService,
@@ -108,7 +120,7 @@ public class IndexPageServiceImpl implements IndexPageService {
     }
 
     /**
-     * TODO 当月每日收费统计
+     * 当月每日收费统计
      *
      * @return IndexAddAndStreamInfoVo
      */
@@ -147,6 +159,28 @@ public class IndexPageServiceImpl implements IndexPageService {
         }
         vo.setData(data);
 
+        return vo;
+    }
+
+    /**
+     * 会员计数、活跃会员计数、预约计数
+     *
+     * @return IndexHoneDateVo
+     */
+    @Override
+    public IndexHomeDateVo getHomeDateVo() {
+        IndexHomeDateVo vo = new IndexHomeDateVo();
+        //会员计数
+        Integer memberCount = memberDao.getMemberCount();
+        LocalDateTime end = LocalDateTime.now();
+        LocalDateTime start = end.minusMonths(1);
+        //活跃会员计数
+        Integer reserveMemberCount = reservationRecordDao.getReserveMemberCount(start, end);
+        //预约计数
+        Integer reservationCount = reservationRecordDao.getReservationCount();
+        vo.setTotalMembers(memberCount);
+        vo.setActiveMembers(reserveMemberCount);
+        vo.setTotalReservations(reservationCount);
         return vo;
     }
 }

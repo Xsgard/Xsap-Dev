@@ -1,6 +1,7 @@
 package com.kclm.xsap.service;
 
 import com.kclm.xsap.entity.MemberEntity;
+import com.kclm.xsap.vo.IndexHomeDateVo;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
 
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: IndexService
  * @date 2023/8/12 10:12
  */
 public interface IndexPageService {
@@ -19,4 +20,6 @@ public interface IndexPageService {
     List<IndexPieChartVo> getMemberCards();
 
     IndexAddAndStreamInfoVo DailyCharge();
+
+    IndexHomeDateVo getHomeDateVo();
 }
