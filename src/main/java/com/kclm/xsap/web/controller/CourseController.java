@@ -107,7 +107,7 @@ public class CourseController {
     //添加课程
     @PostMapping("/courseAdd.do")
     @ResponseBody
-    public R addCourse(@Valid CourseEntity course, Long[] cardListStr, BindingResult bindingResult) {
+    public R addCourse(@Valid CourseEntity course, BindingResult bindingResult, Long[] cardListStr) {
         //校验前端传入的数据
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
