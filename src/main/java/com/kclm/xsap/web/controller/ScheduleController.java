@@ -64,6 +64,7 @@ public class ScheduleController {
         return "course/x_course_schedule_detail";
     }
 
+    //添加排课记录
     @PostMapping("/scheduleAdd.do")
     @ResponseBody
     public R addSchedule(ScheduleRecordEntity scheduleRecord, BindingResult bindingResult) {
@@ -74,12 +75,14 @@ public class ScheduleController {
         }
     }
 
+    //获取全部排课记录
     @PostMapping("/scheduleList.do")
     @ResponseBody
     public List<ScheduleRecordDto> getScheduleList(Long start, Long end) {
         return scheduleRecordService.scheduleList();
     }
 
+    //根据Id获取排课的详细信息
     @PostMapping("/scheduleDetail.do")
     @ResponseBody
     public R scheduleDetail(Long id) {
@@ -87,6 +90,7 @@ public class ScheduleController {
         return R.ok().put("data", scheduleDto);
     }
 
+    //排课的预约记录信息
     @PostMapping("/reservedList.do")
     @ResponseBody
     public R reserveList(Long id) {
@@ -94,6 +98,7 @@ public class ScheduleController {
         return R.ok().put("data", reserveInfoDto);
     }
 
+    //排课的全部预约记录信息（包括取消的）
     @PostMapping("/reserveRecord.do")
     @ResponseBody
     public R reverseAllList(Long id) {
@@ -101,6 +106,7 @@ public class ScheduleController {
         return R.ok().put("data", allReserveInfoDto);
     }
 
+    //上课记录信息
     @PostMapping("/classRecord.do")
     @ResponseBody
     public R classRecord(Long id) {
@@ -116,6 +122,7 @@ public class ScheduleController {
         return R.ok().put("data", money);
     }
 
+    //单次扣费
     @PostMapping("/consumeEnsure.do")
     @ResponseBody
     public R consumeEnsure(ConsumeFormVo vo) {
@@ -127,6 +134,7 @@ public class ScheduleController {
         return R.ok("扣费成功！");
     }
 
+    //一键扣费
     @PostMapping("/consumeEnsureAll.do")
     @ResponseBody
     public R consumeEnsureAll(Long scheduleId, String operators) {
@@ -138,6 +146,7 @@ public class ScheduleController {
         return R.ok("一件扣费成功！");
     }
 
+    //
     @GetMapping("/toSearch.do")
     @ResponseBody
     public R toSearch() {
