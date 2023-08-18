@@ -5,6 +5,7 @@ import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
 
 /**
  * @author Asgard
@@ -41,7 +44,9 @@ public class CardBindController {
 
     @PostMapping("/memberBind.do")
     @ResponseBody
-    public R memberBind(BindCardInfoDto infoDto, BindingResult bindingResult) {
+    public R memberBind(@Valid BindCardInfoDto infoDto, BindingResult bindingResult) {
+        //BeanValidation
+        ValidationUtil.getErrors(bindingResult);
         //绑定会员卡信息
         try {
             memberCardService.memberBind(infoDto, bindingResult);

@@ -84,6 +84,7 @@ public class CardController {
         return "member/x_member_card_edit";
     }
 
+    //激活、禁用会员卡
     @PostMapping("/activeOpt.do")
     @ResponseBody
     public R activeOpt(Long memberId, Long bindId, Integer status, HttpSession session) {
@@ -97,6 +98,7 @@ public class CardController {
         return R.ok();
     }
 
+    //添加会员卡
     @PostMapping("/cardAdd.do")
     @ResponseBody
     @Transactional
@@ -104,6 +106,7 @@ public class CardController {
         return memberCardService.addCard(cardEntity, courseListStr, bindingResult);
     }
 
+    //修改会员卡
     @PostMapping("/cardEdit.do")
     @ResponseBody
     public R cardEdit(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
@@ -117,6 +120,7 @@ public class CardController {
         return R.ok();
     }
 
+    //获取会员可用的会员卡
     @PostMapping("/toSearchByMemberId.do")
     @ResponseBody
     public R getByMemberId(Long memberId) {
@@ -124,6 +128,7 @@ public class CardController {
         return R.ok().put("value", cardList);
     }
 
+    //获取会员卡信息
     @PostMapping("/cardTip.do")
     @ResponseBody
     public R cardTip(Long cardId, Long memberId, Long scheduleId) {
@@ -134,6 +139,7 @@ public class CardController {
         }
     }
 
+    //获取该卡的可使用剩余次数 和 课程中每次消费多少课次
     @PostMapping("/operateRecord.do")
     @ResponseBody
     public R operateRecord(Long memberId, Long cardId) {
@@ -141,6 +147,7 @@ public class CardController {
         return R.ok().put("data", operateRecords);
     }
 
+    //充值会员卡
     @PostMapping("/rechargeOpt.do")
     @ResponseBody
     public R rechargeOpt(@Valid RechargeRecordEntity rechargeRecord, BindingResult bindingResult) {
@@ -154,13 +161,25 @@ public class CardController {
         return R.ok("充值成功！");
     }
 
+    //删除会员卡
+    @PostMapping("/deleteOne.do")
+    @ResponseBody
+    public R deleteOne(Long id) {
+
+        return null;
+    }
+
+    //会员卡扣费
     @PostMapping("/consumeOpt.do")
     @ResponseBody
     public R consumeOpt(@Valid ConsumeFormVo vo, BindingResult bindingResult) {
         //BeanValidation
         ValidationUtil.getErrors(bindingResult);
-
-
-        return null;
+        try {
+            memberCardService.consumeOpt(vo);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("扣费成功！");
     }
 }
