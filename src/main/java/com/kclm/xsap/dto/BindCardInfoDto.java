@@ -2,7 +2,9 @@ package com.kclm.xsap.dto;
 
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author Asgard
@@ -12,20 +14,24 @@ import javax.validation.constraints.NotBlank;
  */
 @Data
 public class BindCardInfoDto {
+    @NotNull(message = "请选择一个会员！")
     private Long memberId;
 
     private String operator;
 
-    @NotBlank(message = "请选择一张卡")
+    @NotNull(message = "请选择一张卡")
     private Long cardId;
 
-    @NotBlank(message = "请输入充值次数")
+    @NotNull(message = "请输入充值次数")
+    @Min(value = 0, message = "输入有误，请检查输入次数！")
     private Integer validCount;
 
-    @NotBlank(message = "请输入有效期")
+    @NotNull(message = "请输入有效期")
+    @Min(value = 0, message = "输入有误，请检查输入天数！")
     private Integer validDay;
 
-    @NotBlank(message = "请输入实收金额")
+    @NotNull(message = "请输入实收金额")
+    @Min(value = 0, message = "输入有误，请检查输入金额！")
     private Integer receivedMoney;
 
     @NotBlank(message = "请选择支付方式")
