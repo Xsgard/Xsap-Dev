@@ -33,4 +33,7 @@ public interface MemberDao extends BaseMapper<MemberEntity> {
             "where (is_deleted = 0 or is_deleted = 1)\n" +
             "  and (create_time between #{start} and #{end});")
     List<MemberEntity> selectMemberBetween(LocalDateTime start, LocalDateTime end);
+
+    @Select("select count(id) from t_member where is_deleted=0;")
+    Integer getMemberCount();
 }
