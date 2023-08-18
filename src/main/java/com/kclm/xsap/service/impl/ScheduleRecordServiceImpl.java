@@ -300,6 +300,12 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
             throw new BusinessException("保存消费记录出现异常！");
     }
 
+    /**
+     * 一键扣费功能
+     *
+     * @param scheduleId 排课计划Id
+     * @param operator   操作人
+     */
     @Override
     @Transactional
     public void consumeEnsureAll(Long scheduleId, String operator) {
@@ -339,6 +345,11 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         voList.forEach(this::consumeEnsure);
     }
 
+    /**
+     * 获取排课信息
+     *
+     * @return List<ScheduleForConsumeSearchVo>
+     */
     @Override
     public List<ScheduleForConsumeSearchVo> getForConsumeSearch() {
         //当前时间
