@@ -90,8 +90,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      */
     @Override
     @Transactional
-    public void memberBind(@Valid BindCardInfoDto info, BindingResult bindingResult) {
-        ValidationUtil.getErrors(bindingResult);
+    public void memberBind(BindCardInfoDto info, BindingResult bindingResult) {
         MemberBindRecordEntity bindRecordEntity = new MemberBindRecordEntity();
         BeanUtils.copyProperties(info, bindRecordEntity);
 
@@ -155,7 +154,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
             boolean save = rechargeRecordService.save(rechargeRecord);
             if (!save)
-                throw new BusinessException("充值记录保存失败！");
+                throw new BusinessException("绑卡充值失败！");
         }
     }
 

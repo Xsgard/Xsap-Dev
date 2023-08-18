@@ -37,4 +37,6 @@ public interface MemberCardService extends IService<MemberCardEntity> {
     List<OperateRecordVo> getOperateRecords(Long memberId, Long bindCardId);
 
     void consumeOpt(ConsumeFormVo vo);
+
+
 }
