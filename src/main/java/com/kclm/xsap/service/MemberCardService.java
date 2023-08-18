@@ -38,5 +38,6 @@ public interface MemberCardService extends IService<MemberCardEntity> {
 
     void consumeOpt(ConsumeFormVo vo);
 
+    void deleteOneCard(Long cardId);
 
 }

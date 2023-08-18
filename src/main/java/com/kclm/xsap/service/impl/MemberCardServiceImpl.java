@@ -399,6 +399,31 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 删除会员卡
+     *
+     * @param cardId 会员卡Id
+     */
+    @Override
+    public void deleteOneCard(Long cardId) {
+        //查询绑定该卡的绑定记录
+        LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(MemberBindRecordEntity::getCardId, cardId);
+        //绑定记录集合
+        List<MemberBindRecordEntity> bindRecords = memberBindRecordService.list(queryWrapper);
+        //如果绑定记录中仍有激活的就抛出异常
+        if (bindRecords.stream().anyMatch(item -> item.getActiveStatus() == 1))
+            throw new BusinessException("仍有会员绑定并激活该会员卡，不能删除");
+        //获取会员卡实体信息
+        MemberCardEntity card = memberCardService.getById(cardId);
+        //设置为不激活
+        card.setStatus(1);
+        card.setLastModifyTime(LocalDateTime.now());
+        //保存信息
+        boolean save = memberCardService.updateById(card);
+        if (!save)
+            throw new BusinessException("删除会员卡失败！");
+    }
 
     /**
      * 重构方法：用于创建CourseCardList
