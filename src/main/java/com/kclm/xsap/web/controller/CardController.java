@@ -168,8 +168,12 @@ public class CardController {
     @PostMapping("/deleteOne.do")
     @ResponseBody
     public R deleteOne(Long id) {
-
-        return null;
+        try {
+            memberCardService.deleteOneCard(id);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("删除会员卡成功！");
     }
 
     //会员卡扣费
