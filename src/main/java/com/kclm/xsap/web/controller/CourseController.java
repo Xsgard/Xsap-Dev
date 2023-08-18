@@ -77,8 +77,12 @@ public class CourseController {
     @PostMapping("/deleteOne.do")
     @ResponseBody
     public R deleteOneCourse(Long id) {
-
-        return null;
+        try {
+            courseService.deleteOne(id);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("删除成功！");
     }
 
     @PostMapping("/courseEdit.do")
