@@ -76,7 +76,7 @@ public class CourseController {
 
     @PostMapping("/deleteOne.do")
     @ResponseBody
-    public R deleteOneCourse(Long CourseId) {
+    public R deleteOneCourse(Long id) {
 
         return null;
     }
