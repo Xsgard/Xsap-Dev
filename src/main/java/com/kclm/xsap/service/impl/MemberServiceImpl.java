@@ -371,16 +371,19 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                 .eq(MemberBindRecordEntity::getActiveStatus, 1);
         //绑定的激活的会员卡信息
         List<MemberBindRecordEntity> bindRecords = bindRecordService.list(wrapper);
-        //修改集合中绑定会员卡的状态
-        bindRecords = bindRecords.stream()
-                .peek(item -> {
-                    item.setActiveStatus(0);
-                    item.setLastModifyTime(LocalDateTime.now());
-                })
-                .collect(Collectors.toList());
-        boolean b = bindRecordService.updateBatchById(bindRecords);
-        if (!b)
-            throw new BusinessException("会员卡信息更新失败！");
+        if (!bindRecords.isEmpty()) {
+            //修改集合中绑定会员卡的状态
+            bindRecords = bindRecords.stream()
+                    .peek(item -> {
+                        item.setActiveStatus(0);
+                        item.setLastModifyTime(LocalDateTime.now());
+                    })
+                    .collect(Collectors.toList());
+            //批量更新
+            boolean b = bindRecordService.updateBatchById(bindRecords);
+            if (!b)
+                throw new BusinessException("会员卡信息更新失败！");
+        }
         //逻辑删除会员
         boolean b1 = this.removeById(memberId);
         if (!b1)
