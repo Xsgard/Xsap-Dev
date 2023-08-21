@@ -62,7 +62,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         //添加一个文件上传的静态路径映射, 如果是文件目录，则需要以 file: 开头
-        registry.addResourceHandler("/images/**").addResourceLocations(UPLOAD_IMAGE_URL);
+        registry.addResourceHandler("/upload/images/**").addResourceLocations(UPLOAD_IMAGE_URL);
     }
 
 
