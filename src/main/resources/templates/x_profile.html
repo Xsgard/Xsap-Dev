@@ -58,30 +58,33 @@
                         <!--体部定义-->
                         <div class="modal-body">
                             <!-- 表单定义 -->
-                            <center>
-								<span th:if="${CHECK_PHONE_EXIST}" class="text-danger">手机号跟其它用户撞名了</span>
-                            </center>
+                            <!--                            <center>-->
+                            <!--								<span th:if="${CHECK_PHONE_EXIST}" class="text-danger">手机号跟其它用户撞名了</span>-->
+                            <!--                            </center>-->
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">用户名</label>
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-7">
+                                        <input type="hidden" name="id" th:value="${userInfo.id}">
                                         <input type="text" name="roleName" th:value="${userInfo.roleName}" class="form-control" placeholder="超级管理员" disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">真实姓名</label>
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-7">
                                         <input type="text" name="name" th:value="${userInfo.name}" class="form-control" placeholder="admin">
                                     </div>
+                                    <span th:if="${NAME_NULL}" class="text-danger">真实姓名不能为空</span>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">手机号</label>
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-7">
                                         <input type="text" name="phone" th:value="${userInfo.phone}" class="form-control" placeholder="13778899110">
                                     </div>
+                                    <span th:if="${CHECK_PHONE_EXIST}" class="text-danger">手机号跟其它用户撞名了</span>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">性别</label>
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-7">
                                         <label class="checkbox-inline">
                                             <input type="radio" name="sex" th:attr ="checked=${userInfo.sex=='男'?true:false}" value="男"> 男
                                         </label>
@@ -92,13 +95,13 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">注册时间</label>
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-7">
                                         <input type="text" name="createTime" th:value="${userInfo.createTime}" class="form-control" value="2020-06-01 " disabled>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">上次登陆时间</label>
-                                    <div class="col-sm-8">
+                                    <div class="col-sm-7">
                                         <input type="text" name="lastModifyTime" th:value="${session.LOGIN_USER.lastModifyTime}" class="form-control" value="2020-05-31 08:08:08" disabled>
                                     </div>
                                 </div>
