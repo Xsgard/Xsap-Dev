@@ -3,6 +3,7 @@ package com.kclm.xsap.utils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 /**
  * @author Asgard
@@ -29,5 +30,9 @@ public class TimeUtil {
 
     public static LocalDateTime toEndTime(LocalDateTime start, Long minutes) {
         return start.plusMinutes(minutes);
+    }
+
+    public static Integer calculateMonths(LocalDateTime start, LocalDateTime end) {
+        return Math.toIntExact(ChronoUnit.MONTHS.between(start, end));
     }
 }
