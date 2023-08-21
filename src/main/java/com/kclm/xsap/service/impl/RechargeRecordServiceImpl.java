@@ -46,13 +46,15 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
         queryWrapper.between(RechargeRecordEntity::getCreateTime, start, end);
         List<RechargeRecordEntity> recharges = this.list(queryWrapper);
         List<Integer> data = new ArrayList<>(end.getMonthValue());
-        for (int i = 1; i <= end.getMonthValue(); i++) {
-            int finalI = i;
-            Integer monthMoney = (int) recharges.stream()
-                    .filter(e -> e.getCreateTime().getMonthValue() == finalI)
-                    .mapToDouble(item -> item.getReceivedMoney().doubleValue())
-                    .sum();
-            data.add(monthMoney);
+        if (!recharges.isEmpty()) {
+            for (int i = 1; i <= end.getMonthValue(); i++) {
+                int finalI = i;
+                Integer monthMoney = (int) recharges.stream()
+                        .filter(e -> e.getCreateTime().getMonthValue() == finalI)
+                        .mapToDouble(item -> item.getReceivedMoney().doubleValue())
+                        .sum();
+                data.add(monthMoney);
+            }
         }
         return data;
     }

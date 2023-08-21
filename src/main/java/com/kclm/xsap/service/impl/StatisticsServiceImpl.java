@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -294,7 +295,10 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = 1; i <= 4; i++) {
             time.add("第" + i + "季度");
             LocalDateTime endDateTime = startDateTime.plusMonths(3);
-            data.add(rechargeRecordService.getRechargeList(startDateTime, endDateTime).get(0));
+            AtomicInteger sum = new AtomicInteger();
+            List<Integer> rechargeList = rechargeRecordService.getRechargeList(startDateTime, endDateTime);
+            rechargeList.forEach(sum::addAndGet);
+            data.add(sum.get());
             startDateTime = startDateTime.plusMonths(3);
             if (endDateTime.isAfter(now))
                 break;

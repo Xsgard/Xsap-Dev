@@ -93,6 +93,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     public void memberBind(BindCardInfoDto info, BindingResult bindingResult) {
         MemberBindRecordEntity bindRecordEntity = new MemberBindRecordEntity();
         BeanUtils.copyProperties(info, bindRecordEntity);
+        bindRecordEntity.setReceivedMoney(BigDecimal.valueOf(info.getReceivedMoney()));
 
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MemberBindRecordEntity::getMemberId, bindRecordEntity.getMemberId())
