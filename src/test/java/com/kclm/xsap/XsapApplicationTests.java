@@ -9,7 +9,6 @@ import com.kclm.xsap.entity.MemberCardEntity;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
-import com.kclm.xsap.utils.TimeUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,14 +54,6 @@ class XsapApplicationTests {
                 dtoList) {
             System.out.println(d);
         }
-    }
-
-    @Test
-    public void testTimePlus() {
-        LocalDateTime now = LocalDateTime.now();
-        Integer day = 10;
-        LocalDateTime localDateTime = TimeUtil.timeSub(now, day);
-        System.out.println(localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
     @Test
