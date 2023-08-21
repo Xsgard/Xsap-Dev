@@ -3,6 +3,7 @@ package com.kclm.xsap.web.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.kclm.xsap.entity.*;
+import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.UploadImg;
@@ -592,6 +593,25 @@ public class EmployeeController {
         } else {
             return R.error("添加失败");
         }
+    }
+
+    @PostMapping("/modifyUser.do")
+    public String modifyUserInfo(EmployeeEntity employee, Model model) {
+        try {
+            EmployeeEntity employeeEntity = employeeService.modifyUserInfo(employee);
+            model.addAttribute("userInfo", employeeEntity);
+            return "/x_profile";
+        } catch (BusinessException e) {
+            if (e.getCode() == 100) {
+                model.addAttribute("NAME_NULL", "用户名为空");
+            } else {
+                model.addAttribute("CHECK_PHONE_EXIST", "手机号跟其它用户撞名了");
+            }
+            EmployeeEntity entity = employeeService.getById(employee.getId());
+            model.addAttribute("userInfo", entity);
+            return "/x_profile";
+        }
+
     }
 
 }
