@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.entity.EmployeeEntity;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 员工表
@@ -32,5 +31,7 @@ public interface EmployeeService extends IService<EmployeeEntity> {
      * @return
      */
     List<String> getTeacherNameListByIds(List<Long> teacherIdList);
+
+    EmployeeEntity modifyUserInfo(EmployeeEntity employee);
 }
 
