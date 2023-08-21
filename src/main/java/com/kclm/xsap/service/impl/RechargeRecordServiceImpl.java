@@ -10,6 +10,7 @@ import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberLogService;
 import com.kclm.xsap.service.RechargeRecordService;
+import com.kclm.xsap.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,11 +48,11 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
         List<RechargeRecordEntity> recharges = this.list(queryWrapper);
         List<Integer> data = new ArrayList<>(end.getMonthValue());
         if (!recharges.isEmpty()) {
-            for (int i = 1; i <= end.getMonthValue(); i++) {
+            for (int i = start.getMonthValue(); i <= start.getMonthValue() + TimeUtil.calculateMonths(start, end); i++) {
                 int finalI = i;
-                Integer monthMoney = (int) recharges.stream()
+                Integer monthMoney = recharges.stream()
                         .filter(e -> e.getCreateTime().getMonthValue() == finalI)
-                        .mapToDouble(item -> item.getReceivedMoney().doubleValue())
+                        .mapToInt(item -> item.getReceivedMoney().intValue())
                         .sum();
                 data.add(monthMoney);
             }

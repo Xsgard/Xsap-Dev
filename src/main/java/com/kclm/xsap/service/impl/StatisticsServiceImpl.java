@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -295,10 +294,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = 1; i <= 4; i++) {
             time.add("第" + i + "季度");
             LocalDateTime endDateTime = startDateTime.plusMonths(3);
-            AtomicInteger sum = new AtomicInteger();
             List<Integer> rechargeList = rechargeRecordService.getRechargeList(startDateTime, endDateTime);
-            rechargeList.forEach(sum::addAndGet);
-            data.add(sum.get());
+            int sum = rechargeList.stream()
+                    .mapToInt(item -> item)
+                    .sum();
+            data.add(sum);
             startDateTime = startDateTime.plusMonths(3);
             if (endDateTime.isAfter(now))
                 break;
@@ -325,7 +325,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = vo.getBeginYear(); i <= vo.getEndYear(); i++) {
             time.add(String.valueOf(i));
             LocalDateTime end = start.plusYears(1);
-            data.add(rechargeRecordService.getRechargeList(start, end).get(0));
+            int sum = rechargeRecordService.getRechargeList(start, end)
+                    .stream().mapToInt(item -> item).sum();
+            data.add(sum);
             start = start.plusYears(1);
         }
         result.setTime(time);
@@ -418,7 +420,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         //
         LocalDateTime startDateTime = TimeUtil.timeTransfer(LocalDate.of(vo.getBeginYear(), 1, 1), startTime);
         Map<String, TempList> dataMap = new HashMap<>();
-        for (int i = vo.getBeginYear(); i < vo.getEndYear(); i++) {
+        for (int i = vo.getBeginYear(); i <= vo.getEndYear(); i++) {
             time.add(String.valueOf(i));
             LocalDateTime endTime = startDateTime.plusYears(1);
             teacherConsumeVoHandler(startDateTime, dataMap, endTime);
@@ -507,7 +509,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = costVo.getBeginYear(); i <= costVo.getEndYear(); i++) {
             time.add(String.valueOf(i));
             LocalDateTime end = start.plusYears(1);
-            data.add(rechargeRecordService.getRechargeList(start, end).get(0));
+            data.add(consumeRecordService.consumeRecordsBetween(start, end));
             start = start.plusYears(1);
         }
         vo.setTime(time);

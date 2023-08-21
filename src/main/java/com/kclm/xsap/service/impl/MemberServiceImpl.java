@@ -384,6 +384,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             if (!b)
                 throw new BusinessException("会员卡信息更新失败！");
         }
+        //设置最后修改时间
+        MemberEntity member = memberService.getById(memberId);
+        member.setLastModifyTime(LocalDateTime.now());
+        memberService.updateById(member);
         //逻辑删除会员
         boolean b1 = this.removeById(memberId);
         if (!b1)
