@@ -348,6 +348,7 @@
                 data: serializeAddForm,
                 dataType: 'json',
                 success: function (data) {
+                    console.log(data)
                     if (data.code === 0) {
                         swal(data.msg, "", "success");
                         setTimeout(function () {
