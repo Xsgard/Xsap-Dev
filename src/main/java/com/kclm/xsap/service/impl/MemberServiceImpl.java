@@ -79,6 +79,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         this.memberService = memberService;
     }
 
+    /**
+     * 查询会员绑定的会员卡信息
+     *
+     * @param id 会员id
+     * @return List<MemberCardDTO>
+     */
     @Override
     public List<MemberCardDTO> cardInfo(Long id) {
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
@@ -95,6 +101,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 获取会员信息Dto
+     *
+     * @return List<MemberDTO>
+     */
     @Override
     public List<MemberDTO> memberDtoList() {
         //查询出MemberEntity的List
@@ -129,6 +140,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 校验手机号
+     *
+     * @param phone 手机号码
+     * @return MemberEntity
+     */
     @Override
     public MemberEntity queryByPhone(String phone) {
         //查询条件，根据手机号查询数据库中是否有重复
@@ -138,6 +155,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         return this.getOne(queryWrapper);
     }
 
+    /**
+     * 登录
+     *
+     * @param member        会员信息
+     * @param bindingResult 校验结果集
+     * @return R
+     */
     @Override
     public R login(MemberEntity member, BindingResult bindingResult) {
         //BeanValidation校验前端传入的数据
@@ -158,6 +182,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }
     }
 
+    /**
+     * 会员信息修改
+     *
+     * @param member        会员信息
+     * @param bindingResult 校验结果集
+     * @return R
+     */
     @Override
     public R memberEdit(MemberEntity member, BindingResult bindingResult) {
         //BeanValidation校验前端传入的数据
@@ -168,9 +199,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             }
             return R.error().put("error", fieldErrors);
         } else {
+            //查询到数据库中存储的信息
             MemberEntity temp = this.getById(member.getId());
             int count = 0;
-            if (!temp.getPhone().equals(member.getPhone())) {
+            if (!member.getPhone().equals(temp.getPhone())) {
+                //通过手机号查询记录数
                 LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
                 queryWrapper.eq(MemberEntity::getPhone, member.getPhone());
                 count = this.count(queryWrapper);
@@ -187,6 +220,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }
     }
 
+    /**
+     * 查询支持的卡
+     *
+     * @param cardIds 会员卡ID
+     * @return List<String> 对应的会员卡名集合
+     */
     @Override
     public List<String> getSupportCardNames(List<Long> cardIds) {
         List<String> supportCardNames = new ArrayList<>();
@@ -194,6 +233,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         return supportCardNames;
     }
 
+    /**
+     * 获取预约记录信息
+     *
+     * @param memberId 会员ID
+     * @return List<ReserveRecordDTO>
+     */
     @Override
     public List<ReserveRecordDTO> getReserveRecordDto(Long memberId) {
         LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
@@ -227,6 +272,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 对全部会员信息通过时间进行过滤
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return List<MemberEntity>
+     */
     @Override
     public List<MemberEntity> filterAllMemberByTime(LocalDateTime start, LocalDateTime end) {
         List<MemberEntity> allMember = memberDao.getAllMember();
@@ -288,6 +340,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         return voList;
     }
 
+    /**
+     * 获取课堂记录
+     *
+     * @param memberId 会员Id
+     * @return List<ClassInfoVo>
+     */
     @Override
     public List<ClassInfoVo> getClassInfoList(Long memberId) {
         //
@@ -325,6 +383,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 查询会员信息
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return MemberCountVo
+     */
     @Override
     public MemberCountVo queryMemberBetweenByCondition(LocalDateTime start, LocalDateTime end) {
         MemberCountVo vo = new MemberCountVo();
@@ -344,6 +409,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         return vo;
     }
 
+    /**
+     * 删除会员信息
+     *
+     * @param memberId 会员Id
+     */
     @Override
     public void deleteMember(Long memberId) {
         LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
