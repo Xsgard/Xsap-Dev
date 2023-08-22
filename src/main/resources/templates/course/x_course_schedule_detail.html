@@ -631,12 +631,17 @@
             }, function () {
                 $.post("/schedule/deleteOne.do", {id: schedule_id}, function (data) {
                     if (data.code === 0) {
-                        swal("删除成功！", "", "success");
+                        setTimeout(function () {
+                            swal("删除成功！", "", "success");
+                        }, 100);
                         setTimeout(function () {
                             window.location.href = "/schedule/x_course_schedule.do";
                         }, 1000);
                     } else {
-                        swal("删除失败！", "当前课程已有预约", "info");
+                        setTimeout(function () {
+                            swal("删除失败！", "当前课程已有预约", "info");
+                        }, 100);
+
                     }
                 });
 

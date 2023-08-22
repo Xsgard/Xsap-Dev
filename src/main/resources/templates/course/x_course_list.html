@@ -176,14 +176,19 @@
                             window.location.href = "[[${#request.getContextPath()}]]/course/x_course_list.do";
                         }, 1000);
                     } else {
-                        swal("删除失败！", data.msg, "info");
+                        setTimeout(function () {
+                            swal("删除失败！", data.msg, "info");
+                        }, 100);
                         setTimeout(function () {
                             window.location.reload();
                         }, 1000);
                     }
                 },
                 error: function (data) {
-                    swal("未知错误", data.msg, "info")
+                    setTimeout(function () {
+                        swal("未知错误", data.msg, "info")
+                    }, 100);
+
                 }
             });
         });

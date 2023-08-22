@@ -9,7 +9,8 @@
 
     <title>X+约课系统 - 预约课程</title>
     <meta content="后台bootstrap框架,会员中心主题,后台HTML,响应式后台" name="keywords">
-    <meta content="完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术" name="description">
+    <meta content="完全响应式，基于Bootstrap3最新版本开发的扁平化主题，她采用了主流的左右两栏式布局，使用了Html5+CSS3等现代技术"
+          name="description">
 
     <link href="../../static/favicon.ico" rel="shortcut icon" th:href="@{/static/favicon.ico}">
     <link href="../../static/css/bootstrap.min.css?v=3.3.6" rel="stylesheet"
@@ -55,7 +56,8 @@
                                th:field="${GLOBAL_SET.appointmentStartMode}" type="radio"
                                value="2">
                         <!--                                    <input type="radio" name="start" value="0" id="start-1" th:attr="checked=${GLOBAL_SET.startDay != '-1' ? 'checked': ''}">-->
-                        会员最多可以提前预约<input name="startDay" th:value="${GLOBAL_SET.startDay}" type="text" value="10"/>天内的课程
+                        会员最多可以提前预约<input name="startDay" th:value="${GLOBAL_SET.startDay}" type="text"
+                                                   value="10"/>天内的课程
                     </label>
                 </div>
             </div>
@@ -107,7 +109,8 @@
                                th:field="${GLOBAL_SET.appointmentCancelMode}" type="radio"
                                value="2">
                         <!--                                <input type="radio" name="cancel"  value="cancelHour" id="cancel-1">-->
-                        取消预约截止时间:上课前<input name="cancelHour" th:value="${GLOBAL_SET.cancelHour}" type="text" value="2">小时
+                        取消预约截止时间:上课前<input name="cancelHour" th:value="${GLOBAL_SET.cancelHour}" type="text"
+                                                      value="2">小时
                     </label>
                     <br>
                     <label>
@@ -115,7 +118,8 @@
                                th:field="${GLOBAL_SET.appointmentCancelMode}" type="radio"
                                value="3">
                         <!--                                <input type="radio" name="cancel" value="cancelDay" id="cancel-2">-->
-                        取消预约截止时间:上课前<input name="cancelDay" th:value="${GLOBAL_SET.cancelDay}" type="text" value="1">天的
+                        取消预约截止时间:上课前<input name="cancelDay" th:value="${GLOBAL_SET.cancelDay}" type="text"
+                                                      value="1">天的
                         <input name="cancelTime" th:value="${cancelTimeStr}" type="time" value="21:00:00">
                     </label>
                 </div>
@@ -200,11 +204,15 @@
                                 window.location.reload();
                             }, 1000);
                         } else {
-                            swal(data.msg, "", "info");
+                            setTimeout(function () {
+                                swal(data.msg, "", "info");
+                            }, 100);
                         }
                     },
                     error: function () {
-                        swal("修改失败！！！", "请联系管理员", "info");
+                        setTimeout(function () {
+                            swal("修改失败！！！", "请联系管理员", "info");
+                        }, 100);
                     }
                 });
             });

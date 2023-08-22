@@ -378,11 +378,17 @@
                             $("<span class='text-danger'>" + errors[key] + "</span>").appendTo($("[tip=" + key + "]"));
                         }
                     } else {
-                        swal("保存失败！", data.msg, "info");
+                        setTimeout(function () {
+                            swal("保存失败！", data.msg, "info");
+                        }, 100);
+
                     }
                 },
                 error: function (data) {
-                    swal("未知错误", data.msg, "info")
+                    setTimeout(function () {
+                        swal("未知错误", data.msg, "info")
+                    }, 100);
+
                 }
             });
         });

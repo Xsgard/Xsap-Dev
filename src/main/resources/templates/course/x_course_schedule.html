@@ -536,12 +536,18 @@
                 $.post("/schedule/scheduleCopy.do", copyScheduleForm, function (result) {
                     if (result.code === 0) {
                         //刷新页面
-                        swal("复制成功！", "", "success");
+
+                        setTimeout(function () {
+                            swal("复制成功！", "", "success");
+                        }, 100);
                         setTimeout(function () {
                             window.location.reload();
                         }, 1500);
                     } else {
-                        swal("复制失败！", result.msg, "info");
+                        setTimeout(function () {
+                            swal("复制失败！", result.msg, "info");
+                        }, 100);
+
                     }
                 });
 
