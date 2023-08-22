@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -96,6 +97,9 @@ public class CourseController {
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
         }
+        cardListStr = Arrays.stream(cardListStr)
+                .filter(item -> item != -1)
+                .toArray(Long[]::new);
         try {
             courseService.updateCourse(course, cardListStr, limitAgeRadio, limitCountsRadio);
             return R.ok();

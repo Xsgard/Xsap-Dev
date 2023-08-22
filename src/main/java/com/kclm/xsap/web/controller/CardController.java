@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -103,6 +104,11 @@ public class CardController {
     @ResponseBody
     @Transactional
     public R cardAdd(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
+        if (bindingResult.hasErrors())
+            return ValidationUtil.getErrors(bindingResult);
+        courseListStr = Arrays.stream(courseListStr)
+                .filter(item -> item != -1)//过滤为-1的值
+                .toArray(Long[]::new);
         return memberCardService.addCard(cardEntity, courseListStr, bindingResult);
     }
 
@@ -111,7 +117,11 @@ public class CardController {
     @ResponseBody
     public R cardEdit(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
         //Bean Validation
-        ValidationUtil.getErrors(bindingResult);
+        if (bindingResult.hasErrors())
+            return ValidationUtil.getErrors(bindingResult);
+        courseListStr = Arrays.stream(courseListStr)
+                .filter(item -> item != -1) //过滤值为-1的
+                .toArray(Long[]::new);
         try {
             memberCardService.editCard(cardEntity, courseListStr);
         } catch (RuntimeException e) {
