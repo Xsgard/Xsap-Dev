@@ -12,6 +12,7 @@ import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -67,12 +69,16 @@ public class ScheduleController {
     //添加排课记录
     @PostMapping("/scheduleAdd.do")
     @ResponseBody
-    public R addSchedule(ScheduleRecordEntity scheduleRecord, BindingResult bindingResult) {
+    public R addSchedule(@Valid ScheduleRecordEntity scheduleRecord, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ValidationUtil.getErrors(bindingResult);
+        }
         try {
-            return scheduleRecordService.scheduleAdd(scheduleRecord, bindingResult);
+            scheduleRecordService.scheduleAdd(scheduleRecord);
         } catch (BusinessException e) {
             return R.error(e.getMsg());
         }
+        return R.ok("添加成功！");
     }
 
     //获取全部排课记录
