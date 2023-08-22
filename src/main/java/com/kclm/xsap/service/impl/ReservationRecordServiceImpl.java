@@ -106,7 +106,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
         //判断会员是否满足课程要求
         //课程性别限制
-        if (!courseEntity.getLimitSex().equals(member.getSex()))
+        if (!courseEntity.getLimitSex().equals("无限制") && !courseEntity.getLimitSex().equals(member.getSex()))
             throw new BusinessException("很抱歉，您不满足课程的性别要求！");
         //课程年龄限制
         int age = member.getBirthday().until(LocalDate.now()).getYears();

@@ -162,10 +162,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Override
     public IndexAddAndStreamInfoVo cardCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
 
-        if (vo.getUnit() == 1) {
+        if (vo.getUnit() == MONTH) {
             //统计时段 --月
             return cardCostHandler(vo.getYearOfSelect());
-        } else if (vo.getUnit() == 2) {
+        } else if (vo.getUnit() == SEASON) {
             //统计时段 --季
             return cardCostHandler(vo.getYearOfSelect(), vo.getUnit());
         } else {
@@ -183,10 +183,10 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     @Override
     public ClassCostVo classCostMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
-        if (vo.getUnit() == 1) {
+        if (vo.getUnit() == MONTH) {
             //课消统计时段 --月
             return classCostHandler(vo.getYearOfSelect());
-        } else if (vo.getUnit() == 2) {
+        } else if (vo.getUnit() == SEASON) {
             //课消统计时段 --季
             return classCostHandler(vo.getYearOfSelect(), vo.getUnit());
         } else {
@@ -203,10 +203,10 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     @Override
     public IndexAddAndStreamInfoVo classCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
-        if (vo.getUnit() == 1) {
+        if (vo.getUnit() == MONTH) {
             //统计时段 --月
             return classCountHandler(vo.getYearOfSelect());
-        } else if (vo.getUnit() == 2) {
+        } else if (vo.getUnit() == SEASON) {
             //统计时段 --季
             return classCountHandler(vo.getYearOfSelect(), vo.getUnit());
         } else {
@@ -223,10 +223,10 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     @Override
     public IndexAddAndStreamInfoVo addAndStreamCountMonthOrSeasonOrYear(StatisticsOfCardCostVo vo) {
-        if (vo.getUnit() == 1) {
+        if (vo.getUnit() == MONTH) {
             //统计时段 --月
             return addAndStreamCount(vo.getYearOfSelect());
-        } else if (vo.getUnit() == 2) {
+        } else if (vo.getUnit() == SEASON) {
             //统计时段 --季
             return addAndStreamCount(vo.getYearOfSelect(), vo.getUnit());
         } else {

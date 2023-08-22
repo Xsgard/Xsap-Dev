@@ -14,6 +14,9 @@ import java.util.List;
  * @date 2023/8/14 19:49
  */
 public interface StatisticsService {
+    int MONTH = 1;
+    int SEASON = 2;
+
     MemberCardStatisticsWithTotalDataInfoVo getCardStatisticsVo();
 
     List<Integer> getYearList();
