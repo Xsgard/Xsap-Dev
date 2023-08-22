@@ -566,7 +566,7 @@
             $.post("/reserve/cancelReserve.do", {reserveId: reserve_id}, function (data) {
                 // var result = data.data;
                 // var tip = result.comment;
-                if (data.code == 0) {
+                if (data.code === 0) {
                     swal("取消预约成功！", "", "success");
                     setTimeout(function () {
                         window.location.reload();
@@ -610,7 +610,7 @@
                         swal("添加失败！", data.msg, "info");
                         setTimeout(function () {
                             window.location.reload();
-                        }, 2000);
+                        }, 1000);
                     }
                 });
 
