@@ -6,12 +6,9 @@ import com.kclm.xsap.dto.ReverseClassRecordDto;
 import com.kclm.xsap.dto.ScheduleDetailsDto;
 import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.ScheduleRecordEntity;
-import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
-import org.springframework.validation.BindingResult;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -21,7 +18,7 @@ import java.util.List;
  * @date 2023/8/2 16:34
  */
 public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
-    R scheduleAdd(@Valid ScheduleRecordEntity scheduleRecord, BindingResult bindingResult);
+    void scheduleAdd(ScheduleRecordEntity scheduleRecord);
 
     List<ScheduleRecordDto> scheduleList();
 

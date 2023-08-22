@@ -144,6 +144,9 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
         List<ScheduleRecordEntity> schedules = scheduleRecordService.list(queryWrapper);
         if (!schedules.isEmpty())
             throw new BusinessException("该课程已有排课计划，无法删除！");
+        LambdaQueryWrapper<CourseCardEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseCardEntity::getCourseId, courseId);
+        courseCardService.remove(wrapper);
         boolean b = this.removeById(courseId);
         if (!b)
             throw new BusinessException("删除课程失败，请重试或与管理员联系！");

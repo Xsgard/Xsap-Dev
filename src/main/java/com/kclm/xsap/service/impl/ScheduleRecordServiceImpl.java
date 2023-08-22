@@ -10,17 +10,13 @@ import com.kclm.xsap.dto.ScheduleRecordDto;
 import com.kclm.xsap.entity.*;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
-import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
-import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,17 +63,40 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
      * 添加排课
      *
      * @param scheduleRecord 排课信息
-     * @param bindingResult  校验结果集
-     * @return R
      */
     @Override
-    public R scheduleAdd(@Valid ScheduleRecordEntity scheduleRecord, BindingResult bindingResult) {
-        ValidationUtil.getErrors(bindingResult);
+    public void scheduleAdd(ScheduleRecordEntity scheduleRecord) {
+        //查询条件
+        LambdaQueryWrapper<ScheduleRecordEntity> qw = new LambdaQueryWrapper<ScheduleRecordEntity>()
+                .eq(ScheduleRecordEntity::getTeacherId, scheduleRecord.getTeacherId())
+                .eq(ScheduleRecordEntity::getStartDate, LocalDateTime.now().toLocalDate());
+        //老师今天的预约记录
+        List<ScheduleRecordEntity> teacherSchedules = this.list(qw);
+        teacherSchedules.forEach(ts -> {
+            //新增排课的课程信息
+            CourseEntity scheduleCourse = courseService.getById(ts.getCourseId());
+            //排课开始时间
+            LocalDateTime startTime = TimeUtil.timeTransfer(ts.getStartDate(), ts.getClassTime());
+            //排课结束时间
+            LocalDateTime endTime = startTime.plusMinutes(scheduleCourse.getDuration());
+            //新增排课开始时间
+            LocalDateTime newScheduleStart = TimeUtil.timeTransfer(scheduleRecord.getStartDate(), scheduleRecord.getClassTime());
+            //新增排课结束时间
+            LocalDateTime newScheduleEnd = newScheduleStart.plusMinutes(scheduleCourse.getDuration());
+            //结束时间 在已有排课开始时间之后
+            if (newScheduleEnd.isAfter(startTime) && newScheduleEnd.isBefore(endTime)) {
+                throw new BusinessException("该老师在此时间段已有排课！");
+            }
+            //新增排课开始时间 在已有排课开始时间之后，结束时间之前
+            if (newScheduleStart.isAfter(startTime) && newScheduleStart.isBefore(endTime)) {
+                throw new BusinessException("该老师在此时间段已有排课！");
+            }
+        });
         scheduleRecord.setCreateTime(LocalDateTime.now());
         boolean b = this.save(scheduleRecord);
         if (!b)
-            throw new BusinessException("课程添加失败");
-        return R.ok();
+            throw new BusinessException("课程添加失败,请联系管理员！");
+
     }
 
     /**
@@ -399,9 +418,8 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         LambdaQueryWrapper<ReservationRecordEntity> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
                 .eq(ReservationRecordEntity::getStatus, 0);
-        boolean remove = reservationRecordService.remove(wrapper);
-        if (!remove)
-            throw new BusinessException("已取消预约记录删除失败！");
+        reservationRecordService.remove(wrapper);
+
         boolean b = scheduleRecordService.removeById(scheduleId);
         if (!b)
             throw new BusinessException("排课计划删除失败！");
