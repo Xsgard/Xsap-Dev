@@ -11,7 +11,6 @@ import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
-import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.beans.BeanUtils;
@@ -310,26 +309,18 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      * @param cardEntity    会员卡实体信息
      * @param courseListStr 绑定课程的Id数组
      * @param bindingResult 校验结果集
-     * @return R
      */
     @Override
-    public R addCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return ValidationUtil.getErrors(bindingResult);
-        } else {
-            boolean flag = false;
-            cardEntity.setCreateTime(LocalDateTime.now());
-            boolean b = this.save(cardEntity);
-            List<CourseCardEntity> courseCardEntities = toList(cardEntity, courseListStr);
-            boolean b1 = courseCardService.insertCourseCard(courseCardEntities);
-            if (b && b1) {
-                flag = true;
-            }
-            if (flag)
-                return R.ok();
-            else
-                return R.error();
-        }
+    public void addCard(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult) {
+        cardEntity.setCreateTime(LocalDateTime.now());
+        boolean b = this.save(cardEntity);
+        if (!b)
+            throw new BusinessException("添加失败，请联系管理员！");
+        List<CourseCardEntity> courseCardEntities = toList(cardEntity, courseListStr);
+        boolean b1 = courseCardService.insertCourseCard(courseCardEntities);
+        if (!b1)
+            throw new BusinessException("添加失败，请联系管理员！");
+
     }
 
     /**
