@@ -109,7 +109,12 @@ public class CardController {
         courseListStr = Arrays.stream(courseListStr)
                 .filter(item -> item != -1)//过滤为-1的值
                 .toArray(Long[]::new);
-        return memberCardService.addCard(cardEntity, courseListStr, bindingResult);
+        try {
+            memberCardService.addCard(cardEntity, courseListStr, bindingResult);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok("添加成功！");
     }
 
     //修改会员卡
@@ -127,7 +132,7 @@ public class CardController {
         } catch (RuntimeException e) {
             return R.error(e.getMessage());
         }
-        return R.ok();
+        return R.ok("修改成功！");
     }
 
     //获取会员可用的会员卡
