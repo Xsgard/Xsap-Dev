@@ -384,12 +384,24 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
      */
     @Override
     public void deleteScheduleById(Long scheduleId) {
+        //删除排课判断是否已经开始上课
+//        ScheduleRecordEntity schedule = scheduleRecordService.getById(scheduleId);
+//        if (TimeUtil.timeTransfer(schedule.getStartDate(), schedule.getClassTime()).isAfter(LocalDateTime.now()))
+//            throw new BusinessException("该课程已经开始上课，无法删除！");
+        //查询该排课是否已有预约
         LambdaQueryWrapper<ReservationRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
                 .eq(ReservationRecordEntity::getStatus, 1);
         List<ReservationRecordEntity> reservations = reservationRecordService.list(queryWrapper);
         if (!reservations.isEmpty())
             throw new BusinessException("该排课计划已有预约记录，不能删除！");
+        //删除无效预约记录
+        LambdaQueryWrapper<ReservationRecordEntity> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ReservationRecordEntity::getScheduleId, scheduleId)
+                .eq(ReservationRecordEntity::getStatus, 0);
+        boolean remove = reservationRecordService.remove(wrapper);
+        if (!remove)
+            throw new BusinessException("已取消预约记录删除失败！");
         boolean b = scheduleRecordService.removeById(scheduleId);
         if (!b)
             throw new BusinessException("排课计划删除失败！");
