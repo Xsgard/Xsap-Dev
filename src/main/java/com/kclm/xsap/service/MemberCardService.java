@@ -8,7 +8,6 @@ import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.OperateRecordVo;
 import org.springframework.validation.BindingResult;
 
-import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -22,9 +21,9 @@ public interface MemberCardService extends IService<MemberCardEntity> {
 
     void memberBind(BindCardInfoDto info, BindingResult bindingResult);
 
-    void addCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult);
+    void addCard(MemberCardEntity cardEntity, Long[] courseListStr, BindingResult bindingResult);
 
-    void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr);
+    void editCard(MemberCardEntity cardEntity, Long[] courseListStr);
 
     List<MemberCardEntity> getCardList(Long memberId);
 

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -333,7 +332,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
      */
     @Override
     @Transactional
-    public void editCard(@Valid MemberCardEntity cardEntity, Long[] courseListStr) {
+    public void editCard(MemberCardEntity cardEntity, Long[] courseListStr) {
         //修改实体信息
         cardEntity.setLastModifyTime(LocalDateTime.now());
         boolean b = this.updateById(cardEntity);
