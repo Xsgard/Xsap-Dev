@@ -109,24 +109,39 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         bindRecordEntity.setValidDay((info.getValidDay() + cardEntity.getTotalDay()));
         bindRecordEntity.setCreateTime(LocalDateTime.now());
         memberBindRecordService.save(bindRecordEntity);
-
-        String operateType = "绑卡操作";
-        if (info.getReceivedMoney() != null) {
-            operateType = "绑卡充值操作";
-        }
         //操作记录日志信息
+        String operateType = "绑卡操作";
         MemberLogEntity log = new MemberLogEntity();
+        //绑卡日志
         log.setType(operateType);
-        log.setInvolveMoney(BigDecimal.valueOf(info.getReceivedMoney()));
+        log.setInvolveMoney(BigDecimal.valueOf(0));
         log.setOperator(info.getOperator());
         log.setMemberBindId(bindRecordEntity.getId());
         log.setCreateTime(LocalDateTime.now());
-        log.setCardCountChange(info.getValidCount());
-        log.setCardDayChange(info.getValidDay());
+        log.setCardCountChange(cardEntity.getTotalCount());
+        log.setCardDayChange(cardEntity.getTotalDay());
         log.setCardActiveStatus(1);
         boolean b = memberLogService.save(log);
         if (!b)
             throw new BusinessException("日志保存失败！");
+        //绑卡充值日志
+        if (info.getReceivedMoney() != null) {
+            MemberLogEntity logBind = new MemberLogEntity();
+            operateType = "绑卡充值操作";
+            logBind.setType(operateType);
+            logBind.setInvolveMoney(BigDecimal.valueOf(info.getReceivedMoney()));
+            logBind.setOperator(info.getOperator());
+            logBind.setMemberBindId(bindRecordEntity.getId());
+            logBind.setCreateTime(LocalDateTime.now());
+            logBind.setCardCountChange(info.getValidCount());
+            logBind.setCardDayChange(info.getValidDay());
+            logBind.setCardActiveStatus(1);
+            boolean b1 = memberLogService.save(logBind);
+            if (!b1)
+                throw new BusinessException("日志保存失败！");
+        }
+
+
         //消费记录
         ConsumeRecordEntity consumeRecord = new ConsumeRecordEntity();
         consumeRecord.setOperateType("绑卡操作");
