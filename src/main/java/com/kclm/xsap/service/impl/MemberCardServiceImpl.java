@@ -175,6 +175,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         boolean b = memberBindRecordService.updateById(record);
         if (!b)
             throw new BusinessException("修改状态失败！");
+        //写入日志
         MemberLogEntity log = new MemberLogEntity();
         String note;
         if (status == 1)
@@ -195,6 +196,13 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
             throw new BusinessException("日志保存失败！");
     }
 
+    /**
+     * 获取该卡的可使用剩余次数 和 课程中每次消费多少课次
+     *
+     * @param memberId   会员Id
+     * @param bindCardId 绑卡Id
+     * @return List<OperateRecordVo>
+     */
     @Override
     public List<OperateRecordVo> getOperateRecords(Long memberId, Long bindCardId) {
         LambdaQueryWrapper<MemberLogEntity> queryWrapper = new LambdaQueryWrapper<>();

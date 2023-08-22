@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Asgard
@@ -29,6 +31,8 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     private GlobalReservationSetService reservationSetService;
     private ReservationRecordService reservationRecordService;
     private ClassRecordService classRecordService;
+    private CourseCardService courseCardService;
+    private MemberService memberService;
     private ReservationRecordDao reservationRecordDao;
 
     @Autowired
@@ -43,7 +47,11 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
                             ScheduleRecordService scheduleRecordService,
                             GlobalReservationSetService reservationSetService,
                             ReservationRecordService reservationRecordService,
-                            ClassRecordService classRecordService) {
+                            ClassRecordService classRecordService,
+                            CourseCardService courseCardService,
+                            MemberService memberService) {
+        this.memberService = memberService;
+        this.courseCardService = courseCardService;
         this.classRecordService = classRecordService;
         this.reservationRecordService = reservationRecordService;
         this.courseService = courseService;
@@ -53,7 +61,11 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         this.reservationSetService = reservationSetService;
     }
 
-    //TODO 添加预约时判断会员卡是否支持本课程
+    /**
+     * 添加预约记录
+     *
+     * @param reservationRecord 预约信息
+     */
     @Override
     @Transactional
     public void addReserve(ReservationRecordEntity reservationRecord) {
@@ -64,14 +76,27 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         MemberBindRecordEntity memberBindRecord = memberBindRecordService.getOne(queryWrapper);
         //会员卡实体细信息
         MemberCardEntity cardEntity = memberCardService.getById(memberBindRecord.getCardId());
-        //校验卡是否激活
-        if (memberBindRecord.getActiveStatus() != 1)
-            throw new BusinessException("该卡未激活，不能进行消费！");
         //排课计划实体
         ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(reservationRecord.getScheduleId());
         //课程实体信息
         CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
+        //会员信息
+        MemberEntity member = memberService.getById(reservationRecord.getMemberId());
+
+        //校验卡是否激活
+        if (memberBindRecord.getActiveStatus() != 1)
+            throw new BusinessException("该卡未激活，不能进行消费！");
+
         LocalDateTime valDay = TimeUtil.timeSubDays(memberBindRecord.getCreateTime(), memberBindRecord.getValidDay());
+        //校验本卡是否支持该课程
+        LambdaQueryWrapper<CourseCardEntity> qw = new LambdaQueryWrapper<>();
+        qw.eq(CourseCardEntity::getCourseId, courseEntity.getId());
+        List<CourseCardEntity> courseCard = courseCardService.list(qw);
+        long count = courseCard.stream()
+                .filter(item -> Objects.equals(item.getCardId(), reservationRecord.getCardId()))
+                .count();
+        if (count < 1)
+            throw new BusinessException("该卡不支持本课程，请换一张会员卡！");
         //校验卡是否在有效期
         if (valDay.isBefore(LocalDateTime.now()))
             throw new BusinessException("该卡已不在有效期！");
@@ -79,6 +104,15 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         if ((memberBindRecord.getValidCount() - courseEntity.getTimesCost()) < 0) {
             throw new BusinessException("该卡余额不足以消费该课程！");
         }
+        //判断会员是否满足课程要求
+        //课程性别限制
+        if (!courseEntity.getLimitSex().equals(member.getSex()))
+            throw new BusinessException("很抱歉，您不满足课程的性别要求！");
+        //课程年龄限制
+        int age = member.getBirthday().until(LocalDate.now()).getYears();
+        if (age < courseEntity.getLimitAge())
+            throw new BusinessException("很抱歉，您不满足课程的年龄要求");
+
         //全局设置实体信息
         GlobalReservationSetEntity globalSet = reservationSetService.getById(1);
         //预约开始时间
