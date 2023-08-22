@@ -217,6 +217,12 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 手动扣费
+     * TODO 添加上课记录
+     *
+     * @param vo 扣费信息
+     */
     @Override
     @Transactional
     public void consumeOpt(ConsumeFormVo vo) {
