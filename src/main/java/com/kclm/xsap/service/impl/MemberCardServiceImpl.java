@@ -243,7 +243,6 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
 
     /**
      * 手动扣费
-     * TODO 添加上课记录
      *
      * @param vo 扣费信息
      */

@@ -186,6 +186,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
             //课程记录实体信息
             ClassRecordEntity classRecordEntity = new ClassRecordEntity();
             classRecordEntity.setMemberId(reservationRecord.getMemberId());
+            classRecordEntity.setNote("正常预约客户");
             classRecordEntity.setCardName(cardEntity.getName());
             classRecordEntity.setScheduleId(scheduleRecord.getId());
             classRecordEntity.setCheckStatus(0);
