@@ -3,6 +3,8 @@ package com.kclm.xsap.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.kclm.xsap.entity.ReservationRecordEntity;
 
+import java.time.LocalDate;
+
 /**
  * @author Asgard
  * @version 1.0
@@ -16,4 +18,6 @@ public interface ReservationRecordService extends IService<ReservationRecordEnti
     void cancelReserve(Long reserveId);
 
     Long getReserveId(Long memberId, Long scheduleId);
+
+    void exportReservationListToLocal(LocalDate startDate, LocalDate endDate);
 }

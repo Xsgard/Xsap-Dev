@@ -1,20 +1,26 @@
 package com.kclm.xsap.service.impl;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kclm.xsap.dao.ReservationRecordDao;
+import com.kclm.xsap.dto.ExportReservationDTO;
 import com.kclm.xsap.entity.*;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.*;
+import com.kclm.xsap.utils.ExcelExportUtil;
 import com.kclm.xsap.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Asgard
@@ -148,7 +154,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         wrapper.eq(ReservationRecordEntity::getMemberId, reservationRecord.getMemberId())
                 .eq(ReservationRecordEntity::getScheduleId, reservationRecord.getScheduleId())
                 .eq(ReservationRecordEntity::getCardId, reservationRecord.getCardId());
-        ReservationRecordEntity one = reservationRecordService.getOne(wrapper);
+        ReservationRecordEntity one = this.getOne(wrapper);
         //flag 为true 查询到预约记录
         boolean flag = one != null;
         //已经有预约记录
@@ -218,7 +224,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     @Override
     @Transactional
     public void cancelReserve(Long reserveId) {
-        ReservationRecordEntity reservationRecord = reservationRecordService.getById(reserveId);
+        ReservationRecordEntity reservationRecord = this.getById(reserveId);
         reservationRecord.setStatus(0);
         reservationRecord.setCancelTimes(reservationRecord.getCancelTimes() + 1);
         ScheduleRecordEntity scheduleRecord = scheduleRecordService.getById(reservationRecord.getScheduleId());
@@ -257,7 +263,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         if (!flag) {
             throw new BusinessException("保存失败！");
         }
-        boolean b = reservationRecordService.updateById(reservationRecord);
+        boolean b = this.updateById(reservationRecord);
         if (!b) {
             throw new BusinessException("保存失败！");
         }
@@ -267,4 +273,39 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     public Long getReserveId(Long memberId, Long scheduleId) {
         return reservationRecordDao.getReserveId(memberId, scheduleId);
     }
+
+    @Override
+    public void exportReservationListToLocal(LocalDate startDate, LocalDate endDate) {
+        //
+        List<ReservationRecordEntity> recordEntityList = reservationRecordService.list();
+        //
+        List<ExportReservationDTO> collect = recordEntityList.stream().map(item -> {
+            ScheduleRecordEntity schedule = scheduleRecordService.getById(item.getScheduleId());
+            CourseEntity course = courseService.getById(schedule.getCourseId());
+            MemberEntity member = memberService.getById(item.getMemberId());
+            //
+            ExportReservationDTO dto = new ExportReservationDTO();
+            //
+            dto.setCourseName(course.getName());
+            dto.setReserveTime(LocalDateTimeUtil.format(item.getCreateTime(), DatePattern.NORM_DATETIME_PATTERN));
+            dto.setMemberName(member.getName());
+            dto.setCardName(item.getCardName());
+            dto.setReserveNumbers(item.getReserveNums());
+            dto.setTimesCost(course.getTimesCost());
+            dto.setOperateTime(item.getLastModifyTime() == null ?
+                    LocalDateTimeUtil.format(item.getCreateTime(), DatePattern.NORM_DATETIME_PATTERN) :
+                    LocalDateTimeUtil.format(item.getLastModifyTime(), DatePattern.NORM_DATETIME_PATTERN));
+            dto.setOperator(item.getOperator());
+            dto.setReserveNote(item.getNote());
+            dto.setReserveStatus(item.getStatus() == 1 ? "有效" : "无效");
+            return dto;
+        }).collect(Collectors.toList());
+        try {
+            ExcelExportUtil.excelWriteToLocal(collect);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }
