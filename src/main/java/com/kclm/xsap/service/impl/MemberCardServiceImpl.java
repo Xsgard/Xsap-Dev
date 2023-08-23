@@ -42,6 +42,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     private MemberCardService memberCardService;
     private MemberBindRecordService memberBindRecordService;
     private MemberLogService memberLogService;
+    private ClassRecordService classRecordService;
     private ConsumeRecordService consumeRecordService;
     private RechargeRecordService rechargeRecordService;
 
@@ -59,7 +60,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
                             ScheduleRecordService scheduleRecordService,
                             MemberLogService memberLogService,
                             ConsumeRecordService consumeRecordService,
-                            RechargeRecordService rechargeRecordService) {
+                            RechargeRecordService rechargeRecordService,
+                            ClassRecordService classRecordService) {
+        this.classRecordService = classRecordService;
         this.rechargeRecordService = rechargeRecordService;
         this.consumeRecordService = consumeRecordService;
         this.memberCardService = memberCardService;
@@ -284,6 +287,23 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         boolean save = memberLogService.save(log);
         if (!save)
             throw new BusinessException("保存日志失败！");
+        //查询会员卡实体信息
+        MemberCardEntity card = this.getById(bindRecord.getCardId());
+        //上课记录
+        ClassRecordEntity classRecord = new ClassRecordEntity();
+        classRecord.setMemberId(vo.getMemberId());
+        classRecord.setCardName(card.getName());
+        classRecord.setScheduleId(vo.getScheduleId());
+        classRecord.setNote("手动添加扣费用户");
+        classRecord.setComment(vo.getNote());
+        classRecord.setCheckStatus(1);
+        classRecord.setReserveCheck(0);
+        classRecord.setCreateTime(LocalDateTime.now());
+        classRecord.setBindCardId(vo.getCardBindId());
+        //保存上课记录
+        boolean b1 = classRecordService.save(classRecord);
+        if (!b1)
+            throw new BusinessException("上课记录保存失败！");
         //消费记录
         ConsumeRecordEntity consumeRecord = new ConsumeRecordEntity();
         consumeRecord.setOperateType("会员上课扣费操作");
