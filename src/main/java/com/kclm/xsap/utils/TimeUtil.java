@@ -35,4 +35,11 @@ public class TimeUtil {
     public static Integer calculateMonths(LocalDateTime start, LocalDateTime end) {
         return Math.toIntExact(ChronoUnit.MONTHS.between(start, end));
     }
+
+    public static LocalDate subStringToLocalDate(String date) {
+        String[] split = date.split("-");
+        return LocalDate.of(Integer.parseInt(split[0]),
+                Integer.parseInt(split[1]),
+                Integer.parseInt(split[2]));
+    }
 }
