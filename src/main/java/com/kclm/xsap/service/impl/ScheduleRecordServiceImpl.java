@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -437,55 +438,95 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
     @Override
     @Transactional
     public String copySchedules(LocalDate sourceDate, LocalDate targetDate) {
+        LocalDate now = LocalDate.now();
+        if (targetDate.isBefore(now)) {
+            throw new BusinessException("不能将排课复制到过去的时间！");
+        }
         //查询源时间的所有排课信息
         LambdaQueryWrapper<ScheduleRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ScheduleRecordEntity::getStartDate, sourceDate);
         List<ScheduleRecordEntity> sourceSchedules = this.list(queryWrapper);
+        sourceSchedules = sourceSchedules.stream()
+                .map(item -> item.setStartDate(targetDate))//设置排课时间为目标时间
+                .collect(Collectors.toList());
         //查询目标时间所有排课信息
         LambdaQueryWrapper<ScheduleRecordEntity> wrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ScheduleRecordEntity::getStartDate, sourceDate);
+        wrapper.eq(ScheduleRecordEntity::getStartDate, targetDate);
         List<ScheduleRecordEntity> targetSchedules = this.list(wrapper);
         List<ScheduleRecordEntity> result = new ArrayList<>();
         //查询到目标时间 排课信息为空
         if (targetSchedules.isEmpty()) {
-            targetSchedules = sourceSchedules.stream()
-                    .map(item -> item.setStartDate(targetDate)) //设置排课时间为目标时间
-                    .collect(Collectors.toList());
-            boolean b = this.saveBatch(targetSchedules);
+            boolean b = this.saveBatch(sourceSchedules);
             if (!b)
                 throw new BusinessException("复制时发生错误，请联系管理员！");
             return "原排课计划共有-》" + sourceSchedules.size() + "条,已成功复制-》" + sourceSchedules.size() + "条排课！";
         } else {
-            //查询到目标时间 排课信息不为空
-            targetSchedules.forEach(t -> {
-                for (ScheduleRecordEntity schedule : sourceSchedules) {
-                    if (!Objects.equals(schedule.getTeacherId(), t.getTeacherId())) {
-                        result.add(schedule);
-                    } else {
-                        CourseEntity course_t = courseService.getById(t.getCourseId());
-                        CourseEntity course_s = courseService.getById(schedule.getCourseId());
-                        if (schedule.getClassTime().isAfter(t.getClassTime()) &&
-                                schedule.getClassTime().isBefore(t.getClassTime()
-                                        .plusMinutes(course_t.getDuration()))) {
-                            //源排课的开始时间在目标排课开始时间到结束时间之间
-                            result.add(null);
-                        } else if (schedule.getClassTime().isBefore(t.getClassTime()) &&
-                                schedule.getClassTime().plusMinutes(course_s.getDuration()).isAfter(t.getClassTime())) {
-                            //源排课开始时间在目标开始时间之前，结束时间在目标排课开始时间之后
-                            result.add(null);
-                        } else {
-                            result.add(schedule);
+//            List<ScheduleRecordEntity> finalSourceSchedules = sourceSchedules;
+//            targetSchedules.forEach(t -> {
+//                for (ScheduleRecordEntity schedule : finalSourceSchedules) {
+//                    if (!Objects.equals(schedule.getTeacherId(), t.getTeacherId())) {
+//                        result.add(schedule);
+//                    } else {
+//                        CourseEntity course_t = courseService.getById(t.getCourseId());
+//                        CourseEntity course_s = courseService.getById(schedule.getCourseId());
+//                        if (schedule.getClassTime().isAfter(t.getClassTime()) &&
+//                                schedule.getClassTime().isBefore(t.getClassTime()
+//                                        .plusMinutes(course_t.getDuration()))) {
+//                            //源排课的开始时间在目标排课开始时间到结束时间之间
+//                            result.add(null);
+//                        } else if (schedule.getClassTime().isBefore(t.getClassTime()) &&
+//                                schedule.getClassTime().plusMinutes(course_s.getDuration()).isAfter(t.getClassTime())) {
+//                            //源排课开始时间在目标开始时间之前，结束时间在目标排课开始时间之后
+//                            result.add(null);
+//                        } else if (t.getClassTime().equals(schedule.getClassTime())) {
+//                            result.add(null);
+//                        } else {
+//                            result.add(schedule);
+//                        }
+//                    }
+//                }
+//            });
+            for (ScheduleRecordEntity s : sourceSchedules) {
+                CourseEntity s_course = courseService.getById(s.getCourseId());
+                LocalTime s_start = s.getClassTime();
+                LocalTime s_end = s_start.plusMinutes(s_course.getDuration());
+                boolean flag = true;
+                List<ScheduleRecordEntity> teacherSchedule = targetSchedules.stream()
+                        .filter(item -> Objects.equals(item.getTeacherId(), s.getTeacherId()))
+                        .collect(Collectors.toList());
+                if (!teacherSchedule.isEmpty()) {
+                    for (ScheduleRecordEntity t : teacherSchedule) {
+                        CourseEntity t_course = courseService.getById(t.getCourseId());
+                        LocalTime t_start = t.getClassTime();
+                        LocalTime t_end = t_start.plusMinutes(t_course.getDuration());
+                        if (s_start.isBefore(t_start) && s_end.isAfter(t_start)) {
+                            flag = false;
+                            break;
+                        }
+                        if (s_start.isAfter(t_start) && s_start.isBefore(t_end)) {
+                            flag = false;
+                            break;
+                        }
+                        if (s_start.equals(t_start)) {
+                            flag = false;
+                            break;
                         }
                     }
                 }
-            });
-            List<ScheduleRecordEntity> collect = result.stream()
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            boolean b = scheduleRecordService.saveBatch(collect);
-            if (!b)
-                throw new BusinessException("复制时发生错误，请联系管理员！");
-            return "原排课计划共有-》" + sourceSchedules.size() + "条,已成功复制-》" + collect.size() + "条排课！";
+                //
+                if (flag)
+                    result.add(s);
+            }
+//            List<ScheduleRecordEntity> collect = result.stream()
+//                    .filter(Objects::nonNull)
+//                    .distinct()
+//                    .collect(Collectors.toList());
+            if (!result.isEmpty()) {
+                boolean b = scheduleRecordService.saveBatch(result);
+                if (!b)
+                    throw new BusinessException("复制时发生错误，请联系管理员！");
+            }
+            return "原排课计划共有-》" + sourceSchedules.size() + "条,已成功复制-》" + result.size() + "条排课！";
         }
 //比较器
 //        Comparator<ScheduleRecordEntity> comparator = new Comparator<ScheduleRecordEntity>() {
