@@ -9,6 +9,7 @@ import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -37,4 +38,6 @@ public interface ScheduleRecordService extends IService<ScheduleRecordEntity> {
     List<ScheduleForConsumeSearchVo> getForConsumeSearch();
 
     void deleteScheduleById(Long scheduleId);
+
+    String copySchedules(LocalDate sourceDate, LocalDate targetDate);
 }
