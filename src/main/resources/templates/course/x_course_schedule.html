@@ -562,17 +562,28 @@
         });
 
         //提交表单
+        // $("#reserveList_btn").click(function () {
+        //     $.post("/reserve/exportReserveList.do", exportReserveListForm, function (result) {
+        //         if (result.code === 0) {
+        //             alert(result.msg);
+        //             window.location.reload();
+        //         } else if (result.code === 400) {
+        //             alert(result.msg);
+        //         } else {
+        //             alert("尚无此功能")
+        //         }
+        //     });
+        // });
+
         $("#reserveList_btn").click(function () {
-            $.post("/reserve/exportReserveList.do", exportReserveListForm, function (result) {
-                if (result.code === 0) {
-                    alert(result.msg);
-                    window.location.reload();
-                } else if (result.code === 400) {
-                    alert(result.msg);
-                } else {
-                    alert("尚无此功能")
-                }
-            });
+            var startDateStr = $('[name="startDateStr"]').val();
+            var endDateStr = $('[name="endDateStr"]').val();
+            window.location = '/reserve/exportReserveList.do?startDateStr=' + startDateStr + '&endDateStr=' + endDateStr;
+            // window.open($.ajax({
+            //     url: '/reserve/exportReserveList.do',
+            //     method: 'post',
+            //     data: exportReserveListForm
+            // }))
         });
 
         //时间控件
