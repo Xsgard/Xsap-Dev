@@ -15,5 +15,7 @@ import java.util.List;
 public interface RechargeRecordService extends IService<RechargeRecordEntity> {
     List<Integer> getRechargeList(LocalDateTime start, LocalDateTime end);
 
+    List<Integer> getRechargeListForSeason(LocalDateTime start, LocalDateTime end);
+
     void memberRecharge(RechargeRecordEntity rechargeRecord);
 }

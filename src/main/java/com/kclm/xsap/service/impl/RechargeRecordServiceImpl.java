@@ -61,6 +61,25 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
     }
 
     @Override
+    public List<Integer> getRechargeListForSeason(LocalDateTime start, LocalDateTime end) {
+        LambdaQueryWrapper<RechargeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.between(RechargeRecordEntity::getCreateTime, start, end);
+        List<RechargeRecordEntity> recharges = this.list(queryWrapper);
+        List<Integer> data = new ArrayList<>(end.getMonthValue());
+        if (!recharges.isEmpty()) {
+            for (int i = start.getMonthValue(); i <= start.getMonthValue() + TimeUtil.calculateMonths(start, end) - 1; i++) {
+                int finalI = i;
+                Integer monthMoney = recharges.stream()
+                        .filter(e -> e.getCreateTime().getMonthValue() == finalI)
+                        .mapToInt(item -> item.getReceivedMoney().intValue())
+                        .sum();
+                data.add(monthMoney);
+            }
+        }
+        return data;
+    }
+
+    @Override
     @Transactional
     public void memberRecharge(RechargeRecordEntity rechargeRecord) {
         //日志信息

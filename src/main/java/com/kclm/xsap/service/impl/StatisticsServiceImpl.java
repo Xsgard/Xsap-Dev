@@ -325,7 +325,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         for (int i = vo.getBeginYear(); i <= vo.getEndYear(); i++) {
             time.add(String.valueOf(i));
             LocalDateTime end = start.plusYears(1);
-            int sum = rechargeRecordService.getRechargeList(start, end)
+            int sum = rechargeRecordService.getRechargeListForSeason(start, end)
                     .stream().mapToInt(item -> item).sum();
             data.add(sum);
             start = start.plusYears(1);
