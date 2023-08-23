@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: ReserveRecordDTO 预约记录DTO
  * @date 2023/8/2 15:56
  */
 @Data
