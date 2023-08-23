@@ -1,6 +1,5 @@
 package com.kclm.xsap.utils;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 
@@ -8,6 +7,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -41,7 +41,7 @@ public class ExcelExportUtil {
         }
     }
 
-    public static <T> boolean excelWriteToOnline(List<T> rows, HttpServletResponse response) throws IOException {
+    public static <T> void excelWriteToOnline(List<T> rows, HttpServletResponse response) throws IOException {
         File file = new File(filePath);
         if (!file.exists()) {
             file.createNewFile();
@@ -59,17 +59,14 @@ public class ExcelExportUtil {
             writer.addHeaderAlias("reserveStatus", "预约状态");
 
             writer.write(rows, true);
-
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-            response.setHeader("Content-Disposition", "attachment;filename=test.xlsx");
             ServletOutputStream out = response.getOutputStream();
+            String fileName = URLEncoder.encode("预约记录", "UTF-8");
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
 
             writer.flush(out, true);
-            writer.close();
-            IoUtil.close(out);
-            return true;
         } catch (Exception e) {
-            return false;
+            e.printStackTrace();
         }
     }
 }
