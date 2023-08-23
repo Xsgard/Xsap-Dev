@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -277,6 +278,31 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
     @Override
     public void exportReservationListToLocal(LocalDate startDate, LocalDate endDate) {
         //
+        List<ExportReservationDTO> collect = getExportReservationDTOS();
+        try {
+            ExcelExportUtil.excelWriteToLocal(collect);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void exportReservationListOnline(LocalDate startDate, LocalDate endDate, HttpServletResponse response) {
+        //
+        List<ExportReservationDTO> collect = getExportReservationDTOS();
+        try {
+            ExcelExportUtil.excelWriteToOnline(collect, response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 重构方法：将预约记录实体转为预约记录DTO
+     *
+     * @return List<ExportReservationDTO>
+     */
+    private List<ExportReservationDTO> getExportReservationDTOS() {
         List<ReservationRecordEntity> recordEntityList = reservationRecordService.list();
         //
         List<ExportReservationDTO> collect = recordEntityList.stream().map(item -> {
@@ -300,11 +326,7 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
             dto.setReserveStatus(item.getStatus() == 1 ? "有效" : "无效");
             return dto;
         }).collect(Collectors.toList());
-        try {
-            ExcelExportUtil.excelWriteToLocal(collect);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return collect;
     }
 
 
