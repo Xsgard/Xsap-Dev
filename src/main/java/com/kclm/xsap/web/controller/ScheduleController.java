@@ -12,6 +12,7 @@ import com.kclm.xsap.service.CourseService;
 import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
+import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.utils.ValidationUtil;
 import com.kclm.xsap.vo.ConsumeFormVo;
 import com.kclm.xsap.vo.ScheduleForConsumeSearchVo;
@@ -175,9 +176,11 @@ public class ScheduleController {
 
     @PostMapping("/scheduleCopy.do")
     @ResponseBody
-    public R scheduleCopy(LocalDate sourceDateStr, LocalDate targetDateStr) {
+    public R scheduleCopy(String sourceDateStr, String targetDateStr) {
+        LocalDate sourceDate = TimeUtil.subStringToLocalDate(sourceDateStr);
+        LocalDate targetDate = TimeUtil.subStringToLocalDate(targetDateStr);
         try {
-            String result = scheduleRecordService.copySchedules(sourceDateStr, targetDateStr);
+            String result = scheduleRecordService.copySchedules(sourceDate, targetDate);
             if (result != null)
                 return R.ok(result);
         } catch (BusinessException e) {
