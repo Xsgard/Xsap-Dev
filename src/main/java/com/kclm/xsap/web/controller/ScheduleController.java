@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -170,5 +171,18 @@ public class ScheduleController {
             return R.error(e.getMsg());
         }
         return R.ok("排课计划删除失败！");
+    }
+
+    @PostMapping("/scheduleCopy.do")
+    @ResponseBody
+    public R scheduleCopy(LocalDate sourceDateStr, LocalDate targetDateStr) {
+        try {
+            String result = scheduleRecordService.copySchedules(sourceDateStr, targetDateStr);
+            if (result != null)
+                return R.ok(result);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return R.ok();
     }
 }
