@@ -7,6 +7,7 @@ import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -67,10 +68,24 @@ public class ReserveController {
         LocalDate endDate = TimeUtil.subStringToLocalDate(endDateStr);
 
         try {
-            reservationRecordService.exportReservationListToLocal(startDate, endDate);
+            reservationRecordService.exportReservationListOnline(startDate, endDate, response);
         } catch (BusinessException e) {
             return R.error(e.getMsg());
         }
         return R.ok("导出成功！");
+    }
+
+    @GetMapping("/exportReserveList.do")
+    @ResponseBody
+    public R exportReserveListOnline(String startDateStr, String endDateStr, HttpServletResponse response) {
+        LocalDate startDate = TimeUtil.subStringToLocalDate(startDateStr);
+        LocalDate endDate = TimeUtil.subStringToLocalDate(endDateStr);
+
+        try {
+            reservationRecordService.exportReservationListOnline(startDate, endDate, response);
+        } catch (BusinessException e) {
+            return R.error(e.getMsg());
+        }
+        return null;
     }
 }
