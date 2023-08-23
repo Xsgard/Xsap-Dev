@@ -40,7 +40,7 @@ public class StatisticsController {
     }
 
     /**
-     * TODO 收费统计
+     * 收费统计
      *
      * @return 数据统计--收费统计页面
      */
@@ -50,7 +50,7 @@ public class StatisticsController {
     }
 
     /**
-     * TODO 课消统计
+     * 课消统计
      *
      * @return 数据统计--课消统计页面
      */
@@ -60,7 +60,7 @@ public class StatisticsController {
     }
 
     /**
-     * TODO 总课次统计
+     * 总课次统计
      *
      * @return 数据统计--总课次统计页面
      */
@@ -70,7 +70,7 @@ public class StatisticsController {
     }
 
     /**
-     * TODO 新增与流失统计
+     * 新增与流失统计
      *
      * @return 数据统计--新增与流失统计页面
      */

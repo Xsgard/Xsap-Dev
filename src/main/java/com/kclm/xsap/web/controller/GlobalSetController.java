@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: 处理 /globalSet请求
  * @date 2023/8/8 9:11
  */
 @RequestMapping("/globalSet")
