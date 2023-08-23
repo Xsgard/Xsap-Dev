@@ -564,9 +564,11 @@
         //提交表单
         $("#reserveList_btn").click(function () {
             $.post("/reserve/exportReserveList.do", exportReserveListForm, function (result) {
-                if (result == "yes") {
-                    alert("导出成功");
+                if (result.code === 0) {
+                    alert(result.msg);
                     window.location.reload();
+                } else if (result.code === 400) {
+                    alert(result.msg);
                 } else {
                     alert("尚无此功能")
                 }
