@@ -446,6 +446,9 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
         LambdaQueryWrapper<ScheduleRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ScheduleRecordEntity::getStartDate, sourceDate);
         List<ScheduleRecordEntity> sourceSchedules = this.list(queryWrapper);
+        if (sourceSchedules.isEmpty())
+            throw new BusinessException("原日期内没有排课记录！");
+        //
         sourceSchedules = sourceSchedules.stream()
                 .map(item -> item.setStartDate(targetDate))//设置排课时间为目标时间
                 .collect(Collectors.toList());
@@ -459,7 +462,8 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
             boolean b = this.saveBatch(sourceSchedules);
             if (!b)
                 throw new BusinessException("复制时发生错误，请联系管理员！");
-            return "原排课计划共有-》" + sourceSchedules.size() + "条,已成功复制-》" + sourceSchedules.size() + "条排课！";
+
+            return "原排课计划共有->" + sourceSchedules.size() + "条,已成功复制->" + sourceSchedules.size() + "条排课！";
         } else {
 //            List<ScheduleRecordEntity> finalSourceSchedules = sourceSchedules;
 //            targetSchedules.forEach(t -> {
@@ -486,7 +490,9 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
 //                    }
 //                }
 //            });
+            //
             for (ScheduleRecordEntity s : sourceSchedules) {
+                //
                 CourseEntity s_course = courseService.getById(s.getCourseId());
                 LocalTime s_start = s.getClassTime();
                 LocalTime s_end = s_start.plusMinutes(s_course.getDuration());
@@ -526,7 +532,7 @@ public class ScheduleRecordServiceImpl extends ServiceImpl<ScheduleRecordDao, Sc
                 if (!b)
                     throw new BusinessException("复制时发生错误，请联系管理员！");
             }
-            return "原排课计划共有-》" + sourceSchedules.size() + "条,已成功复制-》" + result.size() + "条排课！";
+            return "原排课计划共有->" + sourceSchedules.size() + "条,已成功复制->" + result.size() + "条排课！";
         }
 //比较器
 //        Comparator<ScheduleRecordEntity> comparator = new Comparator<ScheduleRecordEntity>() {
