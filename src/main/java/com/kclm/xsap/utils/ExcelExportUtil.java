@@ -2,6 +2,7 @@ package com.kclm.xsap.utils;
 
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import org.springframework.boot.system.ApplicationHome;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -13,15 +14,17 @@ import java.util.List;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO excel数据导出工具类
+ * @description: excel数据导出工具类
  * @date 2023/8/23 15:31
  */
 public class ExcelExportUtil {
-    private static final String filePath = "d:/develop/预约记录.xlsx";
+    private static final String filePath = "/reservations/预约记录.xlsx";
 
     public static <T> boolean excelWriteToLocal(List<T> rows) throws IOException {
-
-        try (ExcelWriter writer = ExcelUtil.getWriter(filePath)) {
+        ApplicationHome home = new ApplicationHome(ExcelExportUtil.class);
+        File dir = home.getDir();
+        File file = new File(dir, filePath);
+        try (ExcelWriter writer = ExcelUtil.getWriter(file)) {
             writer.addHeaderAlias("courseName", "课程名");
             writer.addHeaderAlias("reserveTime", "预约时间");
             writer.addHeaderAlias("memberName", "会员名");
