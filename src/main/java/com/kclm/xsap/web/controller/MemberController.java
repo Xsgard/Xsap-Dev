@@ -34,8 +34,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/member")
 public class MemberController {
-    private static final String phoneRegex = "^1[3-9]\\d{9}$";
-
     private MemberService memberService;
 
     private MemberCardService cardService;
@@ -102,7 +100,7 @@ public class MemberController {
     @PostMapping("/memberAdd.do")
     @ResponseBody
     public R memberAdd(@Valid MemberEntity member, BindingResult bindingResult) {
-        return memberService.login(member, bindingResult);
+        return memberService.memberAdd(member, bindingResult);
     }
 
     @PostMapping("/x_member_edit.do")
