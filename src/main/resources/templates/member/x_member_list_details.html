@@ -49,7 +49,8 @@
                 <div class="ibox-content" style="height: 190px;">
                     <div class="col-md-8">
                         <img alt="会员信息" class="img-circle" id="avatar_img" src="../../static/img/个性头像.png"
-                             style="height: 150px;width: 150px; float: left; " th:src="@{/static/img/个性头像.png}">
+                             style="height: 150px;width: 150px; float: left; "
+                             th:src="@{/upload/static/img/个性头像.png}">
                         <input accept="image/jpg,image/png,image/gif" id="avatar_file" name="avatar_file"
                                style="width: 100%;height:100%;opacity: 0;position: absolute;left:0;top: 0;"
                                type="file"/>
@@ -656,7 +657,7 @@
                         swal(userData.msg, "", "success");
                         //刷新界面
                         setTimeout(function () {
-                            $("#avatar_img").attr("src", "/images/member_img/" + userData.avatarUrl);
+                            $("#avatar_img").attr("src", "/upload/images/member_img/" + userData.avatarUrl);
                         }, 1000);
                     } else {
                         swal(userData.msg, "请联系管理", "info");
@@ -872,7 +873,7 @@
             if (baseInfo.avatarUrl == null) {
                 baseInfo.avatarUrl = "user.png";
             }
-            $("#avatar_img").attr("src", "/images/member_img/" + baseInfo.avatarUrl);
+            $("#avatar_img").attr("src", "/upload/images/member_img/" + baseInfo.avatarUrl);
 
             $("label h2").html('<strong>' + baseInfo.name + '</strong>');
             $("label p:nth-child(2)").html('<span style="margin-right: 15px;">性别:</span>' + baseInfo.sex);
