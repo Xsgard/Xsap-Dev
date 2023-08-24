@@ -24,9 +24,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -304,27 +302,48 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
      */
     @Override
     public List<ConsumeInfoVo> getMemberConsumeList(Long memberId) {
+        //存放已经消费卡次
+        Map<Long, Integer> countMap = new HashMap<>();
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(MemberBindRecordEntity::getMemberId, memberId);
         List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
+        //
+
         List<ConsumeInfoVo> voList = new ArrayList<>();
         bindRecordEntities.forEach(item -> {
-            //
-            ConsumeInfoVo vo = new ConsumeInfoVo();
             //会员卡实体信息
             MemberCardEntity card = cardService.getById(item.getCardId());
             //
             LambdaQueryWrapper<ConsumeRecordEntity> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(ConsumeRecordEntity::getMemberBindId, item.getId());
+            wrapper.eq(ConsumeRecordEntity::getMemberBindId, item.getId())
+                    .orderByAsc(ConsumeRecordEntity::getCreateTime);
             //
             List<ConsumeRecordEntity> consumeList = consumeRecordService.list(wrapper);
+            //统计已经消费次数 K--会员卡绑定Id  V--消费次数和
+            for (ConsumeRecordEntity c : consumeList) {
+                if (countMap.containsKey(c.getMemberBindId())) {
+                    //遍历消费记录是添加上每次的消费次数
+                    countMap.put(c.getMemberBindId(),
+                            countMap.get(c.getMemberBindId()) + c.getCardCountChange());
+                } else {
+                    //添加值
+                    countMap.put(c.getMemberBindId(), c.getCardCountChange());
+                }
+            }
             //
-            consumeList.forEach(e -> {
+            for (ConsumeRecordEntity e : consumeList) {
+                //
+                ConsumeInfoVo vo = new ConsumeInfoVo();
+
                 vo.setCardName(card.getName());
                 vo.setConsumeId(e.getId());
                 vo.setOperateTime(e.getCreateTime());
                 vo.setCardCountChange(e.getCardCountChange());
-                vo.setTimesRemainder(item.getValidCount());
+                //
+                int i = countMap.get(e.getMemberBindId()) - e.getCardCountChange();
+                vo.setTimesRemainder(item.getValidCount() + i);
+                countMap.put(e.getMemberBindId(), i);
+
                 vo.setMoneyCostBigD(e.getMoneyCost());
                 vo.setMoneyCost(e.getMoneyCost().toString());
                 vo.setOperateType(e.getOperateType());
@@ -334,7 +353,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                 if (e.getLastModifyTime() != null)
                     vo.setLastModifyTime(e.getLastModifyTime());
                 voList.add(vo);
-            });
+            }
+
         });
 
         return voList;
