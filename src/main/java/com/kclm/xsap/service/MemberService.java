@@ -28,7 +28,7 @@ public interface MemberService extends IService<MemberEntity> {
 
     MemberEntity queryByPhone(String phone);
 
-    R login(@Valid MemberEntity member, BindingResult bindingResult);
+    R memberAdd(@Valid MemberEntity member, BindingResult bindingResult);
 
     R memberEdit(@Valid MemberEntity member, BindingResult bindingResult);
 

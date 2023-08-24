@@ -21,8 +21,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +35,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> implements MemberService {
+    private static final String phoneRegex = "^1[3-9]\\d{9}$";
+
     private MemberCardService cardService;
 
     private MemberBindRecordService bindRecordService;
@@ -154,18 +156,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
     }
 
     /**
-     * 登录
+     * 添加会员
      *
      * @param member        会员信息
      * @param bindingResult 校验结果集
      * @return R
      */
     @Override
-    public R login(MemberEntity member, BindingResult bindingResult) {
+    public R memberAdd(MemberEntity member, BindingResult bindingResult) {
         //BeanValidation校验前端传入的数据
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
         }
+        if (!member.getPhone().matches(phoneRegex))
+            return R.error("手机号有误，请检查是否操作有误！");
         //根据手机号查询数据库中是否有重复记录
         MemberEntity queried = this.queryByPhone(member.getPhone());
         //记录数大于0 或 手机号不满足正则校验
@@ -188,34 +192,32 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
      * @return R
      */
     @Override
-    public R memberEdit(MemberEntity member, BindingResult bindingResult) {
+    public R memberEdit(@Valid MemberEntity member, BindingResult bindingResult) {
         //BeanValidation校验前端传入的数据
         if (bindingResult.hasErrors()) {
-            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-            for (FieldError fe : fieldErrors) {
-                System.out.println(fe.getField() + " ==> " + fe.getDefaultMessage());
-            }
-            return R.error().put("error", fieldErrors);
-        } else {
-            //查询到数据库中存储的信息
-            MemberEntity temp = this.getById(member.getId());
-            int count = 0;
-            if (!member.getPhone().equals(temp.getPhone())) {
-                //通过手机号查询记录数
-                LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(MemberEntity::getPhone, member.getPhone());
-                count = this.count(queryWrapper);
-            }
-            if (count > 0) {
-                throw new BusinessException("电话号码重复，检查是否操作有误！");
-            }
-            //修改
-            boolean b = this.updateById(member);
-            if (b)
-                return R.ok();
-            else
-                return R.error();
+            return ValidationUtil.getErrors(bindingResult);
         }
+        if (!member.getPhone().matches(phoneRegex))
+            throw new BusinessException("手机号码格式不正确！");
+        //查询到数据库中存储的信息
+        MemberEntity temp = this.getById(member.getId());
+        int count = 0;
+        if (!member.getPhone().equals(temp.getPhone())) {
+            //通过手机号查询记录数
+            LambdaQueryWrapper<MemberEntity> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberEntity::getPhone, member.getPhone());
+            count = this.count(queryWrapper);
+        }
+        if (count > 0) {
+            throw new BusinessException("电话号码重复，检查是否操作有误！");
+        }
+        //修改
+        boolean b = this.updateById(member);
+        if (b)
+            return R.ok();
+        else
+            return R.error();
+
     }
 
     /**
