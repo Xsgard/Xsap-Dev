@@ -9,7 +9,6 @@ import com.kclm.xsap.entity.ScheduleRecordEntity;
 import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.ConsumeRecordService;
 import com.kclm.xsap.service.CourseService;
-import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.ScheduleRecordService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
@@ -41,15 +40,12 @@ import java.util.List;
 public class ScheduleController {
     private ScheduleRecordService scheduleRecordService;
     private CourseService courseService;
-    private MemberBindRecordService memberBindRecordService;
     private ConsumeRecordService consumeRecordService;
 
     @Autowired
     private void setApplicationContext(ScheduleRecordService scheduleRecordService, CourseService courseService,
-                                       MemberBindRecordService memberBindRecordService,
                                        ConsumeRecordService consumeRecordService) {
         this.consumeRecordService = consumeRecordService;
-        this.memberBindRecordService = memberBindRecordService;
         this.scheduleRecordService = scheduleRecordService;
         this.courseService = courseService;
     }
