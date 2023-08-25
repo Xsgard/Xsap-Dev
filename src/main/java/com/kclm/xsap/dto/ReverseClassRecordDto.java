@@ -12,7 +12,7 @@ import java.time.LocalTime;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description:
  * @date 2023/8/9 14:31
  */
 @Data
@@ -45,8 +45,6 @@ public class ReverseClassRecordDto {
     private String memberSex;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate memberBirthday;
-
-//    private MemberEntity member;
 
     /**
      * 创建时间
