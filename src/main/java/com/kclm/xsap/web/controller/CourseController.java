@@ -2,9 +2,7 @@ package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.entity.CourseEntity;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.CourseCardService;
 import com.kclm.xsap.service.CourseService;
-import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,17 +30,9 @@ public class CourseController {
 
     private CourseService courseService;
 
-    private CourseCardService courseCardService;
-
-    private MemberCardService cardService;
-
     @Autowired
-    private void setApplicationContext(CourseService courseService,
-                                       MemberCardService cardService,
-                                       CourseCardService courseCardService) {
+    private void setApplicationContext(CourseService courseService) {
         this.courseService = courseService;
-        this.cardService = cardService;
-        this.courseCardService = courseCardService;
     }
 
     @GetMapping("/x_course_list.do")
