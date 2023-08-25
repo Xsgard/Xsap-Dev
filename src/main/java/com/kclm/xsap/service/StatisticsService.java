@@ -1,7 +1,7 @@
 package com.kclm.xsap.service;
 
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
-import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.index.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 
