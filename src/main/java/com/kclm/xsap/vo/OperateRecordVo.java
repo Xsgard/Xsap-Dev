@@ -44,14 +44,6 @@ public class OperateRecordVo {
     private Integer changeCount;
 
     /**
-     * 有效期
-     */
-//    private Integer validDay;
-    /**
-     * 卡到期日
-     */
-//    private LocalDateTime endToDate;
-    /**
      * 消费金额
      */
 //    @JSONField(format = "¤00.00")
