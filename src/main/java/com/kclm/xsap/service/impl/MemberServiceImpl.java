@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> implements MemberService {
-    private static final String phoneRegex = "^1[3-9]\\d{9}$";
+    private static final String PHONE_REGEX = "^1[3-9]\\d{9}$";
 
     private MemberCardService cardService;
 
@@ -90,7 +90,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         LambdaQueryWrapper<MemberBindRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(id != null, MemberBindRecordEntity::getMemberId, id);
         List<MemberBindRecordEntity> bindRecordEntities = bindRecordService.list(queryWrapper);
-        return bindRecordEntities.stream().map((item) -> {
+        return bindRecordEntities.stream().map(item -> {
             MemberCardEntity card = cardService.getById(item.getCardId());
             LocalDateTime endTime = TimeUtil.timeSubDays(item.getCreateTime(), item.getValidDay());
             return new MemberCardDTO(
@@ -111,7 +111,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         //查询出MemberEntity的List
         List<MemberEntity> memberEntityList = this.list();
         //使用Stream流操作memberEntityList返回List<MemberDTO>类型
-        return memberEntityList.stream().map((item) -> {
+        return memberEntityList.stream().map(item -> {
             //将MemberEntity转换为MemberDTO
             MemberDTO memberDTO = MemberConvert.INSTANCE.entity2Dto(item);
             memberDTO.setName(item.getName() + "(" + item.getPhone() + ")");
@@ -124,13 +124,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             //存储会员卡名的集合
             List<String> cardName = new ArrayList<>();
             //遍历record集合
-            recordEntityList.forEach((record) -> {
-                if (Objects.equals(record.getMemberId(), item.getId())) {
+            recordEntityList.forEach(memberBindRecordEntity -> {
+                if (Objects.equals(memberBindRecordEntity.getMemberId(), item.getId())) {
                     //查询条件--> 会员卡表的id等于会员绑定记录表的卡号
                     LambdaQueryWrapper<MemberCardEntity> queryWrapper = new LambdaQueryWrapper<>();
-                    queryWrapper.eq(MemberCardEntity::getId, record.getCardId());
+                    queryWrapper.eq(MemberCardEntity::getId, memberBindRecordEntity.getCardId());
                     List<MemberCardEntity> cardEntityList = cardService.list(queryWrapper);
-                    cardEntityList.forEach((card) -> {
+                    cardEntityList.forEach(card -> {
                         cardName.add(card.getName());
                         memberDTO.setCardNameList(cardName);
                     });
@@ -168,12 +168,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
         }
-        if (!member.getPhone().matches(phoneRegex))
+        if (!member.getPhone().matches(PHONE_REGEX))
             return R.error(401, "手机号格式错误！");
         //根据手机号查询数据库中是否有重复记录
         MemberEntity queried = this.queryByPhone(member.getPhone());
         //记录数大于0 或 手机号不满足正则校验
-        //if (count > 0 || member.getPhone().matches(phoneRegex)) {
         if (queried != null) {
             return R.error(401, "手机号有误，请检查是否操作有误！");
         } else {
@@ -197,7 +196,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         if (bindingResult.hasErrors()) {
             return ValidationUtil.getErrors(bindingResult);
         }
-        if (!member.getPhone().matches(phoneRegex))
+        if (!member.getPhone().matches(PHONE_REGEX))
             throw new BusinessException("手机号码格式不正确！");
         //查询到数据库中存储的信息
         MemberEntity temp = this.getById(member.getId());
@@ -251,19 +250,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             CourseEntity courseEntity = courseService.getById(scheduleRecord.getCourseId());
             ReserveRecordDTO dto = new ReserveRecordDTO();
             dto.setCourseName(courseEntity.getName());
-            //设置预约时间
-            if (item.getLastModifyTime() == null)
-                dto.setReserveTime(item.getCreateTime());
-            else
-                dto.setReserveTime(item.getCreateTime());
+            //设置预约时间 设置操作时间
+            dto.setReserveTime(item.getLastModifyTime() == null ? item.getCreateTime() : item.getLastModifyTime());
+            dto.setOperateTime(item.getLastModifyTime() == null ? item.getCreateTime() : item.getLastModifyTime());
+
             dto.setCardName(item.getCardName());
             dto.setReserveNumbers(item.getReserveNums());
             dto.setTimesCost(courseEntity.getTimesCost());
-            //设置操作时间
-            if (item.getLastModifyTime() == null)
-                dto.setOperateTime(item.getCreateTime());
-            else
-                dto.setOperateTime(item.getCreateTime());
             dto.setOperator(item.getOperator());
             dto.setReserveNote(item.getNote());
             dto.setReserveStatus(item.getStatus());
@@ -287,9 +280,10 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
                 if (item.getCreateTime().isAfter(start) && item.getCreateTime().isBefore(end))
                     return item;
             } else {
-                if (item.getLastModifyTime() != null) {
-                    if (item.getLastModifyTime().isAfter(start) && item.getLastModifyTime().isBefore(end))
-                        return item;
+                if (item.getLastModifyTime() != null &&
+                        item.getLastModifyTime().isAfter(start) &&
+                        item.getLastModifyTime().isBefore(end)) {
+                    return item;
                 }
             }
             return null;
@@ -374,7 +368,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         LambdaQueryWrapper<ClassRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ClassRecordEntity::getMemberId, memberId);
         List<ClassRecordEntity> classRecords = classRecordService.list(queryWrapper);
-        List<ClassInfoVo> voList = new ArrayList<>();
         return classRecords.stream().map(item -> {
             //预约记录
             LambdaQueryWrapper<ReservationRecordEntity> wrapper = new LambdaQueryWrapper<>();
@@ -465,12 +458,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         List<MemberBindRecordEntity> bindRecords = bindRecordService.list(wrapper);
         if (!bindRecords.isEmpty()) {
             //修改集合中绑定会员卡的状态
-            bindRecords = bindRecords.stream()
-                    .peek(item -> {
-                        item.setActiveStatus(0);
-                        item.setLastModifyTime(LocalDateTime.now());
-                    })
-                    .collect(Collectors.toList());
+            List<MemberBindRecordEntity> bindRecordEntities = new ArrayList<>();
+            for (MemberBindRecordEntity item : bindRecords) {
+                item.setActiveStatus(0);
+                item.setLastModifyTime(LocalDateTime.now());
+                bindRecordEntities.add(item);
+            }
+            bindRecords = bindRecordEntities;
             //批量更新
             boolean b = bindRecordService.updateBatchById(bindRecords);
             if (!b)
@@ -486,9 +480,4 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             throw new BusinessException("会员卡删除失败！");
     }
 
-    @Override
-    public List<MemberEntity> getMemberList() {
-        List<MemberEntity> memberList = memberService.getMemberList();
-        return null;
-    }
 }
