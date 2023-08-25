@@ -15,12 +15,14 @@ import java.util.UUID;
  */
 @Slf4j
 public class UploadImg {
+    private UploadImg() {
+    }
 
     public static String uploadImg(MultipartFile avatarFile, String savePath) {
         String filename = avatarFile.getOriginalFilename();//获取文件名以及后缀名
         String projectPath = System.getProperty("user.dir");
         String dirPath = projectPath + savePath;
-        System.out.println(dirPath);
+        log.info(dirPath);
         File filePath = new File(dirPath);
         if (!filePath.exists())
             filePath.mkdirs();
@@ -30,10 +32,10 @@ public class UploadImg {
             newFileName = uuid + filename.substring(filename.lastIndexOf("."));
         }
         try {
-            System.out.println(dirPath + newFileName);
+            log.info(dirPath + newFileName);
             avatarFile.transferTo(new File(dirPath + newFileName));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.debug(e.getMessage());
             return null;
         }
         return newFileName;
