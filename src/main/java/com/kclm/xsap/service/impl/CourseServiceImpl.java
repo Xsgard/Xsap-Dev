@@ -65,19 +65,8 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
     @Transactional
     @Override
     public void updateCourse(CourseEntity course, Long[] cardListStr, Integer limitAgeRadio, Integer limitCountsRadio) {
-        //判断
-        if (limitAgeRadio == -1) {
-            course.setLimitAge(0);
-        } else {
-            if (course.getLimitAge() < 1)
-                throw new BusinessException("限制年龄不能小于1，请修改！");
-        }
-        if (limitCountsRadio == -1) {
-            course.setLimitCounts(0);
-        } else {
-            if (course.getLimitCounts() < 1)
-                throw new BusinessException("限制预约次数不能小于1，请修改！");
-        }
+        //判断是否选择按钮 选择则判断值是否满足规范
+        validateRadioIsChecked(course, limitAgeRadio, limitCountsRadio);
         //修改实体信息 --失败则抛出异常
         course.setLastModifyTime(LocalDateTime.now());
         boolean b = this.updateById(course);
@@ -166,6 +155,29 @@ public class CourseServiceImpl extends ServiceImpl<CourseDao, CourseEntity> impl
             courseCardEntities.add(courseCard);
         }
         return courseCardEntities;
+    }
+
+    /**
+     * 判断是否选择按钮 选择则判断值是否满足规范
+     *
+     * @param course           课程信息
+     * @param limitAgeRadio    年龄限制按钮 -1->未选择
+     * @param limitCountsRadio 性别限制按钮 -1->未选择
+     */
+    private static void validateRadioIsChecked(CourseEntity course, Integer limitAgeRadio, Integer limitCountsRadio) {
+        //判断
+        if (limitAgeRadio == -1) {
+            course.setLimitAge(0);
+        } else {
+            if (course.getLimitAge() < 1)
+                throw new BusinessException("限制年龄不能小于1，请修改！");
+        }
+        if (limitCountsRadio == -1) {
+            course.setLimitCounts(0);
+        } else {
+            if (course.getLimitCounts() < 1)
+                throw new BusinessException("限制预约次数不能小于1，请修改！");
+        }
     }
 
 }
