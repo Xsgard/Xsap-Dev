@@ -1,4 +1,4 @@
-package com.kclm.xsap.vo.indexStatistics;
+package com.kclm.xsap.vo.index;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
