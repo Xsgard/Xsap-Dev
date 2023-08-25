@@ -29,7 +29,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public WebMvcConfig() {
         log.debug("虚拟映射路径处理");
         String homeDir = System.getProperty("user.dir");
-//        UPLOAD_IMAGE_URL = "file:" + homeDir + "\\upload\\images\\";
         UPLOAD_IMAGE_URL = "file:" + homeDir + "/upload/images/";
         log.debug("\n----> 上传的图片映射路径：{}",UPLOAD_IMAGE_URL);
     }
@@ -51,7 +50,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public MessageSource messageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         //属性
-//        messageSource.setBasename("beanValidation");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setCacheSeconds(60);
         messageSource.setAlwaysUseMessageFormat(true);
