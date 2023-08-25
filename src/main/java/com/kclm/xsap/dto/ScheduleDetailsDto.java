@@ -39,7 +39,7 @@ public class ScheduleDetailsDto {
 
     private List<String> supportCards;
 
-    private String TeacherName;
+    private String teacherName;
     /**
      * 此项排课的预约人数
      */
