@@ -7,7 +7,7 @@ import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.service.*;
 import com.kclm.xsap.utils.TimeUtil;
 import com.kclm.xsap.vo.*;
-import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.index.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 import lombok.extern.slf4j.Slf4j;
