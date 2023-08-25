@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO
+ * @description: 封装两个集合
  * @date 2023/8/16 9:55
  */
 @Data
