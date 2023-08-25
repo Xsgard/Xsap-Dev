@@ -39,9 +39,7 @@ public class R extends HashMap<String, Object> {
 		//默认是map
 		Object data = get("data");
 		String dataToJsonString = JSON.toJSONString(data);
-		T t = JSON.parseObject(dataToJsonString, typeReference);
-
-		return t;
+		return JSON.parseObject(dataToJsonString, typeReference);
 	}
 
 
@@ -81,6 +79,7 @@ public class R extends HashMap<String, Object> {
 		return new R();
 	}
 
+	@Override
 	public R put(String key, Object value) {
 		super.put(key, value);
 		return this;
