@@ -42,8 +42,8 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
 
     @Override
     public BigDecimal queryAmountPayable(Long bindCardId) {
-        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
-        BigDecimal receivedMoney = record.getReceivedMoney();
+        MemberBindRecordEntity memberBindRecord = memberBindRecordService.getById(bindCardId);
+        BigDecimal receivedMoney = memberBindRecord.getReceivedMoney();
         LambdaQueryWrapper<ConsumeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ConsumeRecordEntity::getMemberBindId, bindCardId);
         List<ConsumeRecordEntity> consumeRecords = this.list(queryWrapper);
@@ -52,7 +52,7 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
                 .filter(item -> !item.getOperateType().equals("绑卡操作"))
                 .mapToDouble(e -> e.getMoneyCost().doubleValue())
                 .sum());
-        double validCount = record.getValidCount().doubleValue();
+        double validCount = memberBindRecord.getValidCount().doubleValue();
 
         return receivedMoney.subtract(moneyCostPlus)
                 .divide(BigDecimal.valueOf(validCount), 0, RoundingMode.DOWN);
@@ -61,10 +61,10 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
     @Override
     public Integer queryUsedClassCost(Long bindCardId) {
         //绑定记录
-        MemberBindRecordEntity record = memberBindRecordService.getById(bindCardId);
+        MemberBindRecordEntity memberBindRecord = memberBindRecordService.getById(bindCardId);
         //
         LambdaQueryWrapper<ConsumeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ConsumeRecordEntity::getMemberBindId, record.getId());
+        queryWrapper.eq(ConsumeRecordEntity::getMemberBindId, memberBindRecord.getId());
         //消费记录集合
         List<ConsumeRecordEntity> consumes = this.list(queryWrapper);
         //过滤绑卡操作 对卡次变化求和
