@@ -49,8 +49,6 @@ public class ClassRecordVo {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate memberBirthday;
 
-//    private MemberEntity member;
-
     /**
      * 创建时间
      */
