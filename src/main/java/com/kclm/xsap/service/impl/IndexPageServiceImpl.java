@@ -12,8 +12,8 @@ import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.RechargeRecordService;
 import com.kclm.xsap.vo.IndexHomeDateVo;
-import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
-import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
+import com.kclm.xsap.vo.index.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.index.IndexPieChartVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
