@@ -41,7 +41,7 @@
             	    <figure class="text-center">
             	        <div style="position: relative;border: 5px solid lightblue;width: 150px;height:150px;margin: 5px auto;border-radius: 50%;">
             	            <img name="avatarUrl" src="../static/img/a1.jpg"
-            				th:src="@{/images/teacher_img/{avatar}(avatar=${userInfo.avatarUrl})}"
+                                 th:src="@{/upload/images/teacher_img/{avatar}(avatar=${userInfo.avatarUrl})}"
             				 alt="" id="avatar_img" style="width: 140px;height: 140px;left:0;top: 0;border-radius: 50%;"/>
             	            <input type="file" id="avatar_file" name="avatar_file"
             	                   accept="image/jpg,image/jpeg,image/png,image/gif"
@@ -167,7 +167,7 @@
                     // 读取的URL结果：this.result	@{/static/img/{avatar}(avatar=${userInfo.avatarUrl})}
                     console.log("之后的图片信息：" + userData.avatarUrl);
 
-                    $("#avatar_img").attr("src", "/images/teacher_img/" + userData.avatarUrl);
+                    $("#avatar_img").attr("src", "/upload/images/teacher_img/" + userData.avatarUrl);
                 }
             },
             error: function (jqXHR) {

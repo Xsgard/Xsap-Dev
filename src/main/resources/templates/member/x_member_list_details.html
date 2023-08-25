@@ -654,9 +654,9 @@
                     // var userData = data.data;
                     if (userData.code === 0) {
                         console.log("之后的图片信息：" + userData.avatarUrl);
-                        swal(userData.msg, "", "success");
                         //刷新界面
                         setTimeout(function () {
+                            swal(userData.msg, "", "success");
                             $("#avatar_img").attr("src", "/upload/images/member_img/" + userData.avatarUrl);
                         }, 1000);
                     } else {
