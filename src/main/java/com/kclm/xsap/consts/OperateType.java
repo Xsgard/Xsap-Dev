@@ -1,11 +1,15 @@
 package com.kclm.xsap.consts;
 
+import lombok.Getter;
+
 /**
  * @author fangkai
  * @description
  * @create 2021-12-20 22:52
  */
+@Getter
 public enum OperateType {
+
     RECHARGE_OPERATION(0, "充值操作"),
     BINDING_CARD_OPERATION(1, "绑卡操作"),
     CLASS_DEDUCTION_OPERATION(2, "会员上课扣费操作"),
@@ -21,11 +25,4 @@ public enum OperateType {
         this.msg = msg;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
 }
