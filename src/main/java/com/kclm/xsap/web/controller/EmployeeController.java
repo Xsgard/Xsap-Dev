@@ -42,7 +42,11 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/user")
 public class EmployeeController {
-
+    private static final String PAGE_MODIFY_PWD = "x_modify_password";
+    private static final String PAGE_ENSURE_USER = "x_ensure_user";
+    private static final String USER_INFO = "userInfo";
+    private static final String TEACHER_ID = "teacher_id";
+    private static final String SCHEDULE_ID = "schedule_id";
     private static final String UPLOAD_IMAGES_TEACHER_IMG = "/upload/images/teacher_img/";
 
     private EmployeeService employeeService;
@@ -169,7 +173,7 @@ public class EmployeeController {
      */
     @GetMapping("/toEnsureUser")
     public String toEnsureUser() {
-        return "x_ensure_user";
+        return PAGE_ENSURE_USER;
     }
 
     /**
@@ -200,7 +204,7 @@ public class EmployeeController {
     public String toResetPwd(String userPhoneOrEmail, Model model) {
         //
         log.debug("\n==>打印用户要充值的用户手机号或者邮箱==>{}", userPhoneOrEmail);
-        String emailRegex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
+        String emailRegex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+([a-zA-Z0-9_-])$";
         String phoneRegex = "^1[0-9]{10}$";
 
         boolean isAEmail = Pattern.compile(emailRegex).matcher(userPhoneOrEmail).matches();
@@ -212,14 +216,14 @@ public class EmployeeController {
             if (userOne.isEmpty()) {
                 //没查到该用户信息,返回提示到前台
                 model.addAttribute("CHECK_USER_ERROR", true);
-                return "x_ensure_user";
+                return PAGE_ENSURE_USER;
             }
             //查到信息，跳转页面
             return "send_mail_ok";
         } else {
             //格式不正确，返回提示到前台
             model.addAttribute("CHECK_INPUT_FORMAT", true);
-            return "x_ensure_user";
+            return PAGE_ENSURE_USER;
         }
 
 
@@ -233,7 +237,7 @@ public class EmployeeController {
      */
     @GetMapping("/x_modify_password.do")
     public String modifyPassword() {
-        return "x_modify_password";
+        return PAGE_MODIFY_PWD;
     }
 
 
@@ -246,26 +250,27 @@ public class EmployeeController {
      */
     @PostMapping("/modifyPwd.do")
     public String modifyPwd(ModifyPassword entity, Model model) {
+        String pwdError = "CHECK_PWD_ERROR";
         log.debug("\n==>打印前台传入的修改密码表单数据==>{}", entity);
 
         if (null == entity) {
             throw new RRException("修改数据表单为空", 22404);
         }
         if (entity.getOldPwd().isEmpty()) {
-            model.addAttribute("CHECK_PWD_ERROR", 0);
+            model.addAttribute(pwdError, 0);
             log.debug("\n==>原密码为空");
-            return "x_modify_password";
+            return PAGE_MODIFY_PWD;
         } else {
             if (!entity.getNewPwd().equals(entity.getPwd2())) {
-                model.addAttribute("CHECK_PWD_ERROR", 2);
+                model.addAttribute(pwdError, 2);
                 log.debug("\n==>新密码两次不一样");
-                return "x_modify_password";
+                return PAGE_MODIFY_PWD;
             }
             EmployeeEntity employeeEntity = employeeService.getById(entity.getId());
             if (!employeeEntity.getRolePassword().equals(entity.getOldPwd())) {
-                model.addAttribute("CHECK_PWD_ERROR", 1);
+                model.addAttribute(pwdError, 1);
                 log.debug("\n==>原密码不正确");
-                return "x_modify_password";
+                return PAGE_MODIFY_PWD;
             } else {
                 employeeEntity.setRolePassword(entity.getNewPwd()).setVersion(employeeEntity.getVersion() + 1).setLastModifyTime(LocalDateTime.now());
                 boolean isUpdatePwd = employeeService.updateById(employeeEntity);
@@ -288,7 +293,7 @@ public class EmployeeController {
     @GetMapping("/x_profile.do")
     public String profile(Long id, Model model) {
         EmployeeEntity employeeServiceById = employeeService.getById(id);
-        model.addAttribute("userInfo", employeeServiceById);
+        model.addAttribute(USER_INFO, employeeServiceById);
         return "x_profile";
     }
 
@@ -329,7 +334,7 @@ public class EmployeeController {
     @PostMapping("/teacherEdit.do")
     @ResponseBody
     public R teacherEdit(EmployeeEntity entity) {
-        //todo 加入jsr303
+        //加入jsr303
         log.debug("\n==>前端传入的要更新的员工信息的封装:entity==>{}", entity);
 
         //更新操作
@@ -369,7 +374,7 @@ public class EmployeeController {
     public R teacherClassRecord(@RequestParam("tid") Long id) {
         log.debug("\n==>打印传入的teacherId==>{}", id);
 
-        List<ScheduleRecordEntity> scheduleForTeacher = scheduleRecordService.list(new QueryWrapper<ScheduleRecordEntity>().eq("teacher_id", id));
+        List<ScheduleRecordEntity> scheduleForTeacher = scheduleRecordService.list(new QueryWrapper<ScheduleRecordEntity>().eq(TEACHER_ID, id));
         log.debug("\n==>打印该老师的所有排课计划==>{}", scheduleForTeacher);
         List<TeacherClassRecordVo> teacherClassRecordVos = scheduleForTeacher.stream().map(entity -> {
             //获取当前排课记录的id
@@ -385,7 +390,7 @@ public class EmployeeController {
             //获取课程单位消耗次数
             Integer timesCost = courseById.getTimesCost();
             //在上课记录中查询所有上了当前课程的会员的id的list
-            List<Long> memberIdList = classRecordService.list(new QueryWrapper<ClassRecordEntity>().select("member_id").eq("schedule_id", scheduleId).eq("check_status", 1)).stream().map(ClassRecordEntity::getMemberId).collect(Collectors.toList());
+            List<Long> memberIdList = classRecordService.list(new QueryWrapper<ClassRecordEntity>().select("member_id").eq(SCHEDULE_ID, scheduleId).eq("check_status", 1)).stream().map(ClassRecordEntity::getMemberId).collect(Collectors.toList());
 
             //初始化创建一个用于存放会员名的list，当会员id为空时
             List<String> memberNames = new ArrayList<>();
@@ -433,7 +438,6 @@ public class EmployeeController {
      * @param id 老师id
      * @return r -> 删除结果和信息
      */
-    //全在控制层异常都不好抛！！！找时间改回来！todo
     @PostMapping("/deleteOne.do")
     @ResponseBody
     @Transactional
@@ -441,19 +445,12 @@ public class EmployeeController {
         log.debug("\n==>前端传入的要删除的老师id：==>{}", id);
         //检查该老师的排课计划表
         List<ScheduleRecordEntity> allScheduleForCurrentTeacher = scheduleRecordService.list(new QueryWrapper<ScheduleRecordEntity>()
-                .select("id", "order_nums", "start_date", "class_time").eq("teacher_id", id));
+                .select("id", "order_nums", "start_date", "class_time").eq(TEACHER_ID, id));
         log.debug("\n==>打印该老师的所有排课计划表==>{}", allScheduleForCurrentTeacher);
         //当该老师没有排课记录和计划时,直接删除老师信息
         if (allScheduleForCurrentTeacher.isEmpty()) {
             log.debug("\n==>该老师已没有排课记录和计划,删除成功！！");
-            boolean isRemove = employeeService.removeById(id);
-            if (isRemove) {
-                log.debug("\n==>删除成功@！");
-                return R.ok("该老师已没有排课记录和计划");
-            } else {
-                log.debug("\n==>删除老师失败");
-                throw new RuntimeException("删除失败！");
-            }
+            return successCondition(id);
         } else {
             //该老师有排课记录
             //取出该老师所有还未完成的排课计划
@@ -465,16 +462,7 @@ public class EmployeeController {
             }).collect(Collectors.toList());
 
             if (allScheduleAfterThisMoment.isEmpty()) {
-                //该老师没有未完成的排课计划，删除该老师信息后保留已有的排课记录
-                boolean isRemove = employeeService.removeById(id);
-                log.debug("\n==>该老师没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录");
-                if (isRemove) {
-                    log.debug("\n==>删除老师信息成功!");
-                    return R.ok("该老师存在排课记录但没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录");
-                } else {
-                    log.debug("\n==>删除老师失败");
-                    throw new RuntimeException("删除失败！");
-                }
+                return deleteTeacher(id);
             } else {
                 //该老师存在未完成的排课记录
                 //获取所有未完成的排课计划的预约人数的和
@@ -488,51 +476,83 @@ public class EmployeeController {
                     //获取未开始的全部排课的id-list
                     List<Long> scheduleIds = allScheduleAfterThisMoment.stream().map(ScheduleRecordEntity::getId).collect(Collectors.toList());
                     if (allScheduleAfterThisMoment.size() == allScheduleForCurrentTeacher.size()) {
-                        //该老师只有未完成的排课记录，删除该老师信息后未完成的排课计划也会被删除，且没有预约记录
-                        //删除老师
-                        boolean isRemoveTeacher = employeeService.removeById(id);
-                        //删除预约后取消预约导致预约人数显示0 的预约记录
-                        reservationRecordService.remove(new QueryWrapper<ReservationRecordEntity>().in("schedule_id", scheduleIds));
-                        //最后删除该老师的全部排课记录【因为没有已完成的记录】
-                        boolean isRemoveSchedule = scheduleRecordService.remove(new QueryWrapper<ScheduleRecordEntity>().eq("teacher_id", id));
-                        if (isRemoveSchedule && isRemoveTeacher) {
-                            log.debug("\n==>删除成功");
-                            return R.ok("该老师只有未完成的排课记录，删除该老师信息后未完成的排课计划也会被删除");
-                        } else {
-                            log.debug("\n==>删除老师信息或该老师排课记录失败");
-                            //抛出异常回滚
-                            throw new RRException("删除老师信息或该老师排课记录失败", 22405);
-                        }
+                        return teacherHasNotDoneClass(id, scheduleIds);
                     } else {
 
-                        //该老师有已完成和未完成的排课记录，但未完成的排课计划没有预约记录 ，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留
-                        //首先通过老师id删除该老师
-                        boolean isRemoveTeacher = employeeService.removeById(id);
-                        //再通过该老师的所有未开始的全部排课计划的排课id删除所有未开始的排课的预约记录【目的是删除有预约但取消了的记录，此时预约人数未0，不用担心删错预约记录；而先删预约记录为了避免外键冲突】
-                        boolean isRemoveReserveOfCancel = reservationRecordService.remove(new QueryWrapper<ReservationRecordEntity>().in("schedule_id", scheduleIds));
-                        if (isRemoveReserveOfCancel) {
-                            log.debug("\n==>删除了这些预约id==>{}在预约该课程后取消的用户", scheduleIds);
-                        }
-                        //最后删除这些未完成的排课记录【此时已经没有了外键约束】
-                        boolean isRemoveSchedule = scheduleRecordService.removeByIds(scheduleIds);
-
-                        if (isRemoveSchedule && isRemoveTeacher) {
-                            log.debug("\n==>删除成功！");
-                            return R.ok("该老师存在未完成的排课计划，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留");
-                        } else {
-                            log.debug("\n==>删除老师信息或该老师排课记录失败");
-                            //抛出异常 回滚
-                            throw new RRException("删除老师信息或该老师排课记录失败", 22406);
-                        }
+                        return removeWithRemoveSchedules(id, scheduleIds);
                     }
                 }
             }
         }
     }
 
+    private R removeWithRemoveSchedules(Long id, List<Long> scheduleIds) {
+        //该老师有已完成和未完成的排课记录，但未完成的排课计划没有预约记录 ，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留
+        //首先通过老师id删除该老师
+        boolean isRemoveTeacher = employeeService.removeById(id);
+        //再通过该老师的所有未开始的全部排课计划的排课id删除所有未开始的排课的预约记录【目的是删除有预约但取消了的记录，此时预约人数未0，不用担心删错预约记录；而先删预约记录为了避免外键冲突】
+        boolean isRemoveReserveOfCancel = reservationRecordService.remove(new QueryWrapper<ReservationRecordEntity>().in(SCHEDULE_ID, scheduleIds));
+        if (isRemoveReserveOfCancel) {
+            log.debug("\n==>删除了这些预约id==>{}在预约该课程后取消的用户", scheduleIds);
+        }
+        //最后删除这些未完成的排课记录【此时已经没有了外键约束】
+        boolean isRemoveSchedule = scheduleRecordService.removeByIds(scheduleIds);
+
+        if (isRemoveSchedule && isRemoveTeacher) {
+            log.debug("\n==>删除成功！");
+            return R.ok("该老师存在未完成的排课计划，删除该老师信息后未完成的排课计划也会被删除，但已完成的排课记录会被保留");
+        } else {
+            log.debug("\n==>删除老师信息或该老师排课记录失败");
+            //抛出异常 回滚
+            throw new RRException("删除老师信息或该老师排课记录失败", 22406);
+        }
+    }
+
+    private R teacherHasNotDoneClass(Long id, List<Long> scheduleIds) {
+        //该老师只有未完成的排课记录，删除该老师信息后未完成的排课计划也会被删除，且没有预约记录
+        //删除老师
+        boolean isRemoveTeacher = employeeService.removeById(id);
+        //删除预约后取消预约导致预约人数显示0 的预约记录
+        reservationRecordService.remove(new QueryWrapper<ReservationRecordEntity>().in(SCHEDULE_ID, scheduleIds));
+        //最后删除该老师的全部排课记录【因为没有已完成的记录】
+        boolean isRemoveSchedule = scheduleRecordService.remove(new QueryWrapper<ScheduleRecordEntity>().eq(TEACHER_ID, id));
+        if (isRemoveSchedule && isRemoveTeacher) {
+            log.debug("\n==>删除成功");
+            return R.ok("该老师只有未完成的排课记录，删除该老师信息后未完成的排课计划也会被删除");
+        } else {
+            log.debug("\n==>删除老师信息或该老师排课记录失败");
+            //抛出异常回滚
+            throw new RRException("删除老师信息或该老师排课记录失败", 22405);
+        }
+    }
+
+    private R deleteTeacher(Long id) {
+        //该老师没有未完成的排课计划，删除该老师信息后保留已有的排课记录
+        boolean isRemove = employeeService.removeById(id);
+        log.debug("\n==>该老师没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录");
+        if (isRemove) {
+            log.debug("\n==>删除老师信息成功!");
+            return R.ok("该老师存在排课记录但没有未完成的排课计划，仅删除该老师信息后保留已有的排课记录");
+        } else {
+            log.debug("\n==>删除老师失败");
+            throw new BusinessException("删除失败！");
+        }
+    }
+
+    private R successCondition(Long id) {
+        boolean isRemove = employeeService.removeById(id);
+        if (isRemove) {
+            log.debug("\n==>删除成功@！");
+            return R.ok("该老师已没有排课记录和计划");
+        } else {
+            log.debug("\n==>删除老师失败");
+            throw new BusinessException("删除失败！");
+        }
+    }
+
     /**
      * 头像更新
-     * todo 回显。。
+     * 回显。。
      *
      * @param id   要更新头像的老师的id
      * @param file 要更新的头像图片文件
@@ -599,7 +619,7 @@ public class EmployeeController {
     public String modifyUserInfo(EmployeeEntity employee, Model model) {
         try {
             EmployeeEntity employeeEntity = employeeService.modifyUserInfo(employee);
-            model.addAttribute("userInfo", employeeEntity);
+            model.addAttribute(USER_INFO, employeeEntity);
             return "/x_profile";
         } catch (BusinessException e) {
             if (e.getCode() == 100) {
@@ -608,7 +628,7 @@ public class EmployeeController {
                 model.addAttribute("CHECK_PHONE_EXIST", "手机号跟其它用户撞名了");
             }
             EmployeeEntity entity = employeeService.getById(employee.getId());
-            model.addAttribute("userInfo", entity);
+            model.addAttribute(USER_INFO, entity);
             return "/x_profile";
         }
 
