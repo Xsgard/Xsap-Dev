@@ -169,13 +169,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             return ValidationUtil.getErrors(bindingResult);
         }
         if (!member.getPhone().matches(phoneRegex))
-            return R.error("手机号有误，请检查是否操作有误！");
+            return R.error(401, "手机号格式错误！");
         //根据手机号查询数据库中是否有重复记录
         MemberEntity queried = this.queryByPhone(member.getPhone());
         //记录数大于0 或 手机号不满足正则校验
         //if (count > 0 || member.getPhone().matches(phoneRegex)) {
         if (queried != null) {
-            return R.error(400, "手机号有误，请检查是否操作有误！");
+            return R.error(401, "手机号有误，请检查是否操作有误！");
         } else {
             member.setCreateTime(LocalDateTime.now());
             //保存
