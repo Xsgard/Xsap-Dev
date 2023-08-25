@@ -14,8 +14,6 @@ import java.util.List;
  */
 public interface EmployeeService extends IService<EmployeeEntity> {
 
-    //PageUtils queryPage(Map<String, Object> params);
-
     EmployeeEntity isExistEmp(String username, String password);
 
     /**
