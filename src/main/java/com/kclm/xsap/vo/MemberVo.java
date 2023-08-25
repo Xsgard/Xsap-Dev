@@ -23,6 +23,4 @@ public class MemberVo {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate joiningDate;
     private String note;
-//    private String[] clubCard;
-//    private String remark;
 }
