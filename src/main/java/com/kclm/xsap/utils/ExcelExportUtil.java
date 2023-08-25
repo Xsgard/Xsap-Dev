@@ -2,6 +2,7 @@ package com.kclm.xsap.utils;
 
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.system.ApplicationHome;
 
 import javax.servlet.ServletOutputStream;
@@ -17,13 +18,20 @@ import java.util.List;
  * @description: excel数据导出工具类
  * @date 2023/8/23 15:31
  */
+@Slf4j
 public class ExcelExportUtil {
-    private static final String filePath = "/static/download/预约记录.xlsx";
+    private ExcelExportUtil() {
+    }
 
-    public static <T> boolean excelWriteToLocal(List<T> rows) throws IOException {
+    private static final String FILE_PATH = "/static/download/预约记录.xlsx";
+
+    /**
+     * 上传至本机
+     */
+    public static <T> boolean excelWriteToLocal(List<T> rows) {
         ApplicationHome home = new ApplicationHome(ExcelExportUtil.class);
         File dir = home.getDir();
-        File file = new File(dir, filePath);
+        File file = new File(dir, FILE_PATH);
         try (ExcelWriter writer = ExcelUtil.getWriter(file)) {
             writer.addHeaderAlias("courseName", "课程名");
             writer.addHeaderAlias("reserveTime", "预约时间");
@@ -44,10 +52,13 @@ public class ExcelExportUtil {
         }
     }
 
+    /**
+     * 通过流在网页传输
+     */
     public static <T> void excelWriteToOnline(List<T> rows, HttpServletResponse response) throws IOException {
         ApplicationHome home = new ApplicationHome(ExcelExportUtil.class);
         File dir = home.getDir();
-        File file = new File(dir, filePath);
+        File file = new File(dir, FILE_PATH);
         try (ExcelWriter writer = ExcelUtil.getWriter(file)) {
             writer.addHeaderAlias("courseName", "课程名");
             writer.addHeaderAlias("reserveTime", "预约时间");
@@ -68,7 +79,7 @@ public class ExcelExportUtil {
 
             writer.flush(out, true);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug(e.getMessage());
         }
     }
 }
