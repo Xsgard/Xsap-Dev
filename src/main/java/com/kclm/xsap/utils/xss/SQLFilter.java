@@ -17,6 +17,8 @@ import org.apache.commons.lang.StringUtils;
  * @author Mark sunlightcs@gmail.com
  */
 public class SQLFilter {
+    private SQLFilter() {
+    }
 
     /**
      * SQL注入过滤
