@@ -10,6 +10,7 @@ import com.kclm.xsap.vo.*;
 import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +27,10 @@ import java.util.stream.Collectors;
  * @description: StatisticsServiceImpl
  * @date 2023/8/14 19:50
  */
+@Slf4j
 @Service
 public class StatisticsServiceImpl implements StatisticsService {
+    private static final String TITLE = "新增与流失统计";
     //
     private static final LocalTime startTime = LocalTime.of(0, 0, 0);
     //
@@ -36,12 +39,9 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private MemberService memberService;
     private MemberBindRecordService memberBindRecordService;
-    private MemberCardService memberCardService;
     private ConsumeRecordService consumeRecordService;
     private RechargeRecordService rechargeRecordService;
     private RechargeRecordDao rechargeRecordDao;
-    private EmployeeService employeeService;
-    private ScheduleRecordService scheduleRecordService;
 
     @Autowired
     public void setDao(RechargeRecordDao rechargeRecordDao) {
@@ -49,15 +49,11 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Autowired
-    public void setMemberBindRecordService(MemberBindRecordService memberBindRecordService, ConsumeRecordService consumeRecordService,
-                                           MemberService memberService, MemberCardService memberCardService,
-                                           RechargeRecordService rechargeRecordService,
-                                           EmployeeService employeeService,
-                                           ScheduleRecordService scheduleRecordService) {
-        this.scheduleRecordService = scheduleRecordService;
-        this.employeeService = employeeService;
+    public void setMemberBindRecordService(MemberBindRecordService memberBindRecordService,
+                                           ConsumeRecordService consumeRecordService,
+                                           MemberService memberService,
+                                           RechargeRecordService rechargeRecordService) {
         this.rechargeRecordService = rechargeRecordService;
-        this.memberCardService = memberCardService;
         this.consumeRecordService = consumeRecordService;
         this.memberService = memberService;
         this.memberBindRecordService = memberBindRecordService;
@@ -247,7 +243,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         result.setTitle("月收费模式");
         result.setXname("月");
         List<String> time = new ArrayList<>();
-        List<Integer> data = new ArrayList<>();
+        List<Integer> data;
         //本年第一天
         LocalDate startDate = LocalDate.of(year, 1, 1);
         //先判断查找年份是否为本年
@@ -282,6 +278,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return IndexAddAndStreamInfoVo
      */
     private IndexAddAndStreamInfoVo cardCostHandler(Integer year, Integer unit) {
+        log.info(String.valueOf(unit));
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
         result.setTitle("季度收费模式");
         result.setXname("季度");
@@ -359,8 +356,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         Map<String, TempList> dataMap = new HashMap<>();
         for (int i = 0; i < 12; i++) {
             time.add((i + 1) + "月");
-            LocalDateTime endTime = startDateTime.plusMonths(1);
-            teacherConsumeVoHandler(startDateTime, dataMap, endTime);
+            LocalDateTime endDateTime = startDateTime.plusMonths(1);
+            teacherConsumeVoHandler(startDateTime, dataMap, endDateTime);
             startDateTime = startDateTime.plusMonths(1);
             if (startDateTime.isAfter(now))
                 break;
@@ -377,6 +374,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      * @return IndexAddAndStreamInfoVo
      */
     private ClassCostVo classCostHandler(Integer year, Integer unit) {
+        log.info(unit.toString());
         ClassCostVo vo = new ClassCostVo();
         vo.setTitle("老师课时消费季度统计");
         vo.setXname("季度");
@@ -391,8 +389,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         Map<String, TempList> dataMap = new HashMap<>();
         for (int i = 0; i < 4; i++) {
             time.add((i + 1) + "季");
-            LocalDateTime endTime = startDateTime.plusMonths(3);
-            teacherConsumeVoHandler(startDateTime, dataMap, endTime);
+            LocalDateTime endDateTime = startDateTime.plusMonths(3);
+            teacherConsumeVoHandler(startDateTime, dataMap, endDateTime);
             startDateTime = startDateTime.plusMonths(3);
             if (startDateTime.isAfter(now))
                 break;
@@ -422,8 +420,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         Map<String, TempList> dataMap = new HashMap<>();
         for (int i = vo.getBeginYear(); i <= vo.getEndYear(); i++) {
             time.add(String.valueOf(i));
-            LocalDateTime endTime = startDateTime.plusYears(1);
-            teacherConsumeVoHandler(startDateTime, dataMap, endTime);
+            LocalDateTime endDateTime = startDateTime.plusYears(1);
+            teacherConsumeVoHandler(startDateTime, dataMap, endDateTime);
             startDateTime = startDateTime.plusYears(1);
             if (startDateTime.isAfter(now))
                 break;
@@ -527,7 +525,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     public IndexAddAndStreamInfoVo addAndStreamCount(Integer year) {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
-        result.setTitle("新增与流失统计");
+        result.setTitle(TITLE);
         result.setXname("月");
         List<String> time = new ArrayList<>();
         List<Integer> data = new ArrayList<>();
@@ -562,7 +560,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     public IndexAddAndStreamInfoVo addAndStreamCount(Integer year, Integer unit) {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
-        result.setTitle("新增与流失统计");
+        result.setTitle(TITLE);
         result.setXname("季度");
         List<String> time = new ArrayList<>();
         List<Integer> data = new ArrayList<>();
@@ -596,7 +594,7 @@ public class StatisticsServiceImpl implements StatisticsService {
      */
     public IndexAddAndStreamInfoVo addAndStreamCount(StatisticsOfCardCostVo costVo) {
         IndexAddAndStreamInfoVo result = new IndexAddAndStreamInfoVo();
-        result.setTitle("新增与流失统计");
+        result.setTitle(TITLE);
         result.setXname("年");
         List<Integer> data = new ArrayList<>();
         List<Integer> data2 = new ArrayList<>();
