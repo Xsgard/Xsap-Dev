@@ -1,12 +1,11 @@
 package com.kclm.xsap.dto.convert;
 
+import com.kclm.xsap.dto.ConsumeRecordDTO;
+import com.kclm.xsap.entity.ConsumeRecordEntity;
 import com.kclm.xsap.entity.MemberCardEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-
-import com.kclm.xsap.dto.ConsumeRecordDTO;
-import com.kclm.xsap.entity.ConsumeRecordEntity;
 
 /**
  * 
@@ -18,8 +17,6 @@ import com.kclm.xsap.entity.ConsumeRecordEntity;
  */
 @Mapper(componentModel = "spring")
 public interface ConsumeRecordConvert {
-
-	//ConsumeRecordConvert INSTANCE = Mappers.getMapper(ConsumeRecordConvert.class);
 	/**
 	 * 
 	 * @param consume	对应消费记录实体类
