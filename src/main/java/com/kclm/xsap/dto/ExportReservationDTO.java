@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @author Asgard
  * @version 1.0
- * @description: TODO 导出预约记录Dto
+ * @description: 导出预约记录Dto
  * @date 2023/8/23 15:54
  */
 @Data
