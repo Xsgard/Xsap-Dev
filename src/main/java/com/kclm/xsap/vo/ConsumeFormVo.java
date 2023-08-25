@@ -21,11 +21,9 @@ public class ConsumeFormVo {
     //卡绑定id
     private Long cardBindId;
     //操作人
-    private String Operator;
+    private String operator;
     //排课记录id
     private Long scheduleId;
-    //课程详情确认扣费时应扣金额 【后自定义扣费金额冗余，】
-//    private BigDecimal amountsPayable;
     //自定义扣费时的消费金额
     private BigDecimal amountOfConsumption;
     /**
