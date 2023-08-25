@@ -204,7 +204,7 @@ public class EmployeeController {
     public String toResetPwd(String userPhoneOrEmail, Model model) {
         //
         log.debug("\n==>打印用户要充值的用户手机号或者邮箱==>{}", userPhoneOrEmail);
-        String emailRegex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+([a-zA-Z0-9_-])$";
+        String emailRegex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
         String phoneRegex = "^1[0-9]{10}$";
 
         boolean isAEmail = Pattern.compile(emailRegex).matcher(userPhoneOrEmail).matches();
