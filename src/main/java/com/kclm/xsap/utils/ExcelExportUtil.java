@@ -18,7 +18,7 @@ import java.util.List;
  * @date 2023/8/23 15:31
  */
 public class ExcelExportUtil {
-    private static final String filePath = "/reservations/预约记录.xlsx";
+    private static final String filePath = "/static/download/预约记录.xlsx";
 
     public static <T> boolean excelWriteToLocal(List<T> rows) throws IOException {
         ApplicationHome home = new ApplicationHome(ExcelExportUtil.class);
@@ -45,10 +45,9 @@ public class ExcelExportUtil {
     }
 
     public static <T> void excelWriteToOnline(List<T> rows, HttpServletResponse response) throws IOException {
-        File file = new File(filePath);
-        if (!file.exists()) {
-            file.createNewFile();
-        }
+        ApplicationHome home = new ApplicationHome(ExcelExportUtil.class);
+        File dir = home.getDir();
+        File file = new File(dir, filePath);
         try (ExcelWriter writer = ExcelUtil.getWriter(file)) {
             writer.addHeaderAlias("courseName", "课程名");
             writer.addHeaderAlias("reserveTime", "预约时间");
