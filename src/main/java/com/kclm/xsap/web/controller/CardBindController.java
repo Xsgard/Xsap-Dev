@@ -2,7 +2,6 @@ package com.kclm.xsap.web.controller;
 
 import com.kclm.xsap.dto.BindCardInfoDto;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.MemberBindRecordService;
 import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.ValidationUtil;
@@ -26,14 +25,10 @@ import javax.validation.Valid;
 @Controller
 public class CardBindController {
 
-    private MemberBindRecordService bindRecordService;
-
     private MemberCardService memberCardService;
 
     @Autowired
-    private void setApplicationContext(MemberBindRecordService bindRecordService,
-                                       MemberCardService memberCardService) {
-        this.bindRecordService = bindRecordService;
+    private void setApplicationContext(MemberCardService memberCardService) {
         this.memberCardService = memberCardService;
     }
 
