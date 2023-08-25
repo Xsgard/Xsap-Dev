@@ -32,8 +32,6 @@ public interface MemberService extends IService<MemberEntity> {
 
     R memberEdit(@Valid MemberEntity member, BindingResult bindingResult);
 
-    List<MemberEntity> getMemberList();
-
     List<String> getSupportCardNames(List<Long> cardIds);
 
     List<ReserveRecordDTO> getReserveRecordDto(Long memberId);
