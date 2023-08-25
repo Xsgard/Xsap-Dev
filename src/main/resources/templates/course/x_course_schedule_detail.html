@@ -496,20 +496,20 @@
                         swal(data.msg, "", "success");
                         setTimeout(function () {
                             window.location.reload();
-                        }, 1000);
+                        }, 1500);
                     } else if (data.code === 400) {
                         // swal("确认上课失败！", data.msg, "info");
                         setTimeout(function () {
                             $(`[tip=cardCountChange]`).html("");
                             $("<span class='text-danger'>" + data.errorMap['cardCountChange'] + "</span>").appendTo($("[tip=cardCountChange]"));
-                        }, 1000);
+                        }, 1500);
                     } else {
                         swal("确认上课失败！", data.msg, "info");
                         setTimeout(function () {
                             $("button[name='cancel_btn'][value='" + reserve_id + "']")
                                 .removeClass("btn-warning").addClass("btn-default").attr("disabled", true);
                             window.location.reload();
-                        }, 1000);
+                        }, 1500);
                     }
                 });
             });
@@ -538,7 +538,7 @@
                             swal("一键确认扣费成功！", "", "success");
                             setTimeout(function () {
                                 window.location.reload();
-                            }, 1000);
+                            }, 1500);
                         } else {
                             swal("一键扣费失败！", data.msg, "info");
                         }
@@ -570,7 +570,7 @@
                     swal("取消预约成功！", "", "success");
                     setTimeout(function () {
                         window.location.reload();
-                    }, 1000);
+                    }, 1500);
                 } else {
                     swal("取消预约失败！", data.msg, "info");
                 }
@@ -605,12 +605,12 @@
                         swal("添加预约成功！", data.msg, "success");
                         setTimeout(function () {
                             window.location.reload();
-                        }, 1000);
+                        }, 1500);
                     } else {
                         swal("添加失败！", data.msg, "info");
                         setTimeout(function () {
                             window.location.reload();
-                        }, 1000);
+                        }, 1500);
                     }
                 });
 
@@ -636,7 +636,7 @@
                         }, 100);
                         setTimeout(function () {
                             window.location.href = "/schedule/x_course_schedule.do";
-                        }, 1000);
+                        }, 1500);
                     } else {
                         setTimeout(function () {
                             swal("删除失败！", "当前课程已有预约", "info");

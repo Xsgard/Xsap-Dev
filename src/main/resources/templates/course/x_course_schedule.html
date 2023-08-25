@@ -579,6 +579,11 @@
             var startDateStr = $('[name="startDateStr"]').val();
             var endDateStr = $('[name="endDateStr"]').val();
             window.location = '/reserve/exportReserveList.do?startDateStr=' + startDateStr + '&endDateStr=' + endDateStr;
+            setTimeout(function () {
+                swal("导出成功！", "", "success")
+                window.location.reload();
+            }, 3000);
+
             // window.open($.ajax({
             //     url: '/reserve/exportReserveList.do',
             //     method: 'post',
