@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCardEntity> implements MemberCardService {
-
     private MemberCardDao cardDao;
     private MemberBindRecordDao memberBindRecordDao;
     private CourseCardService courseCardService;
@@ -123,8 +122,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         log.setCardDayChange(cardEntity.getTotalDay());
         log.setCardActiveStatus(1);
         boolean b = memberLogService.save(log);
+        String logSaveFail = "日志保存失败";
         if (!b)
-            throw new BusinessException("日志保存失败！");
+            throw new BusinessException(logSaveFail);
         //绑卡充值日志
         if (info.getReceivedMoney() != null) {
             MemberLogEntity logBind = new MemberLogEntity();
@@ -139,7 +139,7 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
             logBind.setCardActiveStatus(1);
             boolean b1 = memberLogService.save(logBind);
             if (!b1)
-                throw new BusinessException("日志保存失败！");
+                throw new BusinessException(logSaveFail);
         }
 
 
@@ -186,9 +186,9 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
     @Override
     @Transactional
     public void activeOpt(Long memberId, Long bindId, Integer status, String operatorName) {
-        MemberBindRecordEntity record = memberBindRecordService.getById(bindId);
-        record.setActiveStatus(status);
-        boolean b = memberBindRecordService.updateById(record);
+        MemberBindRecordEntity memberBindRecord = memberBindRecordService.getById(bindId);
+        memberBindRecord.setActiveStatus(status);
+        boolean b = memberBindRecordService.updateById(memberBindRecord);
         if (!b)
             throw new BusinessException("修改状态失败！");
         //写入日志
@@ -225,8 +225,6 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
         queryWrapper.eq(MemberLogEntity::getMemberBindId, bindCardId);
         List<MemberLogEntity> memberLogs = memberLogService.list(queryWrapper);
         return memberLogs.stream().map(item -> {
-            MemberBindRecordEntity bindRecord = memberBindRecordService.getById(bindCardId);
-            MemberCardEntity cardEntity = memberCardService.getById(bindRecord.getCardId());
             OperateRecordVo vo = new OperateRecordVo();
             vo.setId(item.getId());
             vo.setOperateTime(item.getCreateTime());
@@ -456,8 +454,6 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardDao, MemberCard
             throw new BusinessException("仍有会员绑定并激活该会员卡，不能删除");
         //获取会员卡实体信息
         MemberCardEntity card = memberCardService.getById(cardId);
-        //设置为不激活
-        //card.setStatus(1);
         card.setLastModifyTime(LocalDateTime.now());
         memberCardService.updateById(card);
         //保存信息
