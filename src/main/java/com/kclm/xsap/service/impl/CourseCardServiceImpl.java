@@ -33,7 +33,7 @@ public class CourseCardServiceImpl extends ServiceImpl<CourseCardDao, CourseCard
 
     @Override
     public boolean insertCourseCard(List<CourseCardEntity> entities) {
-        entities.forEach((item) -> courseCardDao.insertCourseCard(item.getCardId(), item.getCourseId()));
+        entities.forEach(item -> courseCardDao.insertCourseCard(item.getCardId(), item.getCourseId()));
         return true;
     }
 
