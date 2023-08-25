@@ -12,6 +12,9 @@ import java.time.temporal.ChronoUnit;
  * @date 2023/8/3 19:15
  */
 public class TimeUtil {
+    private TimeUtil() {
+    }
+
     public static LocalDateTime timeSubDays(LocalDateTime time, Integer day) {
         return time.plusDays(day.longValue());
     }
