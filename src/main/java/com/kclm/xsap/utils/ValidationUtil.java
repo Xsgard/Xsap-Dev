@@ -14,10 +14,13 @@ import java.util.Map;
  * @date 2023/8/4 16:28
  */
 public class ValidationUtil {
+    private ValidationUtil() {
+    }
+
     public static R getErrors(BindingResult bindingResult) {
         List<FieldError> fieldErrors = bindingResult.getFieldErrors();
         Map<String, String> map = new HashMap<>();
-        fieldErrors.forEach((item) -> map.put(item.getField(), item.getDefaultMessage()));
+        fieldErrors.forEach(item -> map.put(item.getField(), item.getDefaultMessage()));
         return R.error(400, "填写信息有误，请检查！").put("errorMap", map);
     }
 }
