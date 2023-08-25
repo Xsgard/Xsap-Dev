@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
      * @return
      */
     @ExceptionHandler(BusinessException.class)
-    public R CustomExceptionHandler(BusinessException ex) {
+    public R customExceptionHandler(BusinessException ex) {
         log.info(ex.getMessage());
         return R.error(ex.getMessage());
     }
