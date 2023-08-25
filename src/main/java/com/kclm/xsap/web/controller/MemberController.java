@@ -6,9 +6,6 @@ import com.kclm.xsap.dto.MemberDTO;
 import com.kclm.xsap.dto.ReserveRecordDTO;
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.exceptions.BusinessException;
-import com.kclm.xsap.service.ConsumeRecordService;
-import com.kclm.xsap.service.MemberBindRecordService;
-import com.kclm.xsap.service.MemberCardService;
 import com.kclm.xsap.service.MemberService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.UploadImg;
@@ -43,25 +40,13 @@ public class MemberController {
     private static final String UPLOAD_IMAGES_MEMBER_IMG = "/upload/images/member_img/";
     private MemberService memberService;
 
-    private MemberCardService cardService;
-
-    private MemberBindRecordService bindRecordService;
-
-    private ConsumeRecordService consumeRecordService;
-
     @Autowired
-    private void setApplicationContext(MemberService memberService,
-                                       MemberCardService cardService,
-                                       MemberBindRecordService bindRecordService,
-                                       ConsumeRecordService consumeRecordService) {
+    private void setApplicationContext(MemberService memberService) {
         this.memberService = memberService;
-        this.cardService = cardService;
-        this.bindRecordService = bindRecordService;
-        this.consumeRecordService = consumeRecordService;
     }
 
     @GetMapping("/x_member_list.do")
-    public String list_do() {
+    public String listDo() {
         return "member/x_member_list";
     }
 
@@ -184,7 +169,7 @@ public class MemberController {
                 MemberEntity member = new MemberEntity().setId(id).setAvatarUrl(fileName).setVersion(+1);
                 boolean isUpdateAvatarUrl = memberService.updateById(member);
                 log.debug("\n==>更新头像是否成功==>{}", isUpdateAvatarUrl);
-                return new R().put("data", member);
+                return new R().put("data", member.getAvatarUrl());
             } else {
                 return R.error("头像上传失败");
             }
