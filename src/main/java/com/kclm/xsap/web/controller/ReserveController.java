@@ -5,6 +5,7 @@ import com.kclm.xsap.exceptions.BusinessException;
 import com.kclm.xsap.service.ReservationRecordService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.utils.TimeUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
  */
 @RequestMapping("/reserve")
 @Controller
+@Slf4j
 public class ReserveController {
 
     private ReservationRecordService reservationRecordService;
@@ -77,15 +79,14 @@ public class ReserveController {
 
     @GetMapping("/exportReserveList.do")
     @ResponseBody
-    public R exportReserveListOnline(String startDateStr, String endDateStr, HttpServletResponse response) {
+    public void exportReserveListOnline(String startDateStr, String endDateStr, HttpServletResponse response) {
         LocalDate startDate = TimeUtil.subStringToLocalDate(startDateStr);
         LocalDate endDate = TimeUtil.subStringToLocalDate(endDateStr);
 
         try {
             reservationRecordService.exportReservationListOnline(startDate, endDate, response);
         } catch (BusinessException e) {
-            return R.error(e.getMsg());
+            log.error(e.getMsg());
         }
-        return null;
     }
 }
