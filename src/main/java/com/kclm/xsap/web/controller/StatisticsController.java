@@ -3,7 +3,7 @@ package com.kclm.xsap.web.controller;
 import com.kclm.xsap.service.StatisticsService;
 import com.kclm.xsap.utils.R;
 import com.kclm.xsap.vo.MemberCardStatisticsWithTotalDataInfoVo;
-import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.index.IndexAddAndStreamInfoVo;
 import com.kclm.xsap.vo.statistics.ClassCostVo;
 import com.kclm.xsap.vo.statistics.StatisticsOfCardCostVo;
 import org.springframework.beans.factory.annotation.Autowired;
