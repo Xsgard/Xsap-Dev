@@ -2,8 +2,8 @@ package com.kclm.xsap.service;
 
 import com.kclm.xsap.entity.MemberEntity;
 import com.kclm.xsap.vo.IndexHomeDateVo;
-import com.kclm.xsap.vo.indexStatistics.IndexAddAndStreamInfoVo;
-import com.kclm.xsap.vo.indexStatistics.IndexPieChartVo;
+import com.kclm.xsap.vo.index.IndexAddAndStreamInfoVo;
+import com.kclm.xsap.vo.index.IndexPieChartVo;
 
 import java.time.LocalDateTime;
 import java.util.List;
