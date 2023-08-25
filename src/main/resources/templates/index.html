@@ -35,7 +35,9 @@
                     <li class="nav-header">
                         <div class="dropdown profile-element">
                             <span>
-                            <img alt="image" width="80px" height="80px" name="avatarUrl" class="img-circle" src="../static/img/profile_small.jpg"  th:src="@{/images/teacher_img/{avatar}(avatar=${session.LOGIN_USER.avatarUrl})}"/>
+                            <img alt="image" width="80px" height="80px" name="avatarUrl" class="img-circle"
+                                 src="../static/img/profile_small.jpg"
+                                 th:src="@{/upload/images/teacher_img/{avatar}(avatar=${session.LOGIN_USER.avatarUrl})}"/>
                             </span>
                             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                                 <span class="clear">
