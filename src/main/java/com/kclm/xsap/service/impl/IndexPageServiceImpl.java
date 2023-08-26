@@ -129,7 +129,7 @@ public class IndexPageServiceImpl implements IndexPageService {
      * @return IndexAddAndStreamInfoVo
      */
     @Override
-    public IndexAddAndStreamInfoVo DailyCharge() {
+    public IndexAddAndStreamInfoVo dailyCharge() {
         IndexAddAndStreamInfoVo vo = new IndexAddAndStreamInfoVo();
         vo.setTitle("当月每日收费统计");
         vo.setXname("日");
