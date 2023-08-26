@@ -95,7 +95,7 @@ public class EmployeeController {
                         HttpSession session,
                         Model model) {
         EmployeeEntity isExistEmp = employeeService.isExistEmp(username, password);
-        Boolean flag = (isExistEmp != null);
+        boolean flag = (isExistEmp != null);
 
         model.addAttribute("USER_NOT_EXIST", flag);
         if (flag) {
@@ -204,8 +204,8 @@ public class EmployeeController {
     public String toResetPwd(String userPhoneOrEmail, Model model) {
         //
         log.debug("\n==>打印用户要充值的用户手机号或者邮箱==>{}", userPhoneOrEmail);
-        String emailRegex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
-        String phoneRegex = "^1[0-9]{10}$";
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        String phoneRegex = "^1\\d{10}$";
 
         boolean isAEmail = Pattern.compile(emailRegex).matcher(userPhoneOrEmail).matches();
         boolean isAPhone = Pattern.compile(phoneRegex).matcher(userPhoneOrEmail).matches();
