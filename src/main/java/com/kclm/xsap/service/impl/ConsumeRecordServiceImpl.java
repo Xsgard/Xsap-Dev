@@ -39,7 +39,12 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
         this.memberBindRecordService = memberBindRecordService;
     }
 
-
+    /**
+     * 获取课程单价
+     *
+     * @param bindCardId 绑卡Id
+     * @return 课程单价
+     */
     @Override
     public BigDecimal queryAmountPayable(Long bindCardId) {
         MemberBindRecordEntity memberBindRecord = memberBindRecordService.getById(bindCardId);
@@ -58,6 +63,12 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
                 .divide(BigDecimal.valueOf(validCount), 0, RoundingMode.DOWN);
     }
 
+    /**
+     * 查询已用的课消之和
+     *
+     * @param bindCardId 绑卡Id
+     * @return 已用的课消之和
+     */
     @Override
     public Integer queryUsedClassCost(Long bindCardId) {
         //绑定记录
@@ -74,11 +85,25 @@ public class ConsumeRecordServiceImpl extends ServiceImpl<ConsumeRecordDao, Cons
                 .sum();
     }
 
+    /**
+     * 获取老师消费记录集合
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return 获取对应老师的消费记录集合
+     */
     @Override
     public List<TeacherConsumeVo> getTeacherConsume(LocalDateTime start, LocalDateTime end) {
         return consumeRecordDao.getTeacherConsume(start, end);
     }
 
+    /**
+     * 获取时间段内消费卡次之和
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return 时间段内消费卡次之和
+     */
     @Override
     public Integer consumeRecordsBetween(LocalDateTime start, LocalDateTime end) {
         LambdaQueryWrapper<ConsumeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
