@@ -40,6 +40,7 @@ public class GlobalSetController {
         return "course/x_course_reservation";
     }
 
+    //修改全局设置
     @PostMapping("/globalSetUpdate.do")
     @ResponseBody
     public R updateGlobalSet(@Valid GlobalReservationSetEntity setEntity, BindingResult bindingResult) {
