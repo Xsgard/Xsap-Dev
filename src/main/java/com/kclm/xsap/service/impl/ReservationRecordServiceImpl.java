@@ -177,6 +177,12 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
 
     }
 
+    /**
+     * 校验是否又多次取消
+     *
+     * @param one          预约记录信息
+     * @param courseEntity 课程信息
+     */
     private static void checkReservations(ReservationRecordEntity one, CourseEntity courseEntity) {
         //已经有预约记录
         if (one != null && one.getStatus() == 1) {
@@ -188,6 +194,13 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
     }
 
+    /**
+     * 校验课程是否以及结束
+     *
+     * @param globalSet 全局预约设置
+     * @param startTime 开始时间
+     * @param now       现在时间
+     */
     private static void checkReserveIsEnd(GlobalReservationSetEntity globalSet, LocalDateTime startTime, LocalDateTime now) {
         //预约截止时间校验
         if (globalSet.getAppointmentDeadlineMode() == 2) {
@@ -204,6 +217,14 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
     }
 
+    /**
+     * 校验课程是否以及开始
+     *
+     * @param now              现在的时间
+     * @param startTime        开始时间
+     * @param globalSet        全局预约设置信息
+     * @param previousDateTime 预约时间
+     */
     private static void checkCourseIsStart(LocalDateTime now, LocalDateTime startTime, GlobalReservationSetEntity globalSet, LocalDateTime previousDateTime) {
         //判断课程是否已经开始
         if (now.isAfter(startTime))
@@ -218,6 +239,13 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
     }
 
+    /**
+     * 会员卡信息校验
+     *
+     * @param valDay           戒指日期
+     * @param memberBindRecord 会员绑定信息
+     * @param courseEntity     课程信息
+     */
     private static void cardValidation(LocalDateTime valDay, MemberBindRecordEntity memberBindRecord, CourseEntity courseEntity) {
         //校验卡是否在有效期
         if (valDay.isBefore(LocalDateTime.now()))
@@ -228,6 +256,12 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
     }
 
+    /**
+     * 校验是否满足卡类型
+     *
+     * @param reservationRecord 预约记录信息
+     * @param courseEntity      课程信息
+     */
     private void checkIsMeetCardType(ReservationRecordEntity reservationRecord, CourseEntity courseEntity) {
         //校验本卡是否支持该课程
         LambdaQueryWrapper<CourseCardEntity> qw = new LambdaQueryWrapper<>();
@@ -240,6 +274,12 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
             throw new BusinessException("该卡不支持本课程，请换一张会员卡！");
     }
 
+    /**
+     * 检查是否满足课程要求
+     *
+     * @param courseEntity 课程信息
+     * @param member       会员信息
+     */
     private static void checkIsMeetCourseRequire(CourseEntity courseEntity, MemberEntity member) {
         //课程性别限制
         if (!courseEntity.getLimitSex().equals("无限制") && !courseEntity.getLimitSex().equals(member.getSex()))
@@ -250,7 +290,11 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
             throw new BusinessException("很抱歉，您不满足课程的年龄要求");
     }
 
-    //加上取消时间判断是否课程已经开始
+    /**
+     * 取消预约
+     *
+     * @param reserveId 预约Id
+     */
     @Override
     @Transactional
     public void cancelReserve(Long reserveId) {
@@ -300,11 +344,24 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         }
     }
 
+    /**
+     * 获取预约记录Id
+     *
+     * @param memberId   会员Id
+     * @param scheduleId 排课Id
+     * @return 预约记录Id
+     */
     @Override
     public Long getReserveId(Long memberId, Long scheduleId) {
         return reservationRecordDao.getReserveId(memberId, scheduleId);
     }
 
+    /**
+     * 导出预约记录到本地
+     *
+     * @param startDate 开始时间
+     * @param endDate   结束时间
+     */
     @Override
     public void exportReservationListToLocal(LocalDate startDate, LocalDate endDate) {
         //
@@ -312,6 +369,13 @@ public class ReservationRecordServiceImpl extends ServiceImpl<ReservationRecordD
         ExcelExportUtil.excelWriteToLocal(collect);
     }
 
+    /**
+     * 导出预约记录到前端页面
+     *
+     * @param startDate 开始时间
+     * @param endDate   结束时间
+     * @param response  响应
+     */
     @Override
     public void exportReservationListOnline(LocalDate startDate, LocalDate endDate, HttpServletResponse response) {
         //
