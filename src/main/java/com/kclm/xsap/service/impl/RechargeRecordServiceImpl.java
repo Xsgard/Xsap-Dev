@@ -41,6 +41,13 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
         this.memberLogService = memberLogService;
     }
 
+    /**
+     * 获取时间段内充值记录之和
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return 充值的金额之和
+     */
     @Override
     public List<Integer> getRechargeList(LocalDateTime start, LocalDateTime end) {
         LambdaQueryWrapper<RechargeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
@@ -60,17 +67,27 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
         return data;
     }
 
+    /**
+     * 获取季度充值之和
+     *
+     * @param start 开始时间
+     * @param end   结束时间
+     * @return 季度充值之和
+     */
     @Override
     public List<Integer> getRechargeListForSeason(LocalDateTime start, LocalDateTime end) {
+        //
         LambdaQueryWrapper<RechargeRecordEntity> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.between(RechargeRecordEntity::getCreateTime, start, end);
+        //充值记录集合
         List<RechargeRecordEntity> recharges = this.list(queryWrapper);
+        //初始化结果集合
         List<Integer> data = new ArrayList<>(end.getMonthValue());
         if (!recharges.isEmpty()) {
             for (int i = start.getMonthValue(); i <= start.getMonthValue() + TimeUtil.calculateMonths(start, end) - 1; i++) {
                 int finalI = i;
                 Integer monthMoney = recharges.stream()
-                        .filter(e -> e.getCreateTime().getMonthValue() == finalI)
+                        .filter(e -> e.getCreateTime().getMonthValue() == finalI) //过滤出本月的数据
                         .mapToInt(item -> item.getReceivedMoney().intValue())
                         .sum();
                 data.add(monthMoney);
@@ -79,6 +96,11 @@ public class RechargeRecordServiceImpl extends ServiceImpl<RechargeRecordDao, Re
         return data;
     }
 
+    /**
+     * 添加充值记录
+     *
+     * @param rechargeRecord 充值信息实体
+     */
     @Override
     @Transactional
     public void memberRecharge(RechargeRecordEntity rechargeRecord) {
