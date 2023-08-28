@@ -32,11 +32,13 @@ public class CardBindController {
         this.memberCardService = memberCardService;
     }
 
+    // 跳转至绑定页面
     @GetMapping("/x_member_card_bind.do")
     public String toCardBind() {
         return "member/x_member_card_bind";
     }
 
+    //会员卡绑定
     @PostMapping("/memberBind.do")
     @ResponseBody
     public R memberBind(@Valid BindCardInfoDto infoDto, BindingResult bindingResult) {
